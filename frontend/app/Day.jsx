@@ -19,20 +19,39 @@ export default function Day() {
   const [antibiotics, setAntibiotics] = useState("");
   const [painkiller, setPainkiller] = useState("");
   const [photo, setPhoto] = useState(null);
-  const [caseNumber, setCaseNumber] = useState("");
+  const [caseNumber, setCaseNumber] = useState("23-OCT-29-01");
   const [modalVisible, setModalVisible] = useState(false);
   const [dogInfo, setDogInfo] = useState(null);
   const [dogModalInfo, setDogModalInfo] = useState(null);
 
+  //error state
+  const [kennelError, setKennelError] = useState("");
+  const [dateError, setDateError] = useState("");
+  const [foodIntakeError, setFoodIntakeError] = useState("");
+  const [waterIntakeError, setWaterIntakeError] = useState("");
+  const [antibioticsError, setAntibioticsError] = useState("");
+  const [painkillerError, setPainkillerError] = useState("");
+  const [photoError, setPhotoError] = useState("");
+
   const handleModalOpen = () => {
+    let errors = {};
+
+    if (!kennel) {
+      errors.kennelError = "Please enter a kennel number.";
+    }
+
+    setKennelError(errors.kennelError || "");
+
+    if (Object.keys(errors).length === 0) {
+      const dummyDogData = {
+        name: "Max",
+        breed: "Labrador",
+        age: 5,
+      };
+      setDogModalInfo(dummyDogData);
+      setModalVisible(true);
+    }
     // Implement API call to retrieve dog's information based on kennelNumber
-    const dummyDogData = {
-      name: "Max",
-      breed: "Labrador",
-      age: 5,
-    };
-    setDogModalInfo(dummyDogData);
-    setModalVisible(true);
   };
 
   const handleModalClose = () => {
@@ -64,43 +83,67 @@ export default function Day() {
   };
 
   const handleSubmit = () => {
-    // Validate form fields here
-    if (
-      !kennel ||
-      !date ||
-      !foodIntake ||
-      !waterIntake ||
-      !antibiotics ||
-      !painkiller ||
-      !photo ||
-      !caseNumber
-    ) {
-      alert("Please fill in all required fields.");
-      return;
+    let errors = {};
+
+    if (!kennel) {
+      errors.kennelError = "Please enter a kennel number.";
     }
 
-    // Handle form submission logic here
-    console.log(
-      kennel,
-      date,
-      foodIntake,
-      waterIntake,
-      painkiller,
-      antibiotics,
-      photo,
-      caseNumber
-    );
-    // For example, you can send the data to a server or perform any other action
-    // console.log(kennel, date, foodIntake, waterIntake, antibiotics, painkiller, photo, caseNumber);
-    // Reset form fields
-    setKennel("");
-    setDate(new Date().toLocaleDateString());
-    setFoodIntake("");
-    setWaterIntake("");
-    setAntibiotics("");
-    setPainkiller("");
-    setPhoto(null);
-    setCaseNumber("");
+    if (!date) {
+      errors.dateError = "Please enter a date.";
+    }
+
+    if (!foodIntake) {
+      errors.foodIntakeError = "Please select food intake.";
+    }
+
+    if (!waterIntake) {
+      errors.waterIntakeError = "Please select water intake.";
+    }
+
+    if (!antibiotics) {
+      errors.antibioticsError = "Please select antibiotics status.";
+    }
+
+    if (!painkiller) {
+      errors.painkillerError = "Please select painkiller status.";
+    }
+
+    if (!photo) {
+      errors.photoError = "Please upload a photo.";
+    }
+
+    setKennelError(errors.kennelError || "");
+    setDateError(errors.dateError || "");
+    setFoodIntakeError(errors.foodIntakeError || "");
+    setWaterIntakeError(errors.waterIntakeError || "");
+    setAntibioticsError(errors.antibioticsError || "");
+    setPainkillerError(errors.painkillerError || "");
+    setPhotoError(errors.photoError || "");
+
+    if (Object.keys(errors).length === 0) {
+      // All fields are valid, proceed with submission
+      console.log(
+        kennel,
+        date,
+        foodIntake,
+        waterIntake,
+        painkiller,
+        antibiotics,
+        photo,
+        caseNumber
+      );
+
+      // Reset form fields
+      setKennel("");
+      setDate(new Date().toLocaleDateString());
+      setFoodIntake("");
+      setWaterIntake("");
+      setAntibiotics("");
+      setPainkiller("");
+      setPhoto(null);
+      setCaseNumber("");
+    }
   };
 
   return (
@@ -116,6 +159,7 @@ export default function Day() {
           onChangeText={(text) => setKennel(text)}
           placeholder="Enter kennel No."
         />
+        <Text style={styles.error}>{kennelError}</Text>
       </View>
 
       {/* Add logic to open the modal */}
@@ -175,6 +219,7 @@ export default function Day() {
               onChangeText={(text) => setDate(text)}
               placeholder="dd/mm/yyyy Format"
             />
+            <Text style={styles.error}>{dateError}</Text>
           </View>
 
           {/* Food Intake */}
@@ -213,6 +258,7 @@ export default function Day() {
                 />
               </TouchableOpacity>
             </View>
+            <Text style={styles.error}>{foodIntakeError}</Text>
           </View>
 
           {/* Water Intake */}
@@ -252,6 +298,7 @@ export default function Day() {
                 />
               </TouchableOpacity>
             </View>
+            <Text style={styles.error}>{waterIntakeError}</Text>
           </View>
 
           {/* Antibiotics */}
@@ -291,6 +338,7 @@ export default function Day() {
                 />
               </TouchableOpacity>
             </View>
+            <Text style={styles.error}>{antibioticsError}</Text>
           </View>
 
           {/* Painkiller */}
@@ -329,6 +377,7 @@ export default function Day() {
                 />
               </TouchableOpacity>
             </View>
+            <Text style={styles.error}>{painkillerError}</Text>
           </View>
 
           {/* Kennel Photo */}
@@ -354,6 +403,7 @@ export default function Day() {
                 </View>
               )}
             </TouchableOpacity>
+            <Text style={styles.error}>{photoError}</Text>
           </View>
 
           {/* Case Number */}
@@ -364,8 +414,8 @@ export default function Day() {
             <TextInput
               style={styles.input}
               value={caseNumber}
-              onChangeText={(text) => setCaseNumber(text)}
-              placeholder="Enter case number"
+              placeholder={caseNumber}
+              editable={false}
             />
           </View>
 
@@ -517,5 +567,9 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#fff",
     fontSize: 16,
+  },
+  error: {
+    color: "red",
+    fontSize: 12,
   },
 });

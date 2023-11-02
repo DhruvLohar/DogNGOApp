@@ -34,20 +34,48 @@ export default function SurgeryDetails() {
   const [dogInfo, setDogInfo] = useState(null);
   const [dogModalInfo, setDogModalInfo] = useState(null);
 
+  //error state
+  const [kennelNumberError, setKennelNumberError] = useState(null);
+  const [dateError, setDateError] = useState(null);
+  const [timeError, setTimeError] = useState(null);
+  const [arvError, setArvError] = useState(null);
+  const [photoError, setPhotoError] = useState(null);
+  const [xylazineError, setXylazineError] = useState(null);
+  const [dexaError, setDexaError] = useState(null);
+  const [melonexError, setMelonexError] = useState(null);
+  const [atropineError, setAtropineError] = useState(null);
+  const [enrodacError, setEnrodacError] = useState(null);
+  const [prednisoloneError, setPrednisoloneError] = useState(null);
+  const [ketaminError, setKetaminError] = useState(null);
+  const [stadrenError, setStadrenError] = useState(null);
+  const [dicrysticinError, setDicrysticinError] = useState(null);
+  const [procedureError, setProcedureError] = useState(null);
+  const [earNotchedError, setEarNotchedError] = useState(null);
+  const [observationsError, setObservationsError] = useState(null);
+
   useEffect(() => {
     setTime(formatTime);
   }, []);
 
   const handleModalOpen = () => {
-    // Make API call to retrieve dog's information based on kennelNumber
-    const dummyDogData = {
-      name: "Max",
-      breed: "Labrador",
-      age: 5,
-    };
-    //if from the backend, we find the kennel is empty, we setDogInfo("Not Found") and setDogModalInfo(null)
-    setDogModalInfo(dummyDogData);
-    setModalVisible(true);
+    let errors = {};
+
+    if (!kennelNumber) {
+      errors.kennelNumberError = "Please enter a kennel number.";
+    }
+
+    setKennelNumberError(errors.kennelNumberError || "");
+
+    if (Object.keys(errors).length === 0) {
+      const dummyDogData = {
+        name: "Max",
+        breed: "Labrador",
+        age: 5,
+      };
+      setDogModalInfo(dummyDogData);
+      setModalVisible(true);
+    }
+    // Implement API call to retrieve dog's information based on kennelNumber
   };
 
   const handleModalClose = () => {
@@ -113,71 +141,137 @@ export default function SurgeryDetails() {
   };
 
   const handleSubmit = () => {
-    // Validate form fields here
-    if (
-      !kennelNumber ||
-      !date ||
-      !time ||
-      !arv ||
-      !photo ||
-      !xylazine ||
-      !dexa ||
-      !melonex ||
-      !atropine ||
-      !enrodac ||
-      !prednisolone ||
-      !ketamin ||
-      !stadren ||
-      !dicrysticin ||
-      !procedure ||
-      !earNotched ||
-      !observations
-    ) {
-      alert("Please fill in all required fields.");
-      return;
+    let errors = {};
+
+    if (!kennelNumber) {
+      errors.kennelNumberError = "Please enter a kennel number.";
     }
 
-    // Handle form submission logic here
-    console.log(
-      kennelNumber,
-      date,
-      time,
-      arv,
-      photo,
-      additionalPhotos,
-      xylazine,
-      dexa,
-      melonex,
-      atropine,
-      enrodac,
-      prednisolone,
-      ketamin,
-      stadren,
-      dicrysticin,
-      procedure,
-      earNotched,
-      observations
-    );
+    if (!date) {
+      errors.dateError = "Please enter a date.";
+    }
 
-    // Reset form fields
-    setKennelNumber("");
-    setDate(new Date().toLocaleDateString());
-    setTime(formatTime());
-    setArv("");
-    setPhoto(null);
-    setAdditionalPhotos([]);
-    setXylazine("");
-    setDexa("");
-    setMelonex("");
-    setAtropine("");
-    setEnrodac("");
-    setPrednisolone("");
-    setKetamin("");
-    setStadren("");
-    setDicrysticin("");
-    setProcedure("");
-    setEarNotched("");
-    setObservations("");
+    if (!time) {
+      errors.timeError = "Please enter a time.";
+    }
+
+    if (!arv) {
+      errors.arvError = "Please select ARV status.";
+    }
+
+    if (!photo) {
+      errors.photoError = "Please upload a photo.";
+    }
+
+    if (!xylazine) {
+      errors.xylazineError = "Please enter Xylazine value.";
+    }
+
+    if (!dexa) {
+      errors.dexaError = "Please enter Dexa value.";
+    }
+
+    if (!melonex) {
+      errors.melonexError = "Please enter Melonex value.";
+    }
+
+    if (!atropine) {
+      errors.atropineError = "Please enter Atropine value.";
+    }
+
+    if (!enrodac) {
+      errors.enrodacError = "Please enter Enrodac value.";
+    }
+
+    if (!prednisolone) {
+      errors.prednisoloneError = "Please enter Prednisolone value.";
+    }
+
+    if (!ketamin) {
+      errors.ketaminError = "Please enter Ketamin value.";
+    }
+
+    if (!stadren) {
+      errors.stadrenError = "Please enter Stadren value.";
+    }
+
+    if (!dicrysticin) {
+      errors.dicrysticinError = "Please enter Dicrysticin value.";
+    }
+
+    if (!procedure) {
+      errors.procedureError = "Please enter Procedure value.";
+    }
+
+    if (!earNotched) {
+      errors.earNotchedError = "Please enter Ear Notched value.";
+    }
+
+    if (!observations) {
+      errors.observationsError = "Please enter Observations.";
+    }
+
+    setKennelNumberError(errors.kennelNumberError || "");
+    setDateError(errors.dateError || "");
+    setTimeError(errors.timeError || "");
+    setArvError(errors.arvError || "");
+    setPhotoError(errors.photoError || "");
+    setXylazineError(errors.xylazineError || "");
+    setDexaError(errors.dexaError || "");
+    setMelonexError(errors.melonexError || "");
+    setAtropineError(errors.atropineError || "");
+    setEnrodacError(errors.enrodacError || "");
+    setPrednisoloneError(errors.prednisoloneError || "");
+    setKetaminError(errors.ketaminError || "");
+    setStadrenError(errors.stadrenError || "");
+    setDicrysticinError(errors.dicrysticinError || "");
+    setProcedureError(errors.procedureError || "");
+    setEarNotchedError(errors.earNotchedError || "");
+    setObservationsError(errors.observationsError || "");
+
+    if (Object.keys(errors).length === 0) {
+      // All fields are valid, proceed with submission
+      console.log(
+        kennelNumber,
+        date,
+        time,
+        arv,
+        photo,
+        additionalPhotos,
+        xylazine,
+        dexa,
+        melonex,
+        atropine,
+        enrodac,
+        prednisolone,
+        ketamin,
+        stadren,
+        dicrysticin,
+        procedure,
+        earNotched,
+        observations
+      );
+
+      // Reset form fields
+      setKennelNumber("");
+      setDate(new Date().toLocaleDateString());
+      setTime(formatTime());
+      setArv("");
+      setPhoto(null);
+      setAdditionalPhotos([]);
+      setXylazine("");
+      setDexa("");
+      setMelonex("");
+      setAtropine("");
+      setEnrodac("");
+      setPrednisolone("");
+      setKetamin("");
+      setStadren("");
+      setDicrysticin("");
+      setProcedure("");
+      setEarNotched("");
+      setObservations("");
+    }
   };
 
   return (
@@ -193,6 +287,7 @@ export default function SurgeryDetails() {
           onChangeText={(text) => setKennelNumber(text)}
           placeholder="Enter kennel number"
         />
+        <Text style={styles.error}>{kennelNumberError}</Text>
       </View>
 
       {/* Add logic to open the modal */}
@@ -252,6 +347,7 @@ export default function SurgeryDetails() {
               onChangeText={(text) => setDate(text)}
               placeholder="dd/mm/yyyy format"
             />
+            <Text style={styles.error}>{dateError}</Text>
           </View>
 
           {/* Time */}
@@ -265,6 +361,7 @@ export default function SurgeryDetails() {
               onChangeText={(text) => setTime(text)}
               placeholder="HH:MM AM/PM format"
             />
+            <Text style={styles.error}>{timeError}</Text>
           </View>
 
           {/* ARV */}
@@ -298,6 +395,7 @@ export default function SurgeryDetails() {
                 />
               </TouchableOpacity>
             </View>
+            <Text style={styles.error}>{arvError}</Text>
           </View>
 
           {/* Photo */}
@@ -323,6 +421,7 @@ export default function SurgeryDetails() {
                 </View>
               )}
             </TouchableOpacity>
+            <Text style={styles.error}>{photoError}</Text>
           </View>
 
           {/* Additional Photos */}
@@ -366,6 +465,7 @@ export default function SurgeryDetails() {
               onChangeText={(text) => setXylazine(text)}
               placeholder="Xylazine value"
             />
+            <Text style={styles.error}>{xylazineError}</Text>
           </View>
 
           {/* Dexa */}
@@ -379,6 +479,7 @@ export default function SurgeryDetails() {
               onChangeText={(text) => setDexa(text)}
               placeholder="Dexa value"
             />
+            <Text style={styles.error}>{dexaError}</Text>
           </View>
 
           {/* Melonex */}
@@ -392,6 +493,7 @@ export default function SurgeryDetails() {
               onChangeText={(text) => setMelonex(text)}
               placeholder="Melonex value"
             />
+            <Text style={styles.error}>{melonexError}</Text>
           </View>
 
           {/* Atropine */}
@@ -405,6 +507,7 @@ export default function SurgeryDetails() {
               onChangeText={(text) => setAtropine(text)}
               placeholder="Atropine value"
             />
+            <Text style={styles.error}>{atropineError}</Text>
           </View>
 
           {/* Enrodac */}
@@ -418,6 +521,7 @@ export default function SurgeryDetails() {
               onChangeText={(text) => setEnrodac(text)}
               placeholder="Enrodac value"
             />
+            <Text style={styles.error}>{enrodacError}</Text>
           </View>
 
           {/* Prednisolone */}
@@ -431,6 +535,7 @@ export default function SurgeryDetails() {
               onChangeText={(text) => setPrednisolone(text)}
               placeholder="Prednisolone value"
             />
+            <Text style={styles.error}>{prednisoloneError}</Text>
           </View>
 
           {/* Ketamin */}
@@ -444,6 +549,7 @@ export default function SurgeryDetails() {
               onChangeText={(text) => setKetamin(text)}
               placeholder="Ketamin value"
             />
+            <Text style={styles.error}>{ketaminError}</Text>
           </View>
 
           {/* Stadren */}
@@ -457,6 +563,7 @@ export default function SurgeryDetails() {
               onChangeText={(text) => setStadren(text)}
               placeholder="Stadren value"
             />
+            <Text style={styles.error}>{stadrenError}</Text>
           </View>
 
           {/* Dicrysticin */}
@@ -470,6 +577,7 @@ export default function SurgeryDetails() {
               onChangeText={(text) => setDicrysticin(text)}
               placeholder="Dicrysticin value"
             />
+            <Text style={styles.error}>{dicrysticinError}</Text>
           </View>
 
           {/* Procedure */}
@@ -483,6 +591,7 @@ export default function SurgeryDetails() {
               onChangeText={(text) => setProcedure(text)}
               placeholder="Procedure value"
             />
+            <Text style={styles.error}>{procedureError}</Text>
           </View>
 
           {/* Ear Notched */}
@@ -496,6 +605,7 @@ export default function SurgeryDetails() {
               onChangeText={(text) => setEarNotched(text)}
               placeholder="Ear Notched value"
             />
+            <Text style={styles.error}>{earNotchedError}</Text>
           </View>
 
           {/* Observations */}
@@ -509,6 +619,7 @@ export default function SurgeryDetails() {
               onChangeText={(text) => setObservations(text)}
               placeholder="Observations"
             />
+            <Text style={styles.error}>{observationsError}</Text>
           </View>
 
           {/* Submit Button */}
@@ -686,5 +797,9 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#fff",
     fontSize: 16,
+  },
+  error: {
+    color: "red",
+    fontSize: 12,
   },
 });

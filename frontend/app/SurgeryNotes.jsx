@@ -13,7 +13,7 @@ import * as ImagePicker from "expo-image-picker";
 
 export default function SurgeryNotes() {
   const [kennelNumber, setKennelNumber] = useState("");
-  const [caseNumber, setCaseNumber] = useState("");
+  const [caseNumber, setCaseNumber] = useState("23-OCT-29-01");
   const [date, setDate] = useState(new Date().toLocaleDateString());
   const [time, setTime] = useState(new Date().toLocaleDateString());
   const [photo, setPhoto] = useState(null);
@@ -25,20 +25,38 @@ export default function SurgeryNotes() {
   const [dogInfo, setDogInfo] = useState(null);
   const [dogModalInfo, setDogModalInfo] = useState(null);
 
+  //error states
+  const [kennelNumberError, setKennelNumberError] = useState("");
+  const [dateError, setDateError] = useState("");
+  const [timeError, setTimeError] = useState("");
+  const [photoError, setPhotoError] = useState("");
+  const [notesError, setNotesError] = useState("");
+  const [weightError, setWeightError] = useState("");
+  const [temperatureError, setTemperatureError] = useState("");
+
   useEffect(() => {
     setTime(formatTime);
   }, []);
 
   const handleModalOpen = () => {
-    // Make API call to retrieve dog's information based on kennelNumber
-    const dummyDogData = {
-      name: "Max",
-      breed: "Labrador",
-      age: 5,
-    };
-    //if from the backend, we find the kennel is empty, we setDogInfo("Not Found") and setDogModalInfo(null)
-    setDogModalInfo(dummyDogData);
-    setModalVisible(true);
+    let errors = {};
+
+    if (!kennelNumber) {
+      errors.kennelNumberError = "Please enter a kennel number.";
+    }
+
+    setKennelNumberError(errors.kennelNumberError || "");
+
+    if (Object.keys(errors).length === 0) {
+      const dummyDogData = {
+        name: "Max",
+        breed: "Labrador",
+        age: 5,
+      };
+      setDogModalInfo(dummyDogData);
+      setModalVisible(true);
+    }
+    // Implement API call to retrieve dog's information based on kennelNumber
   };
 
   const handleModalClose = () => {
@@ -104,44 +122,68 @@ export default function SurgeryNotes() {
   };
 
   const handleSubmit = () => {
-    // Validate form fields here
-    if (
-      !kennelNumber ||
-      !caseNumber ||
-      !date ||
-      !time ||
-      !photo ||
-      !notes ||
-      !weight ||
-      !temperature
-    ) {
-      alert("Please fill in all required fields.");
-      return;
+    let errors = {};
+
+    if (!kennelNumber) {
+      errors.kennelNumberError = "Please enter a kennel number.";
     }
 
-    // Handle form submission logic here
-    console.log(
-      kennelNumber,
-      caseNumber,
-      date,
-      time,
-      photo,
-      additionalPhotos,
-      notes,
-      weight,
-      temperature
-    );
+    if (!date) {
+      errors.dateError = "Please enter a date.";
+    }
 
-    // Reset form fields
-    setKennelNumber("");
-    setCaseNumber("");
-    setDate(new Date().toLocaleDateString());
-    setTime(formatTime());
-    setPhoto(null);
-    setAdditionalPhotos([]);
-    setNotes("");
-    setWeight("");
-    setTemperature("");
+    if (!time) {
+      errors.timeError = "Please enter a time.";
+    }
+
+    if (!photo) {
+      errors.photoError = "Please upload a photo.";
+    }
+
+    if (!notes) {
+      errors.notesError = "Please enter notes.";
+    }
+
+    if (!weight) {
+      errors.weightError = "Please enter weight.";
+    }
+
+    if (!temperature) {
+      errors.temperatureError = "Please enter temperature.";
+    }
+
+    setKennelNumberError(errors.kennelNumberError || "");
+    setDateError(errors.dateError || "");
+    setTimeError(errors.timeError || "");
+    setPhotoError(errors.photoError || "");
+    setNotesError(errors.notesError || "");
+    setWeightError(errors.weightError || "");
+    setTemperatureError(errors.temperatureError || "");
+
+    if (Object.keys(errors).length === 0) {
+      // All fields are valid, proceed with submission
+      console.log(
+        kennelNumber,
+        caseNumber,
+        date,
+        time,
+        photo,
+        additionalPhotos,
+        notes,
+        weight,
+        temperature
+      );
+
+      // Reset form fields
+      setKennelNumber("");
+      setDate(new Date().toLocaleDateString());
+      setTime(formatTime());
+      setPhoto(null);
+      setAdditionalPhotos([]);
+      setNotes("");
+      setWeight("");
+      setTemperature("");
+    }
   };
 
   return (
@@ -157,6 +199,7 @@ export default function SurgeryNotes() {
           onChangeText={(text) => setKennelNumber(text)}
           placeholder="Enter kennel number"
         />
+        <Text style={styles.error}>{kennelNumberError}</Text>
       </View>
 
       {/* Add logic to open the modal */}
@@ -213,8 +256,8 @@ export default function SurgeryNotes() {
             <TextInput
               style={styles.input}
               value={caseNumber}
-              onChangeText={(text) => setCaseNumber(text)}
-              placeholder="Enter case number"
+              placeholder={caseNumber}
+              editable={false}
             />
           </View>
           {/* Date */}
@@ -228,6 +271,7 @@ export default function SurgeryNotes() {
               onChangeText={(text) => setDate(text)}
               placeholder="dd/mm/yyyy format"
             />
+            <Text style={styles.error}>{dateError}</Text>
           </View>
           {/* Time */}
           <View style={styles.fieldContainer}>
@@ -240,6 +284,7 @@ export default function SurgeryNotes() {
               onChangeText={(text) => setTime(text)}
               placeholder="HH:MM AM/PM format"
             />
+            <Text style={styles.error}>{timeError}</Text>
           </View>
           {/* Photo */}
           <View style={styles.fieldContainer}>
@@ -264,6 +309,7 @@ export default function SurgeryNotes() {
                 </View>
               )}
             </TouchableOpacity>
+            <Text style={styles.error}>{photoError}</Text>
           </View>
           {/* Additional Photos */}
           <View style={styles.fieldContainer}>
@@ -307,6 +353,7 @@ export default function SurgeryNotes() {
               multiline
               numberOfLines={4}
             />
+            <Text style={styles.error}>{notesError}</Text>
           </View>
           {/* Weight */}
           <View style={styles.fieldContainer}>
@@ -321,6 +368,7 @@ export default function SurgeryNotes() {
               keyboardType="numeric"
               maxLength={10}
             />
+            <Text style={styles.error}>{weightError}</Text>
           </View>
           {/* Temperature */}
           <View style={styles.fieldContainer}>
@@ -333,6 +381,7 @@ export default function SurgeryNotes() {
               onChangeText={(text) => setTemperature(text)}
               placeholder="Enter temperature"
             />
+            <Text style={styles.error}>{temperatureError}</Text>
           </View>
           {/* Submit Button */}
           <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
@@ -476,5 +525,9 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#fff",
     fontSize: 16,
+  },
+  error: {
+    color: "red",
+    fontSize: 12,
   },
 });

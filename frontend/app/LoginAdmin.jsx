@@ -109,6 +109,7 @@ const Register = () => {
           <Picker.Item label="Catcher" value="catcher" />
           <Picker.Item label="Vet" value="vet" />
           <Picker.Item label="Caretaker" value="caretaker" />
+          <Picker.Item label="Admin" value="admin" />
         </Picker>
       </View>
 

@@ -34,27 +34,44 @@ const FormPage = () => {
 
   return (
     <View style={styles.container}>
-      <FormCard
-        title="Catch Form"
-        navigate={() => navigateToForm("/Catching")}
-      />
-      <FormCard title="Daily Form" navigate={() => navigateToForm("/Day")} />
-      <FormCard
-        title="Initial Observations Form"
-        navigate={() => navigateToForm("/InitialObservations")}
-      />
-      <FormCard
-        title="Surgery Details Form"
-        navigate={() => navigateToForm("/SurgeryDetails")}
-      />
-      <FormCard
-        title="Surgery Notes Form"
-        navigate={() => navigateToForm("/SurgeryNotes")}
-      />
-      <FormCard
-        title="Release"
-        navigate={() => navigateToForm("/ReleaseForm")}
-      />
+      {userRole === "admin" || userRole === "catcher" ? (
+        <>
+          <FormCard
+            title="Catching"
+            navigate={() => navigateToForm("/Catching")}
+          />
+          <FormCard
+            title="Initial Observations "
+            navigate={() => navigateToForm("/InitialObservations")}
+          />
+        </>
+      ) : null}
+
+      {userRole === "admin" || userRole === "caretaker" ? (
+        <FormCard
+          title="Daily Treatment"
+          navigate={() => navigateToForm("/Day")}
+        />
+      ) : null}
+
+      {userRole === "admin" || userRole === "vet" ? (
+        <>
+          <FormCard
+            title="Surgery"
+            navigate={() => navigateToForm("/SurgeryNotes")}
+          />
+          <FormCard
+            title="Medicines"
+            navigate={() => navigateToForm("/SurgeryDetails")}
+          />
+        </>
+      ) : null}
+      {userRole === "admin" || userRole === "catcher" ? (
+        <FormCard
+          title="Release"
+          navigate={() => navigateToForm("/ReleaseForm")}
+        />
+      ) : null}
       {userRole === "admin" ? (
         <FormCard
           title="Add a User"

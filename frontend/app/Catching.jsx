@@ -11,16 +11,22 @@ import {
 import * as Location from "expo-location";
 import * as ImagePicker from "expo-image-picker";
 import Axios from "axios";
+import { API_URL } from "../service/api";
 
 export default function Catching() {
   const [location, setLocation] = useState("");
+  const [locationError, setLocationError] = useState("");
   const [locationDetails, setLocationDetails] = useState("");
   const [spotPhoto, setSpotPhoto] = useState(null);
+  const [spotPhotoError, setSpotPhotoError] = useState(null);
   const [additionalPhotos, setAdditionalPhotos] = useState([]);
   const [date, setDate] = useState(new Date().toLocaleDateString());
+  const [dateError, setDateError] = useState("");
   const [time, setTime] = useState(new Date().toLocaleTimeString());
+  const [timeError, setTimeError] = useState("");
   const [caretaker, setCaretaker] = useState("");
   const [caretakerNumber, setCaretakerNumber] = useState("");
+  const [caretakerNumberError, setCaretakerNumberError] = useState("");
 
   useEffect(() => {
     // Fetch user location
@@ -91,37 +97,87 @@ export default function Catching() {
   };
 
   const handleSubmit = () => {
-    // Validate form fields here
-    if (!location || !spotPhoto || !date || !time) {
-      alert("Please fill in all required fields.");
-      return;
-    }
-    if (caretakerNumber.length > 0 && caretakerNumber.length !== 10) {
-      alert("Please fill in valid 10 digit mobile number");
-      return;
+    let errors = {};
+
+    if (!location) {
+      errors.locationError = "Please enter a location.";
     }
 
-    // Handle form submission logic here
-    // For example, you can send the data to a server or perform any other action
-    // console.log(
-    //   location,
-    //   locationDetails,
-    //   spotPhoto,
-    //   additionalPhotos,
-    //   date,
-    //   time,
-    //   caretaker,
-    //   caretakerNumber
-    // );
-    // Reset form fields
-    setLocation("");
-    setLocationDetails("");
-    setSpotPhoto(null);
-    setAdditionalPhotos([]);
-    setDate(new Date().toLocaleDateString());
-    setTime(formatTime());
-    setCaretaker("");
-    setCaretakerNumber("");
+    if (!spotPhoto) {
+      errors.spotPhotoError = "Please upload a spot photo.";
+    }
+
+    if (!date) {
+      errors.dateError = "Please enter a date.";
+    }
+
+    if (!time) {
+      errors.timeError = "Please enter a time.";
+    }
+
+    if (caretakerNumber.length > 0 && caretakerNumber.length !== 10) {
+      errors.caretakerNumberError =
+        "Please enter a valid 10-digit mobile number.";
+    }
+
+    setLocationError(errors.locationError || "");
+    setSpotPhotoError(errors.spotPhotoError || "");
+    setDateError(errors.dateError || "");
+    setTimeError(errors.timeError || "");
+    setCaretakerNumberError(errors.caretakerNumberError || "");
+
+    if (Object.keys(errors).length === 0) {
+      setLocationError("");
+      setDateError("");
+      setTimeError("");
+      setCaretakerNumberError("");
+      // Handle form submission logic here
+      // For example, you can send the data to a server or perform any other action
+      // console.log(
+      //   location,
+      //   locationDetails,
+      //   spotPhoto,
+      //   additionalPhotos,
+      //   date,
+      //   time,
+      //   caretaker,
+      //   caretakerNumber
+      // );
+      // Reset form fields
+      // Axios.post(API_URL + "/dog", {
+      //   catcher: {
+      //     location,
+      //     locationDetails,
+      //     date,
+      //     time,
+      //     localCareTaker: caretaker,
+      //     localCareTakerNumber: caretakerNumber,
+      //   },
+      //   headers: {
+      //     Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      //   },
+      // })
+      //   .then((res) => {
+      //     console.log(res);
+      //   })
+      //   .catch((error) => {
+      //     if (error.response) {
+      //       alert(error.response.data.message);
+      //     } else if (error.request) {
+      //       console.log("No response received");
+      //     } else {
+      //       console.log("Error:", error.message);
+      //     }
+      //   });
+      setLocation("");
+      setLocationDetails("");
+      setSpotPhoto(null);
+      setAdditionalPhotos([]);
+      setDate(new Date().toLocaleDateString());
+      setTime(formatTime());
+      setCaretaker("");
+      setCaretakerNumber("");
+    }
   };
 
   return (
@@ -137,6 +193,7 @@ export default function Catching() {
           onChangeText={(text) => setLocation(text)}
           placeholder="Enter location"
         />
+        <Text style={styles.error}>{locationError}</Text>
       </View>
 
       {/* Location Details */}
@@ -173,6 +230,7 @@ export default function Catching() {
             </View>
           )}
         </TouchableOpacity>
+        <Text style={styles.error}>{spotPhotoError}</Text>
       </View>
 
       {/* Additional Photos */}
@@ -214,6 +272,7 @@ export default function Catching() {
           onChangeText={(text) => setDate(text)}
           placeholder="dd:mm:yyyy format"
         />
+        <Text style={styles.error}>{dateError}</Text>
       </View>
 
       {/* Time */}
@@ -227,6 +286,7 @@ export default function Catching() {
           onChangeText={(text) => setTime(text)}
           placeholder="HH:MM AM/PM format"
         />
+        <Text style={styles.error}>{timeError}</Text>
       </View>
 
       {/* Caretaker */}
@@ -251,6 +311,7 @@ export default function Catching() {
           keyboardType="numeric"
           maxLength={10}
         />
+        <Text style={styles.error}>{caretakerNumberError}</Text>
       </View>
 
       {/* Submit */}
@@ -280,6 +341,10 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     padding: 8,
     borderRadius: 5,
+  },
+  error: {
+    color: "red",
+    fontSize: 12,
   },
   uploadButton: {
     alignItems: "center",

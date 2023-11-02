@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -10,16 +10,28 @@ import {
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
+import { API_URL } from "../service/api";
 
 export default function InitialObservations() {
   const [kennelNumber, setKennelNumber] = useState("");
-  const [caseNumber, setCaseNumber] = useState("");
+  const [caseNumber, setCaseNumber] = useState("23-OCT-29-01");
   const [mainColor, setMainColor] = useState("");
   const [description, setDescription] = useState("");
   const [gender, setGender] = useState("");
   const [aggression, setAggression] = useState("");
   const [kennelPhoto, setKennelPhoto] = useState(null);
   const [additionalPhotos, setAdditionalPhotos] = useState([]);
+
+  //error states
+  const [kennelNumberError, setKennelNumberError] = useState("");
+  const [mainColorError, setMainColorError] = useState("");
+  const [descriptionError, setDescriptionError] = useState("");
+  const [genderError, setGenderError] = useState("");
+  const [aggressionError, setAggressionError] = useState("");
+  const [kennelPhotoError, setKennelPhotoError] = useState("");
+
+  //get the dog and set const caseNumber = dog.caseNumber
+  useEffect(() => {});
 
   const handleKennelPhotoUpload = async () => {
     let result = await ImagePicker.launchCameraAsync({
@@ -58,41 +70,60 @@ export default function InitialObservations() {
   };
 
   const handleSubmit = () => {
-    // Validate form fields here
-    if (
-      !kennelNumber ||
-      !caseNumber ||
-      !mainColor ||
-      !description ||
-      !gender ||
-      !aggression ||
-      !kennelPhoto
-    ) {
-      alert("Please fill in all required fields.");
-      return;
+    let errors = {};
+
+    if (!kennelNumber) {
+      errors.kennelNumberError = "Please enter a kennel number.";
     }
 
-    // Handle form submission logic here
-    console.log(
-      kennelNumber,
-      caseNumber,
-      mainColor,
-      description,
-      gender,
-      aggression,
-      kennelPhoto,
-      additionalPhotos
-    );
+    if (!mainColor) {
+      errors.mainColorError = "Please select a main color.";
+    }
 
-    // Reset form fields
-    setKennelNumber("");
-    setCaseNumber("");
-    setMainColor("");
-    setDescription("");
-    setGender("");
-    setAggression("");
-    setKennelPhoto(null);
-    setAdditionalPhotos([]);
+    if (!description) {
+      errors.descriptionError = "Please enter a description.";
+    }
+
+    if (!gender) {
+      errors.genderError = "Please select a gender.";
+    }
+
+    if (!aggression) {
+      errors.aggressionError = "Please select aggression status.";
+    }
+
+    if (!kennelPhoto) {
+      errors.kennelPhotoError = "Please upload a kennel photo.";
+    }
+
+    setKennelNumberError(errors.kennelNumberError || "");
+    setMainColorError(errors.mainColorError || "");
+    setDescriptionError(errors.descriptionError || "");
+    setGenderError(errors.genderError || "");
+    setAggressionError(errors.aggressionError || "");
+    setKennelPhotoError(errors.kennelPhotoError || "");
+
+    if (Object.keys(errors).length === 0) {
+      // All fields are valid, proceed with submission
+      console.log(
+        kennelNumber,
+        mainColor,
+        description,
+        gender,
+        aggression,
+        kennelPhoto,
+        additionalPhotos
+      );
+
+      // Reset form fields
+      setKennelNumber("");
+      setMainColor("");
+      setDescription("");
+      setGender("");
+      setAggression("");
+      setKennelPhoto(null);
+      setAdditionalPhotos([]);
+    }
   };
 
   return (
@@ -108,6 +139,7 @@ export default function InitialObservations() {
           onChangeText={(text) => setKennelNumber(text)}
           placeholder="Enter kennel number"
         />
+        <Text style={styles.error}>{kennelNumberError}</Text>
       </View>
 
       {/* Case Number */}
@@ -118,8 +150,8 @@ export default function InitialObservations() {
         <TextInput
           style={styles.input}
           value={caseNumber}
-          onChangeText={(text) => setCaseNumber(text)}
-          placeholder="Enter case number"
+          placeholder={caseNumber}
+          editable={false}
         />
       </View>
 
@@ -139,6 +171,7 @@ export default function InitialObservations() {
           <Picker.Item label="Light Brown" value="LB" />
           <Picker.Item label="Total Mix" value="TM" />
         </Picker>
+        <Text style={styles.error}>{mainColorError}</Text>
       </View>
 
       {/* Description */}
@@ -154,6 +187,7 @@ export default function InitialObservations() {
           multiline
           numberOfLines={4}
         />
+        <Text style={styles.error}>{descriptionError}</Text>
       </View>
 
       {/* Gender */}
@@ -187,6 +221,7 @@ export default function InitialObservations() {
             />
           </TouchableOpacity>
         </View>
+        <Text style={styles.error}>{genderError}</Text>
       </View>
 
       {/* Aggression */}
@@ -220,6 +255,7 @@ export default function InitialObservations() {
             />
           </TouchableOpacity>
         </View>
+        <Text style={styles.error}>{aggressionError}</Text>
       </View>
 
       {/* Kennel Photo */}
@@ -245,6 +281,7 @@ export default function InitialObservations() {
             </View>
           )}
         </TouchableOpacity>
+        <Text style={styles.error}>{kennelPhotoError}</Text>
       </View>
 
       {/* Additional Photos */}
@@ -401,5 +438,9 @@ const styles = StyleSheet.create({
     color: "white",
     padding: 5,
     borderRadius: 5,
+  },
+  error: {
+    color: "red",
+    fontSize: 12,
   },
 });
