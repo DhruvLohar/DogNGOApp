@@ -34,6 +34,7 @@ const FormPage = () => {
 
   return (
     <View style={styles.container}>
+      {console.log(userRole)}
       {userRole === "admin" || userRole === "catcher" ? (
         <>
           <FormCard

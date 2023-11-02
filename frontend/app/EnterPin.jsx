@@ -10,11 +10,13 @@ import {
 import Axios from "axios";
 import { useRoute } from "@react-navigation/native";
 import { API_URL, handleAccessToken } from "../service/api";
+import { useNavigation } from "@react-navigation/native";
 
 const Index = () => {
   const [pin, setPin] = useState("");
   const router = useRouter();
   const route = useRoute();
+  const navigation = useNavigation();
   const contactNumber = route.params?.contactNumber;
 
   const handleLogin = () => {
@@ -38,6 +40,10 @@ const Index = () => {
       });
   };
 
+  const handleForgot = () => {
+    navigation.navigate("OTP", { contactNumber: contactNumber });
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>Enter your PIN</Text>
@@ -53,6 +59,9 @@ const Index = () => {
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Enter your PIN</Text>
       </TouchableOpacity>
+      <Text onPress={handleForgot} style={styles.loginText}>
+        Forgot your PIN?
+      </Text>
     </View>
   );
 };
@@ -94,9 +103,12 @@ const styles = StyleSheet.create({
   },
   login: {
     marginTop: 20,
-    fontSize: 16,
+    fontSize: 12,
   },
   loginText: {
+    marginTop: 20,
+    fontSize: 12,
+    cursor: "pointer",
     color: "#007BFF",
     fontWeight: "bold",
   },

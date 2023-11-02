@@ -1,5 +1,7 @@
-import { useRouter } from "expo-router";
 import React, { useState } from "react";
+import { useNavigation } from "@react-navigation/native";
+
+import { useRoute } from "@react-navigation/native";
 import {
   View,
   Text,
@@ -9,12 +11,16 @@ import {
 } from "react-native";
 
 const OTP = () => {
+  const navigation = useNavigation();
   const [otp, setOtp] = useState("");
-  const router = useRouter();
+
+  const route = useRoute();
+  const phoneNumber = route.params?.contactNumber;
 
   const handleVerifyOTP = () => {
     //if OPT match
-    if (otp.length === 4) router.push("/Setpin");
+    if (otp.length === 4)
+      navigation.navigate("Setpin", { contactNumber: phoneNumber });
     else alert("Invalid OTP");
   };
 

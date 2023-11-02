@@ -1,4 +1,3 @@
-import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   View,
@@ -13,7 +12,6 @@ import { API_URL, axiosAuthorized } from "../service/api";
 
 const Index = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
-  const router = useRouter();
   const navigation = useNavigation();
 
   const handleLogin = () => {
@@ -25,7 +23,7 @@ const Index = () => {
       })
         .then((res) => {
           if (res.status == 205) {
-            navigation.navigate("Setpin", { contactNumber: phoneNumber });
+            navigation.navigate("OTP", { contactNumber: phoneNumber });
           } else if (res.status == 200) {
             // alert("Enter your PIN");
             navigation.navigate("EnterPin", { contactNumber: phoneNumber });
