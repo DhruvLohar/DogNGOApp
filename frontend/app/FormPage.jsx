@@ -42,7 +42,7 @@ const FormPage = () => {
           />
           <FormCard
             title="Initial Observations "
-            navigate={() => navigateToForm("/InitialObservations")}
+            navigate={() => navigateToForm("/DogPhotos")}
           />
         </>
       ) : null}
