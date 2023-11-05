@@ -1,11 +1,17 @@
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { React, useState, useEffect } from "react";
 import { useRouter } from "expo-router";
 import { getUserRole } from "../service/api";
+import Catching from "../assets/catching.png";
+import InitialObservations from "../assets/initialObservations.png";
+import Release from "../assets/release.png";
+import Surgery from "../assets/surgery.png";
+import Treatment from "../assets/treatment.png";
 
-const FormCard = ({ title, navigate }) => {
+const FormCard = ({ title, navigate, image }) => {
   return (
     <TouchableOpacity style={styles.card} onPress={() => navigate(title)}>
+      <Image style={styles.cardImage} source={image} />
       <Text style={styles.cardText}>{title}</Text>
     </TouchableOpacity>
   );
@@ -39,10 +45,12 @@ const FormPage = () => {
         <>
           <FormCard
             title="Catching"
+            image={Catching}
             navigate={() => navigateToForm("/Catching")}
           />
           <FormCard
             title="Initial Observations "
+            image={InitialObservations}
             navigate={() => navigateToForm("/DogPhotos")}
           />
         </>
@@ -51,6 +59,7 @@ const FormPage = () => {
       {userRole === "admin" || userRole === "caretaker" ? (
         <FormCard
           title="Daily Treatment"
+          image={Treatment}
           navigate={() => navigateToForm("/Day")}
         />
       ) : null}
@@ -59,9 +68,11 @@ const FormPage = () => {
         <>
           <FormCard
             title="Surgery"
+            image={Surgery}
             navigate={() => navigateToForm("/SurgeryNotes")}
           />
           <FormCard
+            image={Surgery}
             title="Medicines"
             navigate={() => navigateToForm("/SurgeryDetails")}
           />
@@ -69,6 +80,7 @@ const FormPage = () => {
       ) : null}
       {userRole === "admin" || userRole === "catcher" ? (
         <FormCard
+          image={Release}
           title="Release"
           navigate={() => navigateToForm("/ReleaseForm")}
         />
@@ -95,7 +107,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width: "40%",
-    height: 120,
+    height: 200,
     backgroundColor: "#fff",
     borderRadius: 10,
     margin: 10,
@@ -114,6 +126,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     color: "#333",
+  },
+  cardImage: {
+    height: 100,
+    width: 100,
+    marginBottom: 10,
+    // objectFit,
   },
 });
 

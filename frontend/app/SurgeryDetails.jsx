@@ -64,6 +64,9 @@ export default function SurgeryDetails() {
       errors.kennelNumberError = "Please enter a kennel number.";
     }
 
+    //if kennel is vacant
+    // errors.kennelNumberError = "Kennel is vacant.";
+
     setKennelNumberError(errors.kennelNumberError || "");
 
     if (Object.keys(errors).length === 0) {
