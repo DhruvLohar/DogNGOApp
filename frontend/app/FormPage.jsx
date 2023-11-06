@@ -91,6 +91,12 @@ const FormPage = () => {
           navigate={() => navigateToForm("/LoginAdmin")}
         />
       ) : null}
+      {userRole === "admin" ? (
+        <FormCard
+          title="Generate Reports"
+          navigate={() => navigateToForm("/Report")}
+        />
+      ) : null}
     </View>
   );
 };
