@@ -27,7 +27,7 @@ const Index = () => {
       .then((res) => {
         // console.log(res);
         handleAccessToken(res.data.role, res.data.token);
-        router.push("/FormPage");
+        router.replace("/FormPage");
       })
       .catch((error) => {
         if (error.response) {
@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
   loginText: {
     marginTop: 20,
     fontSize: 12,
-    cursor: "pointer",
+    // cursor: "pointer",
     color: "#007BFF",
     fontWeight: "bold",
   },

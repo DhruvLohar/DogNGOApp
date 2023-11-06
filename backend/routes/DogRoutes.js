@@ -1,4 +1,6 @@
 const express = require("express");
+const multer = require('multer');
+const path = require('path');
 const router = express.Router();
 
 const {
@@ -8,8 +10,23 @@ const {
   DailyMonitoring,
   CareTaker,
 } = require("../models/Dog");
+const Image = require('../models/Image');
 const Kennel = require("../models/Kennel");
+
 const authenticateToken = require("../middleware/authenticateToken");
+
+var storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/')
+  },
+  filename: function (req, file, cb) {
+    let extArray = file.mimetype.split("/");
+    let extension = extArray[extArray.length - 1];
+    cb(null, file.fieldname + '-' + Date.now() + '.' + extension);
+  }
+})
+// const fileUpload = multer({ dest: "uploads/" });
+const fileUpload = multer({ storage: storage });
 
 // List Dogs
 router.get("/", authenticateToken, async (req, res) => {
@@ -148,54 +165,71 @@ router.delete("/:id", authenticateToken, async (req, res) => {
 });
 
 // Create Dog - just update the details in dog, no updation in foriegn keys
-router.post("/", authenticateToken, async (req, res) => {
+router.post("/", authenticateToken, fileUpload.fields([
+  { name: 'spotPhoto', maxCount: 1 },
+  { name: 'additionalPhotos[]', maxCount: 4 },
+]), async (req, res, next) => {
   try {
-    // Extract dog data from the request
-    const { dogName, breed, mainColor, description, gender } = req.body;
-
     // Extract catcher data from the request
     const {
-      location,
+      catchingLocation,
       locationDetails,
-      date,
-      time,
-      localCareTaker,
-      localCareTakerNumber,
-    } = req.body.catcher; // Assuming catcher data is provided in the request as an object
+    } = req.body;
+
+    const imageRefs = [];
+
+    // Save the spotPhoto to the database
+    if (req.files['spotPhoto'] && req.files['spotPhoto'].length > 0) {
+      const spotPhoto = req.files['spotPhoto'][0];
+      // Assuming you have an Image model to save image details, create and save it
+      const image = new Image({
+        name: spotPhoto.originalname,
+        filename: spotPhoto.filename,
+        path: spotPhoto.path,
+      });
+      await image.save();
+      imageRefs.push(image._id);
+    }
+
+    // Save the additionalPhotos to the database
+    if (req.files['additionalPhotos[]'] && req.files['additionalPhotos[]'].length > 0) {
+      const additionalPhotos = req.files['additionalPhotos[]'];
+      for (const photo of additionalPhotos) {
+        // Create and save each additional photo to the Image model
+        const image = new Image({
+          name: photo.originalname,
+          filename: photo.filename,
+          path: photo.path,
+        });
+        await image.save();
+        imageRefs.push(image._id);
+      }
+    }
 
     // Create a new Catcher model | !!! If catcher exists then go ahead wihtpout creating
     const catcher = new Catcher({
-      catcher: req.user.userId,
-      location,
+      catcher: req.user.userId, // Assuming userId is accessible through req.user
+      catchingLocation,
       locationDetails,
+      spotPhoto: imageRefs[0], // Assign the first image as the spotPhoto
     });
+
+    for (let i of imageRefs.slice(1)) {
+      catcher.additionalPhotos.push(i)
+    }
     await catcher.save();
 
     // Create a new Dog model and link it to the catcher
     const dog = new Dog({
-      dogName,
-      breed,
-      date,
-      time,
-      localCareTaker,
-      localCareTakerNumber,
-      mainColor,
-      description,
-      gender,
-      catcher: catcher._id,
+      catcherDetails: catcher._id,
     });
-
-    const assignedKennel = await Kennel.assignKennelToDog(dog._id);
-    if (assignedKennel) {
-      dog.kennel = assignedKennel._id;
-    }
 
     dog.caseNumber = await Dog.generateCaseNumber(); // Generate a case number
     await dog.save();
 
     res.status(201).json({ message: "Case generated successfully" });
   } catch (error) {
-    res.status(500).json({ error: "Error creating a dog case." });
+    res.status(500).json({ error: "Error creating a dog case : " + error.message });
   }
 });
 

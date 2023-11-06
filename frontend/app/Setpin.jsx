@@ -9,7 +9,7 @@ import {
   StyleSheet,
 } from "react-native";
 import Axios from "axios";
-import { API_URL } from "../service/api";
+import { API_URL, handleAccessToken } from "../service/api";
 
 const Setpin = () => {
   const [pin, setPin] = useState("");
@@ -23,8 +23,8 @@ const Setpin = () => {
       password: pin,
     })
       .then((res) => {
-        // handleAccessToken(res.role, res.token);
-        router.push("/FormPage");
+        handleAccessToken(res.data.role, res.data.token)
+        router.replace("/FormPage");
       })
       .catch((error) => {
         if (error.response) {

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 
 import { useRoute } from "@react-navigation/native";
@@ -9,19 +9,34 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from "react-native";
+import { sendOTP, verifyOTP } from "../service/api";
 
 const OTP = () => {
   const navigation = useNavigation();
   const [otp, setOtp] = useState("");
+  const [sessionId, setSessionId] = useState("")
 
   const route = useRoute();
   const phoneNumber = route.params?.contactNumber;
 
+  useEffect(() => {
+    sendOTP(phoneNumber)
+      .then((sess_id) => {
+        if (sess_id) {
+          setSessionId(sess_id)
+        }
+      });
+  }, [])
+
   const handleVerifyOTP = () => {
-    //if OPT match
-    if (otp.length === 4)
-      navigation.navigate("Setpin", { contactNumber: phoneNumber });
-    else alert("Invalid OTP");
+    if (otp.length === 6 && sessionId) {
+      verifyOTP(sessionId, otp).then(res => {
+        if (res) {
+          navigation.navigate("Setpin", { contactNumber: phoneNumber });
+        }
+      });
+    } else alert("Invalid OTP");
+    // navigation.navigate("Setpin", { contactNumber: phoneNumber });
   };
 
   return (
@@ -29,11 +44,11 @@ const OTP = () => {
       <Text style={styles.heading}>OTP Verification</Text>
       <TextInput
         style={styles.input}
-        placeholder="4 Digit OTP sent to your phone number"
+        placeholder="6 Digit OTP sent to your phone number"
         value={otp}
         onChangeText={setOtp}
         keyboardType="numeric"
-        maxLength={4}
+        maxLength={6}
       />
       <TouchableOpacity style={styles.button} onPress={handleVerifyOTP}>
         <Text style={styles.buttonText}>Verify OTP</Text>

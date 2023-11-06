@@ -10,11 +10,11 @@ import {
 } from "react-native";
 import * as Location from "expo-location";
 import * as ImagePicker from "expo-image-picker";
-import Axios from "axios";
-import { API_URL } from "../service/api";
+
+import { axiosRequest } from "../service/api";
 
 export default function Catching() {
-  const [location, setLocation] = useState("");
+  const [catchingLocation, setCatchingLocation] = useState("");
   const [locationError, setLocationError] = useState("");
   const [locationDetails, setLocationDetails] = useState("");
   const [spotPhoto, setSpotPhoto] = useState(null);
@@ -38,7 +38,7 @@ export default function Catching() {
       }
 
       let location = await Location.getCurrentPositionAsync({});
-      setLocation(
+      setCatchingLocation(
         `Latitude: ${location.coords.latitude}, Longitude: ${location.coords.longitude}`
       );
     })();
@@ -53,8 +53,15 @@ export default function Catching() {
       quality: 1,
     });
 
+    const uri = result.assets[0].uri;
+    const ext = uri.split('.').pop(); 
+
     if (!result.canceled) {
-      setSpotPhoto(result.assets[0].uri);
+      setSpotPhoto({
+        uri: uri,
+        type: `${result.assets[0].type}/${ext}`,
+        name: `spotPhoto.${ext}`
+      });
     }
   };
 
@@ -70,8 +77,10 @@ export default function Catching() {
       quality: 1,
     });
 
+    const uri = result.assets[0].uri; 
+
     if (!result.canceled) {
-      setAdditionalPhotos([...additionalPhotos, result.assets[0].uri]);
+      setAdditionalPhotos([...additionalPhotos, uri]);
     }
   };
 
@@ -89,8 +98,8 @@ export default function Catching() {
     const formattedTime =
       hours >= 12
         ? `${hours === 12 ? 12 : hours - 12}:${minutes
-            .toString()
-            .padStart(2, "0")} PM`
+          .toString()
+          .padStart(2, "0")} PM`
         : `${hours}:${minutes.toString().padStart(2, "0")} AM`;
 
     return formattedTime;
@@ -99,26 +108,26 @@ export default function Catching() {
   const handleSubmit = () => {
     let errors = {};
 
-    if (!location) {
+    if (!catchingLocation) {
       errors.locationError = "Please enter a location.";
     }
 
-    if (!spotPhoto) {
-      errors.spotPhotoError = "Please upload a spot photo.";
-    }
+    // if (!spotPhoto) {
+    //   errors.spotPhotoError = "Please upload a spot photo.";
+    // }
 
-    if (!date) {
-      errors.dateError = "Please enter a date.";
-    }
+    // if (!date) {
+    //   errors.dateError = "Please enter a date.";
+    // }
 
-    if (!time) {
-      errors.timeError = "Please enter a time.";
-    }
+    // if (!time) {
+    //   errors.timeError = "Please enter a time.";
+    // }
 
-    if (caretakerNumber.length > 0 && caretakerNumber.length !== 10) {
-      errors.caretakerNumberError =
-        "Please enter a valid 10-digit mobile number.";
-    }
+    // if (caretakerNumber.length > 0 && caretakerNumber.length !== 10) {
+    //   errors.caretakerNumberError =
+    //     "Please enter a valid 10-digit mobile number.";
+    // }
 
     setLocationError(errors.locationError || "");
     setSpotPhotoError(errors.spotPhotoError || "");
@@ -131,52 +140,48 @@ export default function Catching() {
       setDateError("");
       setTimeError("");
       setCaretakerNumberError("");
-      // Handle form submission logic here
-      // For example, you can send the data to a server or perform any other action
-      // console.log(
-      //   location,
-      //   locationDetails,
-      //   spotPhoto,
-      //   additionalPhotos,
-      //   date,
-      //   time,
-      //   caretaker,
-      //   caretakerNumber
-      // );
-      // Reset form fields
-      // Axios.post(API_URL + "/dog", {
-      //   catcher: {
-      //     location,
-      //     locationDetails,
-      //     date,
-      //     time,
-      //     localCareTaker: caretaker,
-      //     localCareTakerNumber: caretakerNumber,
-      //   },
-      //   headers: {
-      //     Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-      //   },
-      // })
-      //   .then((res) => {
-      //     console.log(res);
-      //   })
-      //   .catch((error) => {
-      //     if (error.response) {
-      //       alert(error.response.data.message);
-      //     } else if (error.request) {
-      //       console.log("No response received");
-      //     } else {
-      //       console.log("Error:", error.message);
-      //     }
-      //   });
-      setLocation("");
-      setLocationDetails("");
-      setSpotPhoto(null);
-      setAdditionalPhotos([]);
-      setDate(new Date().toLocaleDateString());
-      setTime(formatTime());
-      setCaretaker("");
-      setCaretakerNumber("");
+
+      const formData = new FormData();
+      formData.append('catchingLocation', catchingLocation);
+      formData.append('locationDetails', locationDetails);
+      formData.append('spotPhoto', spotPhoto);
+
+      additionalPhotos.forEach((photo, index) => {
+        let ext = photo.split('.').pop()
+        formData.append('additionalPhotos[]', {
+          uri: photo,
+          type: `image/${ext}`,
+          name: `catcherAdditionalPhoto_${index}.${ext}`
+        });
+      });
+
+      console.log(spotPhoto, additionalPhotos)
+      
+      axiosRequest("/dog", {
+        method: 'post',
+        data: formData
+      }, true)
+        .then((res) => {
+          alert(JSON.stringify(res))
+        })
+        .catch((error) => {
+          if (error.response) {
+            alert(JSON.stringify(error.response));
+          } else if (error.request) {
+            console.log("No response received");
+          } else {
+            console.log("Error:", error.message);
+          }
+        });
+
+      // setCatchingLocation("");
+      // setLocationDetails("");
+      // setSpotPhoto(null);
+      // setAdditionalPhotos([]);
+      // setDate(new Date().toLocaleDateString());
+      // setTime(formatTime());
+      // setCaretaker("");
+      // setCaretakerNumber("");
     }
   };
 
@@ -189,8 +194,8 @@ export default function Catching() {
         </Text>
         <TextInput
           style={styles.input}
-          value={location}
-          onChangeText={(text) => setLocation(text)}
+          value={catchingLocation}
+          onChangeText={(text) => setCatchingLocation(text)}
           placeholder="Enter location"
         />
         <Text style={styles.error}>{locationError}</Text>
@@ -214,7 +219,7 @@ export default function Catching() {
         </Text>
         {spotPhoto && (
           <View style={styles.imageContainerMain}>
-            <Image source={{ uri: spotPhoto }} style={styles.uploadedImage} />
+            <Image source={{ uri: spotPhoto.uri }} style={styles.uploadedImage} />
             <TouchableOpacity onPress={() => handleDeleteMain()}>
               <Text style={styles.deleteIconMain}>Delete</Text>
             </TouchableOpacity>
@@ -239,9 +244,9 @@ export default function Catching() {
         <View style={styles.uploadButton}>
           {additionalPhotos.length > 0 ? (
             <View style={styles.additionalImage}>
-              {additionalPhotos.map((uri, index) => (
+              {additionalPhotos.map((photo, index) => (
                 <View key={index} style={styles.imageContainer}>
-                  <Image source={{ uri }} style={styles.uploadedImage} />
+                  <Image source={{ uri: photo }} style={styles.uploadedImage} />
                   <TouchableOpacity onPress={() => handleDeletePhoto(index)}>
                     <Text style={styles.deleteIcon}>Delete</Text>
                   </TouchableOpacity>

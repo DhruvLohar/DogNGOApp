@@ -3,11 +3,12 @@ const mongoose = require("mongoose");
 const catcherSchema = new mongoose.Schema({
     catcher: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 
-    isReleased: {type: Boolean, default: false},
-    releaseDate: Date,
+    catchingLocation: String,
+    releasingLocation: String,
+    locationDetails: String,
 
-    location: String,
-    locationDetails: String
+    spotPhoto: { type: mongoose.Schema.Types.ObjectId, ref: 'Image' },
+    additionalPhotos: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Image' }],
 
 }, { timestamps: true, versionKey: false });
 
@@ -17,16 +18,14 @@ const doctorSchema = new mongoose.Schema({
 
     dogWeight: Number,
     temperature: Number,
-
-    agression: String,
     SkinCondition: String,
+    
+    // Medicines form
+    surgeryDate: Date,
     procedure: String,
     earNotched: String,
     observations: String,
-
-    surgeryDate: Date,
-
-    ARV: String,
+    ARV: Boolean,
     xylazine: String,
     dexa: String,
     melonex: String,
@@ -41,8 +40,12 @@ const doctorSchema = new mongoose.Schema({
 const dailyMonitoringSchema = new mongoose.Schema({
     foodIntake: Number,
     waterIntake: Number,
+    antibiotics: Boolean,
+    painkiller: Boolean,
+
     observations: String,
-    treatment: String,
+    kennelPhoto: {}
+
 }, {timestamps: true, versionKey: false});
 
 const careTakerSchema = new mongoose.Schema({
@@ -55,13 +58,20 @@ const careTakerSchema = new mongoose.Schema({
 const dogSchema = new mongoose.Schema({
     caseNumber: { type: String, unique: true },
     sequence: { type: Number, default: 1 },
-    kennel: { type: mongoose.Schema.Types.ObjectId, ref: 'Kennel', required: true }, // Foreign key to Kennel
+    kennel: { type: mongoose.Schema.Types.ObjectId, ref: 'Kennel', required: false }, // Foreign key to Kennel
 
+    // initial observation data
     dogName: String,
     breed: String,
     mainColor: String,
     description: String,
     gender: String,
+    agression: Boolean,
+
+    // release form data
+    isReleased: {type: Boolean, default: false},
+    isDispatched: {type: Boolean, default: false},
+    releaseDate: Date,
 
     catcherDetails: { type: mongoose.Schema.Types.ObjectId, ref: 'Catcher' }, // Foreign key to Catcher
     vetDetails: { type: mongoose.Schema.Types.ObjectId, ref: 'Doctor' }, // Foreign key to Doctor

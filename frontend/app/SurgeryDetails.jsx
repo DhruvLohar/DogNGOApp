@@ -53,6 +53,9 @@ export default function SurgeryDetails() {
   const [earNotchedError, setEarNotchedError] = useState(null);
   const [observationsError, setObservationsError] = useState(null);
 
+  //Akshar Changes get dog weight from backend in a useeffect.
+  const [weight, setWeight] = useState(10)
+
   useEffect(() => {
     setTime(formatTime);
   }, []);
@@ -100,8 +103,8 @@ export default function SurgeryDetails() {
     const formattedTime =
       hours >= 12
         ? `${hours === 12 ? 12 : hours - 12}:${minutes
-            .toString()
-            .padStart(2, "0")} PM`
+          .toString()
+          .padStart(2, "0")} PM`
         : `${hours}:${minutes.toString().padStart(2, "0")} AM`;
 
     return formattedTime;

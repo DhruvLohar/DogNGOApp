@@ -59,6 +59,7 @@ router.delete("/:id", authenticateToken, async (req, res) => {
   }
 });
 
+// create new user
 router.post("/signup", async (req, res) => {
   try {
     const { name, contactNumber, role } = req.body;

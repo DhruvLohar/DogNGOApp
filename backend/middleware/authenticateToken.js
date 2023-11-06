@@ -10,7 +10,7 @@ const authenticateToken = (req, res, next) => {
 
     jwt.verify(token, jwtConfig.secretKey, (err, user) => {
         if (err) {
-            return res.status(403).json({ message: 'Forbidden' });
+            return res.status(403).json({ message: 'Forbidden Request' });
         }
         req.user = user; // Store the user in the request for later use
         next();
