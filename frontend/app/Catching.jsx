@@ -38,9 +38,20 @@ export default function Catching() {
       }
 
       let location = await Location.getCurrentPositionAsync({});
-      setCatchingLocation(
-        `Latitude: ${location.coords.latitude}, Longitude: ${location.coords.longitude}`
+      const { latitude, longitude } = location.coords;
+
+      // Make a request to the Geocoding API
+      const apiKey = "YOUR_API_KEY";
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`
       );
+
+      const data = await response.json();
+      if (data.results && data.results.length > 0) {
+        // Assuming the first result contains the region information
+        const region = data.results[0].formatted_address;
+        setLocation(region);
+      }
     })();
     setTime(formatTime());
   }, []);
