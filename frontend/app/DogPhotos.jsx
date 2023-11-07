@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -12,6 +12,11 @@ import {
 const DogPhotos = () => {
   const router = useRouter();
   const [selectedDogId, setSelectedDogId] = useState(null);
+
+  useEffect(() => {
+    //Make an API call to get all dogs who are captured but not assigned a kennel. I would suggest make another
+    //state for dog ['released', 'dispatched', 'caught', 'treating'] and call dogs with caught, and put them in 'treatng'
+  }, []);
 
   // Sample data of dogs (replace with data fetched from backend)
   const dogs = [

@@ -174,6 +174,26 @@ export default function SurgeryNotes() {
         temperature
       );
 
+      const dog = axiosRequest(
+        `/${kennelNumber}`,
+        {
+          method: "get",
+        },
+        true
+      )
+        .then((res) => {
+          alert(JSON.stringify(res));
+        })
+        .catch((error) => {
+          if (error.response) {
+            alert(JSON.stringify(error.response));
+          } else if (error.request) {
+            console.log("No response received");
+          } else {
+            console.log("Error:", error.message);
+          }
+        });
+
       // Reset form fields
       setKennelNumber("");
       setDate(new Date().toLocaleDateString());

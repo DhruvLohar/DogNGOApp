@@ -10,6 +10,7 @@ import {
   Modal,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import { axiosRequest } from "../service/api";
 
 export default function SurgeryDetails() {
   const [kennelNumber, setKennelNumber] = useState("");
@@ -54,7 +55,7 @@ export default function SurgeryDetails() {
   const [observationsError, setObservationsError] = useState(null);
 
   //Akshar Changes get dog weight from backend in a useeffect.
-  const [weight, setWeight] = useState(10)
+  const [weight, setWeight] = useState(10);
 
   useEffect(() => {
     setTime(formatTime);
@@ -89,10 +90,30 @@ export default function SurgeryDetails() {
     setModalVisible(false);
   };
 
-  const handleModalConfirm = () => {
+  const handleModalConfirm = async () => {
     // Logic for when user confirms the dog info
     setDogInfo(dogModalInfo);
     setModalVisible(false);
+
+    const dog = axiosRequest(
+      `/${kennelNumber}`,
+      {
+        method: "get",
+      },
+      true
+    )
+      .then((res) => {
+        alert(JSON.stringify(res));
+      })
+      .catch((error) => {
+        if (error.response) {
+          alert(JSON.stringify(error.response));
+        } else if (error.request) {
+          console.log("No response received");
+        } else {
+          console.log("Error:", error.message);
+        }
+      });
   };
 
   const formatTime = () => {
@@ -103,8 +124,8 @@ export default function SurgeryDetails() {
     const formattedTime =
       hours >= 12
         ? `${hours === 12 ? 12 : hours - 12}:${minutes
-          .toString()
-          .padStart(2, "0")} PM`
+            .toString()
+            .padStart(2, "0")} PM`
         : `${hours}:${minutes.toString().padStart(2, "0")} AM`;
 
     return formattedTime;
@@ -216,6 +237,55 @@ export default function SurgeryDetails() {
     if (!observations) {
       errors.observationsError = "Please enter Observations.";
     }
+
+    const formData = new FormData();
+    formData.append("date", date);
+    formData.append("time", time);
+    formData.append("arv", arv);
+    formData.append("photo", photo);
+    formData.append("additionalPhotos", additionalPhotos);
+    formData.append("xylazine", xylazine);
+    formData.append("dexa", dexa);
+    formData.append("melonex", melonex);
+    formData.append("atropine", atropine);
+    formData.append("enrodac", enrodac);
+    formData.append("prednisolone", prednisolone);
+    formData.append("ketamin", ketamin);
+    formData.append("stadren", stadren);
+    formData.append("dicrysticin", dicrysticin);
+    formData.append("procedure", procedure);
+    formData.append("earNotched", earNotched);
+    formData.append("observations", observations);
+
+    additionalPhotos.forEach((photo, index) => {
+      let ext = photo.split(".").pop();
+      formData.append("additionalPhotos[]", {
+        uri: photo,
+        type: `image/${ext}`,
+        name: `catcherAdditionalPhoto_${index}.${ext}`,
+      });
+    });
+
+    axiosRequest(
+      `/${dog}/update/vet`,
+      {
+        method: "put",
+        data: formData,
+      },
+      true
+    )
+      .then((res) => {
+        alert(JSON.stringify(res));
+      })
+      .catch((error) => {
+        if (error.response) {
+          alert(JSON.stringify(error.response));
+        } else if (error.request) {
+          console.log("No response received");
+        } else {
+          console.log("Error:", error.message);
+        }
+      });
 
     setKennelNumberError(errors.kennelNumberError || "");
     setDateError(errors.dateError || "");
@@ -469,7 +539,7 @@ export default function SurgeryDetails() {
               style={styles.input}
               value={xylazine}
               onChangeText={(text) => setXylazine(text)}
-              placeholder="Xylazine value"
+              placeholder={weight + "ml"}
             />
             <Text style={styles.error}>{xylazineError}</Text>
           </View>
@@ -483,7 +553,7 @@ export default function SurgeryDetails() {
               style={styles.input}
               value={dexa}
               onChangeText={(text) => setDexa(text)}
-              placeholder="Dexa value"
+              placeholder={weight + "ml"}
             />
             <Text style={styles.error}>{dexaError}</Text>
           </View>
@@ -497,7 +567,7 @@ export default function SurgeryDetails() {
               style={styles.input}
               value={melonex}
               onChangeText={(text) => setMelonex(text)}
-              placeholder="Melonex value"
+              placeholder={weight + "ml"}
             />
             <Text style={styles.error}>{melonexError}</Text>
           </View>
@@ -511,7 +581,7 @@ export default function SurgeryDetails() {
               style={styles.input}
               value={atropine}
               onChangeText={(text) => setAtropine(text)}
-              placeholder="Atropine value"
+              placeholder={weight + "ml"}
             />
             <Text style={styles.error}>{atropineError}</Text>
           </View>
@@ -525,7 +595,7 @@ export default function SurgeryDetails() {
               style={styles.input}
               value={enrodac}
               onChangeText={(text) => setEnrodac(text)}
-              placeholder="Enrodac value"
+              placeholder={weight + "ml"}
             />
             <Text style={styles.error}>{enrodacError}</Text>
           </View>
@@ -539,7 +609,7 @@ export default function SurgeryDetails() {
               style={styles.input}
               value={prednisolone}
               onChangeText={(text) => setPrednisolone(text)}
-              placeholder="Prednisolone value"
+              placeholder={weight + "ml"}
             />
             <Text style={styles.error}>{prednisoloneError}</Text>
           </View>
@@ -553,7 +623,7 @@ export default function SurgeryDetails() {
               style={styles.input}
               value={ketamin}
               onChangeText={(text) => setKetamin(text)}
-              placeholder="Ketamin value"
+              placeholder={weight + "ml"}
             />
             <Text style={styles.error}>{ketaminError}</Text>
           </View>
@@ -567,7 +637,7 @@ export default function SurgeryDetails() {
               style={styles.input}
               value={stadren}
               onChangeText={(text) => setStadren(text)}
-              placeholder="Stadren value"
+              placeholder={weight + "ml"}
             />
             <Text style={styles.error}>{stadrenError}</Text>
           </View>
@@ -581,7 +651,7 @@ export default function SurgeryDetails() {
               style={styles.input}
               value={dicrysticin}
               onChangeText={(text) => setDicrysticin(text)}
-              placeholder="Dicrysticin value"
+              placeholder={weight + "ml"}
             />
             <Text style={styles.error}>{dicrysticinError}</Text>
           </View>

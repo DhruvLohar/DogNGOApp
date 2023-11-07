@@ -65,13 +65,13 @@ export default function Catching() {
     });
 
     const uri = result.assets[0].uri;
-    const ext = uri.split('.').pop(); 
+    const ext = uri.split(".").pop();
 
     if (!result.canceled) {
       setSpotPhoto({
         uri: uri,
         type: `${result.assets[0].type}/${ext}`,
-        name: `spotPhoto.${ext}`
+        name: `spotPhoto.${ext}`,
       });
     }
   };
@@ -88,7 +88,7 @@ export default function Catching() {
       quality: 1,
     });
 
-    const uri = result.assets[0].uri; 
+    const uri = result.assets[0].uri;
 
     if (!result.canceled) {
       setAdditionalPhotos([...additionalPhotos, uri]);
@@ -109,8 +109,8 @@ export default function Catching() {
     const formattedTime =
       hours >= 12
         ? `${hours === 12 ? 12 : hours - 12}:${minutes
-          .toString()
-          .padStart(2, "0")} PM`
+            .toString()
+            .padStart(2, "0")} PM`
         : `${hours}:${minutes.toString().padStart(2, "0")} AM`;
 
     return formattedTime;
@@ -123,22 +123,22 @@ export default function Catching() {
       errors.locationError = "Please enter a location.";
     }
 
-    // if (!spotPhoto) {
-    //   errors.spotPhotoError = "Please upload a spot photo.";
-    // }
+    if (!spotPhoto) {
+      errors.spotPhotoError = "Please upload a spot photo.";
+    }
 
-    // if (!date) {
-    //   errors.dateError = "Please enter a date.";
-    // }
+    if (!date) {
+      errors.dateError = "Please enter a date.";
+    }
 
-    // if (!time) {
-    //   errors.timeError = "Please enter a time.";
-    // }
+    if (!time) {
+      errors.timeError = "Please enter a time.";
+    }
 
-    // if (caretakerNumber.length > 0 && caretakerNumber.length !== 10) {
-    //   errors.caretakerNumberError =
-    //     "Please enter a valid 10-digit mobile number.";
-    // }
+    if (caretakerNumber.length > 0 && caretakerNumber.length !== 10) {
+      errors.caretakerNumberError =
+        "Please enter a valid 10-digit mobile number.";
+    }
 
     setLocationError(errors.locationError || "");
     setSpotPhotoError(errors.spotPhotoError || "");
@@ -153,27 +153,32 @@ export default function Catching() {
       setCaretakerNumberError("");
 
       const formData = new FormData();
-      formData.append('catchingLocation', catchingLocation);
-      formData.append('locationDetails', locationDetails);
-      formData.append('spotPhoto', spotPhoto);
+      formData.append("catchingLocation", catchingLocation);
+      formData.append("locationDetails", locationDetails);
+      formData.append("spotPhoto", spotPhoto);
 
       additionalPhotos.forEach((photo, index) => {
-        let ext = photo.split('.').pop()
-        formData.append('additionalPhotos[]', {
+        let ext = photo.split(".").pop();
+        formData.append("additionalPhotos[]", {
           uri: photo,
           type: `image/${ext}`,
-          name: `catcherAdditionalPhoto_${index}.${ext}`
+          name: `catcherAdditionalPhoto_${index}.${ext}`,
         });
       });
 
-      console.log(spotPhoto, additionalPhotos)
-      
-      axiosRequest("/dog", {
-        method: 'post',
-        data: formData
-      }, true)
+      // console.log(spotPhoto, additionalPhotos);
+
+      axiosRequest(
+        "/dog",
+        {
+          method: "post",
+          data: formData,
+        },
+        true
+      )
         .then((res) => {
-          alert(JSON.stringify(res))
+          console.log(JSON.stringify(res));
+          alert("Dog added Successfully!");
         })
         .catch((error) => {
           if (error.response) {
@@ -185,14 +190,14 @@ export default function Catching() {
           }
         });
 
-      // setCatchingLocation("");
-      // setLocationDetails("");
-      // setSpotPhoto(null);
-      // setAdditionalPhotos([]);
-      // setDate(new Date().toLocaleDateString());
-      // setTime(formatTime());
-      // setCaretaker("");
-      // setCaretakerNumber("");
+      setCatchingLocation("");
+      setLocationDetails("");
+      setSpotPhoto(null);
+      setAdditionalPhotos([]);
+      setDate(new Date().toLocaleDateString());
+      setTime(formatTime());
+      setCaretaker("");
+      setCaretakerNumber("");
     }
   };
 
@@ -230,7 +235,10 @@ export default function Catching() {
         </Text>
         {spotPhoto && (
           <View style={styles.imageContainerMain}>
-            <Image source={{ uri: spotPhoto.uri }} style={styles.uploadedImage} />
+            <Image
+              source={{ uri: spotPhoto.uri }}
+              style={styles.uploadedImage}
+            />
             <TouchableOpacity onPress={() => handleDeleteMain()}>
               <Text style={styles.deleteIconMain}>Delete</Text>
             </TouchableOpacity>

@@ -1,4 +1,11 @@
-import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  ImageBackground,
+} from "react-native";
 import { React, useState, useEffect } from "react";
 import { useRouter } from "expo-router";
 import { getUserRole } from "../service/api";
@@ -7,6 +14,7 @@ import InitialObservations from "../assets/initialObservations.png";
 import Release from "../assets/release.png";
 import Surgery from "../assets/surgery.png";
 import Treatment from "../assets/treatment.png";
+import Logo from "../assets/logo.jpg";
 
 const FormCard = ({ title, navigate, image }) => {
   return (
@@ -39,76 +47,85 @@ const FormPage = () => {
   };
 
   return (
-    <View style={styles.container}>
-      {console.log(userRole)}
-      {userRole === "admin" || userRole === "catcher" ? (
-        <>
-          <FormCard
-            title="Catching"
-            image={Catching}
-            navigate={() => navigateToForm("/Catching")}
-          />
-          <FormCard
-            title="Initial Observations "
-            image={InitialObservations}
-            navigate={() => navigateToForm("/DogPhotos")}
-          />
-        </>
-      ) : null}
+    <ImageBackground
+      source={require("../assets/logo.jpg")}
+      style={styles.backgroundImage}
+    >
+      <View style={styles.container}>
+        {console.log(userRole)}
+        {userRole === "admin" || userRole === "catcher" ? (
+          <>
+            <FormCard
+              title="Catching"
+              image={Catching}
+              navigate={() => navigateToForm("/Catching")}
+            />
+            <FormCard
+              title="Initial Observations "
+              image={InitialObservations}
+              navigate={() => navigateToForm("/DogPhotos")}
+            />
+          </>
+        ) : null}
 
-      {userRole === "admin" || userRole === "caretaker" ? (
-        <FormCard
-          title="Daily Treatment"
-          image={Treatment}
-          navigate={() => navigateToForm("/Day")}
-        />
-      ) : null}
+        {userRole === "admin" || userRole === "caretaker" ? (
+          <FormCard
+            title="Daily Treatment"
+            image={Treatment}
+            navigate={() => navigateToForm("/Day")}
+          />
+        ) : null}
 
-      {userRole === "admin" || userRole === "vet" ? (
-        <>
+        {userRole === "admin" || userRole === "vet" ? (
+          <>
+            <FormCard
+              title="Surgery"
+              image={Surgery}
+              navigate={() => navigateToForm("/SurgeryNotes")}
+            />
+            <FormCard
+              image={Surgery}
+              title="Medicines"
+              navigate={() => navigateToForm("/SurgeryDetails")}
+            />
+          </>
+        ) : null}
+        {userRole === "admin" || userRole === "catcher" ? (
           <FormCard
-            title="Surgery"
-            image={Surgery}
-            navigate={() => navigateToForm("/SurgeryNotes")}
+            image={Release}
+            title="Release"
+            navigate={() => navigateToForm("/ReleaseForm")}
           />
+        ) : null}
+        {userRole === "admin" ? (
           <FormCard
-            image={Surgery}
-            title="Medicines"
-            navigate={() => navigateToForm("/SurgeryDetails")}
+            title="Add a User"
+            navigate={() => navigateToForm("/LoginAdmin")}
           />
-        </>
-      ) : null}
-      {userRole === "admin" || userRole === "catcher" ? (
-        <FormCard
-          image={Release}
-          title="Release"
-          navigate={() => navigateToForm("/ReleaseForm")}
-        />
-      ) : null}
-      {userRole === "admin" ? (
-        <FormCard
-          title="Add a User"
-          navigate={() => navigateToForm("/LoginAdmin")}
-        />
-      ) : null}
-      {userRole === "admin" ? (
-        <FormCard
-          title="Generate Reports"
-          navigate={() => navigateToForm("/Report")}
-        />
-      ) : null}
-    </View>
+        ) : null}
+        {userRole === "admin" ? (
+          <FormCard
+            title="Generate Reports"
+            navigate={() => navigateToForm("/Report")}
+          />
+        ) : null}
+      </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+    resizeMode: "cover", // or "stretch"
+    justifyContent: "center",
+  },
   container: {
     flex: 1,
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#F5F5F5",
     padding: 20,
   },
   card: {
