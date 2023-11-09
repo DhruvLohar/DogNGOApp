@@ -124,8 +124,8 @@ export default function SurgeryDetails() {
     const formattedTime =
       hours >= 12
         ? `${hours === 12 ? 12 : hours - 12}:${minutes
-            .toString()
-            .padStart(2, "0")} PM`
+          .toString()
+          .padStart(2, "0")} PM`
         : `${hours}:${minutes.toString().padStart(2, "0")} AM`;
 
     return formattedTime;
@@ -239,10 +239,9 @@ export default function SurgeryDetails() {
     }
 
     const formData = new FormData();
-    formData.append("date", date);
-    formData.append("time", time);
+    formData.append("surgeryDate", date);
+    // formData.append("time", time);
     formData.append("arv", arv);
-    formData.append("photo", photo);
     formData.append("additionalPhotos", additionalPhotos);
     formData.append("xylazine", xylazine);
     formData.append("dexa", dexa);
@@ -257,12 +256,19 @@ export default function SurgeryDetails() {
     formData.append("earNotched", earNotched);
     formData.append("observations", observations);
 
+    const photoExt = photo.split(".").pop()
+    formData.append("surgeryPhoto", {
+      uri: kennelPhoto,
+      type: `image/${photoExt}`,
+      name: `surgeryPhoto.${photoExt}`
+    })
+
     additionalPhotos.forEach((photo, index) => {
       let ext = photo.split(".").pop();
       formData.append("additionalPhotos[]", {
         uri: photo,
         type: `image/${ext}`,
-        name: `catcherAdditionalPhoto_${index}.${ext}`,
+        name: `vetAdditionalPhoto_${index}.${ext}`,
       });
     });
 

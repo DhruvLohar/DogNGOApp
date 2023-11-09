@@ -24,9 +24,8 @@ const Index = () => {
       contactNumber: contactNumber,
       password: pin,
     })
-      .then((res) => {
-        // console.log(res);
-        handleAccessToken(res.data.role, res.data.token);
+      .then(async (res) => {
+        await handleAccessToken(res.data.role, res.data.token);
         router.replace("/FormPage");
       })
       .catch((error) => {

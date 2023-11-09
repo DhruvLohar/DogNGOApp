@@ -35,6 +35,10 @@ const doctorSchema = new mongoose.Schema({
     ketamin: String,
     stadren: String,
     dicrysticin: String,
+
+    surgeryPhoto: { type: mongoose.Schema.Types.ObjectId, ref: 'Image' },
+    additionalPhotos: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Image' }]
+
 }, { timestamps: true, versionKey: false });
 
 const dailyMonitoringSchema = new mongoose.Schema({
@@ -68,10 +72,14 @@ const dogSchema = new mongoose.Schema({
     gender: String,
     agression: Boolean,
 
+    kennelPhoto: { type: mongoose.Schema.Types.ObjectId, ref: 'Image' },
+    additionalKennelPhotos: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Image' }],
+
     // release form data
     isReleased: {type: Boolean, default: false},
     isDispatched: {type: Boolean, default: false},
     releaseDate: Date,
+    releaseLocation: String, 
 
     catcherDetails: { type: mongoose.Schema.Types.ObjectId, ref: 'Catcher' }, // Foreign key to Catcher
     vetDetails: { type: mongoose.Schema.Types.ObjectId, ref: 'Doctor' }, // Foreign key to Doctor

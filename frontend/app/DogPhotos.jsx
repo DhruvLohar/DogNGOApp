@@ -8,14 +8,36 @@ import {
   Image,
   Button,
 } from "react-native";
+import { axiosRequest } from "../service/api";
 
 const DogPhotos = () => {
   const router = useRouter();
   const [selectedDogId, setSelectedDogId] = useState(null);
+  const [Dogs, setDogs] = useState([])
 
   useEffect(() => {
     //Make an API call to get all dogs who are captured but not assigned a kennel. I would suggest make another
     //state for dog ['released', 'dispatched', 'caught', 'treating'] and call dogs with caught, and put them in 'treatng'
+    axiosRequest(
+      "/dog/observable",
+      {
+        method: "get",
+      },
+      true
+    )
+      .then((res) => {
+        console.log(res.data)
+        setDogs(res.data)
+      })
+      .catch((error) => {
+        if (error.response) {
+          alert(JSON.stringify(error.response));
+        } else if (error.request) {
+          console.log("No response received");
+        } else {
+          console.log("Error:", error.message);
+        }
+      });
   }, []);
 
   // Sample data of dogs (replace with data fetched from backend)
@@ -53,22 +75,20 @@ const DogPhotos = () => {
 
   const handleSubmit = () => {
     if (selectedDogId) {
-      const selectedDog = dogs.find((dog) => dog.id === selectedDogId);
-      console.log(selectedDog);
-      router.push("/InitialObservations");
-    } else {
+      console.log(selectedDogId)
+      router.push(`/initialObservations/${selectedDogId}`);
     }
   };
 
   return (
     <View style={{ padding: 20 }}>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        {dogs.map((dog) => (
+        {Dogs.map((dog) => (
           <TouchableOpacity
-            key={dog.id}
-            onPress={() => handleSelectDog(dog.id)}
+            key={dog._id}
+            onPress={() => handleSelectDog(dog._id)}
             style={{
-              borderColor: selectedDogId === dog.id ? "#007BFF" : "grey",
+              borderColor: selectedDogId === dog._id ? "#007BFF" : "grey",
               borderWidth: 2,
               borderRadius: 10,
               padding: 10,
@@ -80,13 +100,13 @@ const DogPhotos = () => {
           >
             <View style={{ marginBottom: 10 }}>
               <Image
-                source={{ uri: dog.photoUrl }}
+                source={{ uri: dog?.photoUrl }}
                 style={{ width: 100, height: 100, borderRadius: 50 }}
               />
             </View>
-            <Text style={{ fontWeight: "bold" }}>{dog.name}</Text>
-            <Text>{dog.breed}</Text>
-            <Text>{dog.age} years old</Text>
+            <Text style={{ fontWeight: "bold" }}>{dog?._id}</Text>
+            <Text>{dog?.breed}</Text>
+            <Text>{dog?.age} years old</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>

@@ -177,7 +177,6 @@ export default function Catching() {
         true
       )
         .then((res) => {
-          console.log(JSON.stringify(res));
           alert("Dog added Successfully!");
         })
         .catch((error) => {

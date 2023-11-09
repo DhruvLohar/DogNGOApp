@@ -5,10 +5,12 @@ import {
   StyleSheet,
   Image,
   ImageBackground,
+  Button,
+  ScrollView,
 } from "react-native";
 import { React, useState, useEffect } from "react";
 import { useRouter } from "expo-router";
-import { getUserRole } from "../service/api";
+import { getUserRole, logOutUser } from "../service/api";
 import Catching from "../assets/catching.png";
 import InitialObservations from "../assets/initialObservations.png";
 import Release from "../assets/release.png";
@@ -33,10 +35,19 @@ const FormPage = () => {
 
   const role = async () => {
     let r = await getUserRole();
+    console.log(r)
     if (r) {
       setRole(r);
     }
   };
+
+  const handleLogout = () => {
+    logOutUser().then(res => {
+      if (res) {
+        router.replace('/')
+      }
+    });
+  }
 
   useEffect(() => {
     role();
@@ -51,65 +62,68 @@ const FormPage = () => {
       source={require("../assets/logo.jpg")}
       style={styles.backgroundImage}
     >
-      <View style={styles.container}>
-        {console.log(userRole)}
-        {userRole === "admin" || userRole === "catcher" ? (
-          <>
-            <FormCard
-              title="Catching"
-              image={Catching}
-              navigate={() => navigateToForm("/Catching")}
-            />
-            <FormCard
-              title="Initial Observations "
-              image={InitialObservations}
-              navigate={() => navigateToForm("/DogPhotos")}
-            />
-          </>
-        ) : null}
+      <ScrollView>
+        <View style={styles.container}>
+          {userRole === "admin" || userRole === "catcher" ? (
+            <>
+              <FormCard
+                title="Catching"
+                image={Catching}
+                navigate={() => navigateToForm("/Catching")}
+              />
+              <FormCard
+                title="Initial Observations "
+                image={InitialObservations}
+                navigate={() => navigateToForm("/DogPhotos")}
+              />
+            </>
+          ) : null}
 
-        {userRole === "admin" || userRole === "caretaker" ? (
-          <FormCard
-            title="Daily Treatment"
-            image={Treatment}
-            navigate={() => navigateToForm("/Day")}
-          />
-        ) : null}
+          {userRole === "admin" || userRole === "caretaker" ? (
+            <FormCard
+              title="Daily Treatment"
+              image={Treatment}
+              navigate={() => navigateToForm("/Day")}
+            />
+          ) : null}
 
-        {userRole === "admin" || userRole === "vet" ? (
-          <>
+          {userRole === "admin" || userRole === "vet" ? (
+            <>
+              <FormCard
+                title="Surgery"
+                image={Surgery}
+                navigate={() => navigateToForm("/SurgeryNotes")}
+              />
+              <FormCard
+                image={Surgery}
+                title="Medicines"
+                navigate={() => navigateToForm("/SurgeryDetails")}
+              />
+            </>
+          ) : null}
+          {userRole === "admin" || userRole === "catcher" ? (
             <FormCard
-              title="Surgery"
-              image={Surgery}
-              navigate={() => navigateToForm("/SurgeryNotes")}
+              image={Release}
+              title="Release"
+              navigate={() => navigateToForm("/ReleaseForm")}
             />
+          ) : null}
+          {userRole === "admin" ? (
             <FormCard
-              image={Surgery}
-              title="Medicines"
-              navigate={() => navigateToForm("/SurgeryDetails")}
+              title="Add a User"
+              navigate={() => navigateToForm("/LoginAdmin")}
             />
-          </>
-        ) : null}
-        {userRole === "admin" || userRole === "catcher" ? (
-          <FormCard
-            image={Release}
-            title="Release"
-            navigate={() => navigateToForm("/ReleaseForm")}
-          />
-        ) : null}
-        {userRole === "admin" ? (
-          <FormCard
-            title="Add a User"
-            navigate={() => navigateToForm("/LoginAdmin")}
-          />
-        ) : null}
-        {userRole === "admin" ? (
-          <FormCard
-            title="Generate Reports"
-            navigate={() => navigateToForm("/Report")}
-          />
-        ) : null}
-      </View>
+          ) : null}
+          {userRole === "admin" ? (
+            <FormCard
+              title="Generate Reports"
+              navigate={() => navigateToForm("/Report")}
+            />
+          ) : null}
+        </View>
+        <Button title="Logout User" onPress={() => handleLogout()}>
+        </Button>
+      </ScrollView>
     </ImageBackground>
   );
 };
@@ -117,8 +131,10 @@ const FormPage = () => {
 const styles = StyleSheet.create({
   backgroundImage: {
     flex: 1,
-    resizeMode: "cover", // or "stretch"
+    // resizeMode: "cover", // or "stretch"
+    width: "100%",
     justifyContent: "center",
+    objectFit: "contain"
   },
   container: {
     flex: 1,
