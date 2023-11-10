@@ -11,6 +11,8 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 
+import { axiosRequest } from "../service/api";
+
 export default function SurgeryNotes() {
   const [kennelNumber, setKennelNumber] = useState("");
   const [caseNumber, setCaseNumber] = useState("23-OCT-29-01");
@@ -48,12 +50,25 @@ export default function SurgeryNotes() {
     setKennelNumberError(errors.kennelNumberError || "");
 
     if (Object.keys(errors).length === 0) {
-      const dummyDogData = {
-        name: "Max",
-        breed: "Labrador",
-        age: 5,
-      };
-      setDogModalInfo(dummyDogData);
+      axiosRequest(
+        `/dogkennel/${kennelNumber}`,
+        {
+          method: "get",
+        },
+        false
+      )
+        .then((res) => {
+          setDogModalInfo(res.data)
+        })
+        .catch((error) => {
+          if (error.response) {
+            alert(JSON.stringify(error.response));
+          } else if (error.request) {
+            console.log("No response received");
+          } else {
+            console.log("Error:", error.message);
+          }
+        });
       setModalVisible(true);
     }
     // Implement API call to retrieve dog's information based on kennelNumber
@@ -68,6 +83,7 @@ export default function SurgeryNotes() {
     // Logic for when user confirms the dog info
     setDogInfo(dogModalInfo);
     setModalVisible(false);
+
   };
 
   const formatTime = () => {
@@ -174,25 +190,7 @@ export default function SurgeryNotes() {
         temperature
       );
 
-      const dog = axiosRequest(
-        `/${kennelNumber}`,
-        {
-          method: "get",
-        },
-        true
-      )
-        .then((res) => {
-          alert(JSON.stringify(res));
-        })
-        .catch((error) => {
-          if (error.response) {
-            alert(JSON.stringify(error.response));
-          } else if (error.request) {
-            console.log("No response received");
-          } else {
-            console.log("Error:", error.message);
-          }
-        });
+      
 
       // Reset form fields
       setKennelNumber("");
@@ -239,9 +237,8 @@ export default function SurgeryNotes() {
             {dogModalInfo ? (
               <View>
                 <Text style={styles.modalText}>Dog Information</Text>
-                <Text>Name: {dogModalInfo.name}</Text>
-                <Text>Breed: {dogModalInfo.breed}</Text>
-                <Text>Age: {dogModalInfo.age}</Text>
+                <Text>Case Number: {dogModalInfo.caseNumber}</Text>
+                <Text>Caught on : {dogModalInfo.createdAt.splice(0,10)}</Text>
                 <View style={styles.buttonContainer}>
                   <TouchableOpacity
                     style={[styles.modalButton, styles.confirmButton]}

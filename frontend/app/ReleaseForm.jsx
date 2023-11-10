@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, Modal, StyleSheet } from "react-native";
+import { axiosRequest } from "../service/api";
 
 const ReleaseForm = () => {
   const [kennels, setKennels] = useState([
@@ -26,6 +27,9 @@ const ReleaseForm = () => {
     },
   ]);
 
+  const [releasableDogs, setReleasableDogs] = useState([])
+  const [dispatchableDogs, setDispatchableDogs] = useState([])
+
   const [selectedKennels, setSelectedKennels] = useState([]);
   const [releasedKennels, setReleasedKennels] = useState([]);
   const [showReleaseSheet, setShowReleaseSheet] = useState(false);
@@ -42,6 +46,48 @@ const ReleaseForm = () => {
     setReleasedKennels((prev) => prev.filter((kennel) => kennel !== dog));
   };
 
+  useEffect(() => {
+    axiosRequest(
+      "/dog/dispatchable",
+      {
+        method: "get",
+      },
+      false
+    )
+      .then((res) => {
+        setDispatchableDogs(res.data);
+      })
+      .catch((error) => {
+        if (error.response) {
+          alert(JSON.stringify(error.response));
+        } else if (error.request) {
+          console.log("No response received");
+        } else {
+          console.log("Error:", error.message);
+        }
+      });
+
+    axiosRequest(
+      "/dog/releasable",
+      {
+        method: "get",
+      },
+      false
+    )
+      .then((res) => {
+        setReleasableDogs(res.data);
+      })
+      .catch((error) => {
+        if (error.response) {
+          alert(JSON.stringify(error.response));
+        } else if (error.request) {
+          console.log("No response received");
+        } else {
+          console.log("Error:", error.message);
+        }
+      });
+  }, [])
+
   const handleSubmit = () => {
     const newKennels = kennels.filter(
       (kennel) => !selectedKennels.includes(kennel)
@@ -54,27 +100,23 @@ const ReleaseForm = () => {
 
   return (
     <View style={styles.container}>
-      {kennels
-        .filter(
-          (kennel) =>
-            (new Date() - kennel.surgeryDate) / (1000 * 60 * 60 * 24) > 3
-        )
-        .map((kennel) => (
-          <TouchableOpacity
-            key={kennel.id}
-            style={[
-              styles.kennelContainer,
-              selectedKennels.includes(kennel) &&
-                styles.selectedKennelContainer,
-            ]}
-            onPress={() => handleKennelPress(kennel)}
-          >
-            <Text>Kennel ID: {kennel.id}</Text>
-            <Text>Dog Photo: {kennel.dogPhoto}</Text>
-            <Text>Caretaker: {kennel.caretaker}</Text>
-            <Text>Phone Number: {kennel.phoneNumber}</Text>
-          </TouchableOpacity>
-        ))}
+
+      {dispatchableDogs.map(dog => (
+        <TouchableOpacity
+          key={dog._id}
+          style={[
+            styles.kennelContainer,
+            selectedKennels.includes(kennel) &&
+            styles.selectedKennelContainer,
+          ]}
+          onPress={() => handleKennelPress(kennel)}
+        >
+          <Text>Kennel ID: {dog?.kennel?._id}</Text>
+          <Text>Dog Photo: {dog?.catcherDetails?.spotPhoto?.path}</Text>
+          <Text>Caretaker: {dog?.careTakerDetails?.caretaker?.name}</Text>
+          <Text>Phone Number: {dog?.careTakerDetails?.caretaker?.contactNumber}</Text>
+        </TouchableOpacity>
+      ))}
 
       <TouchableOpacity onPress={handleSubmit} style={styles.submitButton}>
         <Text>Submit</Text>

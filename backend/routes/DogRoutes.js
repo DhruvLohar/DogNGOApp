@@ -1,6 +1,7 @@
 const express = require("express");
 const multer = require('multer');
 const path = require('path');
+const XLSX = require('xlsx');
 const router = express.Router();
 
 const {
@@ -107,10 +108,11 @@ router.get("/:id/retrieve", authenticateToken, async (req, res) => {
 });
 
 // Retreieve dog by kennel id
-router.get("/kennel/:kennelId", authenticateToken, async (req, res) => {
-  const kennelId = req.params.kennelId;
+router.get("/kennel/:id", authenticateToken, async (req, res) => {
+  const kennelId = req.params.id;
+
   try {
-    const kennel = await Kennel.findOne({ kennelId });
+    const kennel = await Kennel.findOne({ kennelId: kennelId });
 
     if (!kennel) {
       return res.status(404).json({ message: "Kennel not found" });
@@ -138,7 +140,7 @@ router.get("/kennel/:kennelId", authenticateToken, async (req, res) => {
           select: "_id name contactNumber role",
         },
       })
-      .populate("kennel");
+      .populate("kennel"); 
 
     res.status(200).json(dog);
   } catch (error) {
@@ -174,6 +176,7 @@ router.post("/", authenticateToken, fileUpload.fields([
     const {
       catchingLocation,
       locationDetails,
+      catchingDate
     } = req.body;
 
     const imageRefs = [];
@@ -211,6 +214,7 @@ router.post("/", authenticateToken, fileUpload.fields([
       catcher: req.user.userId, // Assuming userId is accessible through req.user
       catchingLocation,
       locationDetails,
+      catchingDate,
       spotPhoto: imageRefs[0], // Assign the first image as the spotPhoto
     });
 
@@ -249,7 +253,7 @@ router.post("/:id/initialObservations", authenticateToken, fileUpload.fields([
       aggression
     } = req.body;
 
-    const kennel = await Kennel.find({ kennelId: kennelId })
+    const kennel = await Kennel.findOne({ kennelId: kennelId })
     if (!kennel) {
       return res.status(404).json({ message: "Kennel not found" })
     }
@@ -289,6 +293,7 @@ router.post("/:id/initialObservations", authenticateToken, fileUpload.fields([
     }
 
     const dog = await Dog.findByIdAndUpdate(dogId, {
+      kennel: kennel._id,
       mainColor,
       description,
       gender,
@@ -301,8 +306,8 @@ router.post("/:id/initialObservations", authenticateToken, fileUpload.fields([
     }
 
     kennel.isOccupied = true;
-
     await kennel.save();
+
     await dog.save();
 
     res.status(201).json({ message: "Dog's inital observations noted!" });
@@ -470,11 +475,185 @@ router.post("/:id/caretaker/report", authenticateToken, async (req, res) => {
 MISC ROUTES
 */
 
+// Get : Download the report in xlsx format (for admin)
+router.get("/:id/report/xlsx", async (req, res) => {
+  try {
+    if (req) {
+      const dogId = req.params.id;
+      const dog = await Dog.findById(dogId)
+        .populate([
+          {
+            path: "catcherDetails",
+            populate: [{
+              path: "catcher",
+              select: "_id name contactNumber role",
+            },
+            {
+              path: 'spotPhoto',
+              select: 'path'
+            }]
+          },
+          {
+            path: "vetDetails",
+            populate: {
+              path: "vet",
+              select: "_id name contactNumber role",
+            },
+          },
+          {
+            path: "careTakerDetails",
+            populate: {
+              path: "careTaker",
+              select: "_id name contactNumber role",
+            },
+          },
+          {
+            path: "kennel",
+          },
+        ]);
+
+      if (!dog) {
+        return res.status(404).json({ error: 'Dog not found' });
+      }
+
+      const workBook = XLSX.utils.book_new();
+
+      const dogDetails = [
+        {
+          "Dog ID": dog._id.toString(),
+          "Dog Name": dog.dogName,
+          "Dog's Main Color": dog.mainColor,
+          "Dog Gender": dog.gender,
+          "Description": dog.description,
+          "Is Agressive?": dog.agression,
+        }
+      ]
+      const ddws = XLSX.utils.json_to_sheet(dogDetails);
+      XLSX.utils.book_append_sheet(workBook, ddws, "Dog Details");
+
+      if (dog.catcherDetails) {
+        const catcherDetails = [
+          {
+            "Catcher ID": dog.catcherDetails.catcher._id.toString(),
+            "Name": dog.catcherDetails.catcher.name,
+            "Contact Number": dog.catcherDetails.catcher.contactNumber,
+            "Catching Location": dog.catcherDetails.catchingLocation,
+            "Catching Location Details": dog.catcherDetails.locationDetails,
+            "Releasing Location": dog.catcherDetails.releasingLocation,
+            "Catched At": dog.catcherDetails.createdAt.toString(),
+            "Spot Photo": {
+              t: "s",
+              v: "Click to open photo",
+              l: { Target: "http://192.168.1.5:3500/" + dog.catcherDetails.spotPhoto.path },
+              s: { font: { color: { rgb: "0000FFFF" }, underline: true } }
+            }
+          }
+        ]
+        const cdws = XLSX.utils.json_to_sheet(catcherDetails);
+        XLSX.utils.book_append_sheet(workBook, cdws, "Catcher Details");
+      }
+
+      if (dog.vetDetails) {
+        const vetDetails = [
+          {
+            "Vet ID": dog.vetDetails.vet._id.toString(),
+            "Name": dog.vetDetails.vet.name,
+            "Contact Number": dog.vetDetails.vet.contactNumber,
+            "Surgery date": dog.vetDetails.surgeryDate.toString(),
+
+            "Surgery Photo": {
+              t: "s",
+              v: "Click to open photo",
+              l: { Target: "http://192.168.1.5:3500/" + dog.vetDetails.surgeryPhoto.path },
+              s: { font: { color: { rgb: "0000FFFF" }, underline: true } }
+            }
+          }
+        ]
+        Object.keys(dog.vetDetails).map(key, i => {
+          if (!key in ['surgeyPhoto', 'additionalPhotos', 'surgeryDate']) {
+            vetDetails[0][key] = dog.vetDetails[key]
+          }
+        })
+        const vdws = XLSX.utils.json_to_sheet(vetDetails);
+        XLSX.utils.book_append_sheet(workBook, vdws, "Vet Details");
+      }
+
+      if (dog.careTakerDetails) {
+        const careTakerDetails = [
+          {
+            "Caretaker ID": dog.vetDetails.vet._id.toString(),
+            "Name": dog.vetDetails.vet.name,
+            "Contact Number": dog.vetDetails.vet.contactNumber,
+          }
+        ]
+
+        const reportsDetails = []
+        dog.careTakerDetails.reports.map(report => {
+          reportsDetails.push({
+            "Report ID": report._id.toString(),
+            "Water Intake": report.waterIntake,
+            "Antibiotics": report.anitbiotics,
+            "Painkiller": report.painkiller,
+
+            "Observations": report.observations,
+            "Photo": {
+              t: "s",
+              v: "Click to open photo",
+              l: { Target: "http://192.168.1.5:3500/" + report.photo.path },
+              s: { font: { color: { rgb: "0000FFFF" }, underline: true } }
+            },
+            "Date": report.date.toString()
+          })
+        })
+
+        const ctws = XLSX.utils.json_to_sheet([...careTakerDetails, ...reportsDetails], { header: 1 });
+        XLSX.utils.book_append_sheet(workBook, ctws, "Caretaker Details");
+      }
+
+      XLSX.writeFile(workBook, `${dog.dogName} (${dog._id.toString()}).xlsx`);
+
+      // res.setHeader('Content-Disposition', 'attachment; filename=dog_details.xlsx');
+      // res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+
+      // XLSX.write(workbook, { bookType: 'xlsx', type: 'buffer' }, (err, data) => {
+      //   if (err) {
+      //     console.error(err);
+      //     return res.status(500).json({ error: 'Error generating XLSX file' });
+      //   }
+      //   res.end(data);
+      // });
+      res.status(200).json({ message: "Report generated successfully" })
+
+    } else {
+      res.status(403).json({ message: "Unauthorized Access" })
+    }
+
+  } catch (error) {
+    res.status(500).json({ error: "Error generating a report : " + error.message });
+  }
+});
+
 // Get : dogs for inital observations (dogs with no kennel)
 router.get("/observable", authenticateToken, async (req, res) => {
   console.log("aaya bhi ni")
   try {
-    const dogs = await Dog.find({ kennel: { $exists: false } });
+    const dogs = await Dog.find({ kennel: { $exists: false } })
+      .populate({
+        path: "catcherDetails",
+        select: "catchingLocation",
+        populate: {
+          path: "spotPhoto",
+          model: "Image"
+        },
+      })
+      .populate({
+        path: "careTakerDetails",
+        populate: {
+          path: "caretaker",
+          select: "_id name contactNumber",
+        },
+      })
+      .populate('kennel')
 
     res.status(200).json(dogs);
   } catch (error) {
@@ -492,7 +671,23 @@ router.get("/dispatchable", authenticateToken, async (req, res) => {
     // Find dogs with surgery date in the past 3 days
     const dogs = await Dog.find({
       "vetDetails.surgeryDate": { $lte: threeDaysAgo }
-    });
+    })
+      .populate({
+        path: "catcherDetails",
+        select: "catchingLocation",
+        populate: {
+          path: "spotPhoto",
+          model: "Image"
+        },
+      })
+      .populate({
+        path: "careTakerDetails",
+        populate: {
+          path: "caretaker",
+          select: "_id name contactNumber",
+        },
+      })
+      .populate('kennel')
 
     res.status(200).json(dogs);
   } catch (error) {
@@ -503,7 +698,20 @@ router.get("/dispatchable", authenticateToken, async (req, res) => {
 // Get : dogs whose isDispatched status is true
 router.get("/releasable", authenticateToken, async (req, res) => {
   try {
-    const dogs = await Dog.find({ isDispatched: true });
+    const dogs = await Dog.find({ isDispatched: true })
+      .populate([{
+        path: "catcherDetails",
+        select: "catchingLocation",
+        populate: {
+          path: "spotPhoto",
+          model: "Image"
+        },
+      }, {
+        path: "careTakerDetails",
+        select: "_id name contactNumber",
+      }, {
+        path: 'kennel'
+      }])
 
     res.status(200).json(dogs);
   } catch (error) {

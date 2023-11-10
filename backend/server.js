@@ -27,11 +27,13 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 app.use("/", express.static(path.join(__dirname, "/public")));
+app.use("/", express.static(path.join(__dirname, "/uploads")));
 
-app.use(express.static(path.join(__dirname, "/uploads")));
 app.use("/", require("./routes/root"));
 app.use("/user", require("./routes/UserRoutes"));
 app.use("/dog", require("./routes/DogRoutes"));
+
+app.use('/uploads', express.static(path.join(__dirname, "/uploads")));
 
 app.all("*", (req, res) => {
   res.status(404);

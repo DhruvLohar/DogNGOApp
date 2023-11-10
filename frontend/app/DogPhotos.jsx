@@ -8,12 +8,12 @@ import {
   Image,
   Button,
 } from "react-native";
-import { axiosRequest } from "../service/api";
+import { API_URL, axiosRequest } from "../service/api";
 
 const DogPhotos = () => {
   const router = useRouter();
   const [selectedDogId, setSelectedDogId] = useState(null);
-  const [Dogs, setDogs] = useState([])
+  const [Dogs, setDogs] = useState([]);
 
   useEffect(() => {
     //Make an API call to get all dogs who are captured but not assigned a kennel. I would suggest make another
@@ -26,8 +26,8 @@ const DogPhotos = () => {
       true
     )
       .then((res) => {
-        console.log(res.data)
-        setDogs(res.data)
+        console.log(res.data);
+        setDogs(res.data);
       })
       .catch((error) => {
         if (error.response) {
@@ -40,7 +40,7 @@ const DogPhotos = () => {
       });
   }, []);
 
-  // Sample data of dogs (replace with data fetched from backend)
+  // Sample data of dogs (                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 )
   const dogs = [
     {
       id: 1,
@@ -75,7 +75,7 @@ const DogPhotos = () => {
 
   const handleSubmit = () => {
     if (selectedDogId) {
-      console.log(selectedDogId)
+      console.log(selectedDogId);
       router.push(`/initialObservations/${selectedDogId}`);
     }
   };
@@ -100,13 +100,16 @@ const DogPhotos = () => {
           >
             <View style={{ marginBottom: 10 }}>
               <Image
-                source={{ uri: dog?.photoUrl }}
+                source={{ uri: API_URL + "/" + dog?.catcherDetails?.spotPhoto?.path }}
                 style={{ width: 100, height: 100, borderRadius: 50 }}
               />
             </View>
-            <Text style={{ fontWeight: "bold" }}>{dog?._id}</Text>
-            <Text>{dog?.breed}</Text>
-            <Text>{dog?.age} years old</Text>
+            <Text style={{ fontWeight: "bold", fontSize: 14 }}>
+              Case Number: {dog?.caseNumber}
+            </Text>
+            <Text style={{ fontWeight: "bold", fontSize: 14 }}>
+              Caught: {dog?.createdAt?.slice(0, 10)}
+            </Text>
           </TouchableOpacity>
         ))}
       </ScrollView>

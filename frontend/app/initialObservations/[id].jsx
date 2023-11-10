@@ -10,11 +10,12 @@ import {
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
-import { useGlobalSearchParams } from "expo-router";
+import { useGlobalSearchParams, useNavigation } from "expo-router";
 import { axiosRequest } from "../../service/api";
 
 export default function InitialObservations() {
 
+    const navigation = useNavigation()
     const { id } = useGlobalSearchParams();
 
     const [dog, setDog] = useState(null);
@@ -38,6 +39,10 @@ export default function InitialObservations() {
 
     //get the dog and set const caseNumber = dog.caseNumber
     useEffect(() => {
+        navigation.setOptions({
+            title: "Initial Observations"
+        })
+
         axiosRequest(`/dog/${id}/retrieve`, {
             method: 'get'
         })
@@ -56,7 +61,7 @@ export default function InitialObservations() {
                     console.log("Error:", err.message);
                 }
             })
-    });
+    }, []);
 
     const handleKennelPhotoUpload = async () => {
         let result = await ImagePicker.launchCameraAsync({
@@ -196,6 +201,7 @@ export default function InitialObservations() {
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
+
             {/* Kennel Number */}
             <View style={styles.fieldContainer}>
                 <Text>

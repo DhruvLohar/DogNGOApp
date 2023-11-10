@@ -4,14 +4,27 @@ const catcherSchema = new mongoose.Schema({
     catcher: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 
     catchingLocation: String,
-    releasingLocation: String,
     locationDetails: String,
+
+    releasingLocation: String,
+    catchingDate: Date,
 
     spotPhoto: { type: mongoose.Schema.Types.ObjectId, ref: 'Image' },
     additionalPhotos: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Image' }],
 
 }, { timestamps: true, versionKey: false });
 
+const dailyMonitoringSchema = new mongoose.Schema({
+    foodIntake: Number,
+    waterIntake: Number,
+    antibiotics: Boolean,
+    painkiller: Boolean,
+
+    observations: String,
+    photo: { type: mongoose.Schema.Types.ObjectId, ref: 'Image' },
+    date: Date
+
+}, {timestamps: true, versionKey: false});
 
 const doctorSchema = new mongoose.Schema({
     vet: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
@@ -41,17 +54,6 @@ const doctorSchema = new mongoose.Schema({
 
 }, { timestamps: true, versionKey: false });
 
-const dailyMonitoringSchema = new mongoose.Schema({
-    foodIntake: Number,
-    waterIntake: Number,
-    antibiotics: Boolean,
-    painkiller: Boolean,
-
-    observations: String,
-    kennelPhoto: {}
-
-}, {timestamps: true, versionKey: false});
-
 const careTakerSchema = new mongoose.Schema({
     
     careTaker: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
@@ -78,6 +80,7 @@ const dogSchema = new mongoose.Schema({
     // release form data
     isReleased: {type: Boolean, default: false},
     isDispatched: {type: Boolean, default: false},
+
     releaseDate: Date,
     releaseLocation: String, 
 

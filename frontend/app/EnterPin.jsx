@@ -53,7 +53,7 @@ const Index = () => {
         onChangeText={setPin}
         keyboardType="phone-pad"
         maxLength={4}
-        secureTextEntry
+        secureTextEntry={true}
       />
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Enter your PIN</Text>
