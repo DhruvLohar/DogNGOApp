@@ -1,220 +1,287 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Platform, ScrollView, Image } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { API_URL, axiosRequest, getAccessToken } from '../service/api';
+import * as FileSystem from 'expo-file-system';
+import { shareAsync } from 'expo-sharing';
+
+const DogCard = ({ caseNumber, dogName, photoUrl, onDownloadReport }) => {
+  return (
+    <View style={cardStyles.cardContainer}>
+      <Image source={{ uri: photoUrl }} style={cardStyles.photo} />
+      <View style={cardStyles.detailsContainer}>
+        <Text style={cardStyles.caseNumber}>Case Number: {caseNumber}</Text>
+        <Text style={cardStyles.dogName}>Dog's Name: {dogName}</Text>
+      </View>
+      <TouchableOpacity style={cardStyles.downloadButton} onPress={onDownloadReport}>
+        <Text style={cardStyles.buttonText}>Download Report</Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
 
 const Report = () => {
-  const [startDay, setStartDay] = useState("");
-  const [startMonth, setStartMonth] = useState("1");
-  const [startYear, setStartYear] = useState("2000");
-  const [endDay, setEndDay] = useState("");
-  const [endMonth, setEndMonth] = useState("1");
-  const [endYear, setEndYear] = useState("2000");
-  const [maxStartDay, setMaxStartDay] = useState(31);
-  const [maxEndDay, setMaxEndDay] = useState(31);
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
+  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
+  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
 
-  const isLeapYear = (year) => {
-    return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+  const [dogs, setDogs] = useState([])
+
+  const handleStartDateChange = (event, selectedDate) => {
+    setShowStartDatePicker(Platform.OS === 'ios');
+    const currentDate = selectedDate || startDate;
+    setStartDate(currentDate);
   };
 
-  const monthsMaxDays = {
-    1: 31,
-    2: 28,
-    3: 31,
-    4: 30,
-    5: 31,
-    6: 30,
-    7: 31,
-    8: 31,
-    9: 30,
-    10: 31,
-    11: 30,
-    12: 31,
-  };
-
-  const handleMonthChange = (month, isStart) => {
-    if (isStart) {
-      setStartMonth(month);
-      setStartDay("");
-
-      if (month === "2" && isLeapYear(parseInt(startYear, 10))) {
-        setMaxStartDay(29);
-      } else {
-        setMaxStartDay(monthsMaxDays[month]);
-      }
+  const handleEndDateChange = (event, selectedDate) => {
+    setShowEndDatePicker(Platform.OS === 'ios');
+    const currentDate = selectedDate || endDate;
+    // Check if the selected end date is not earlier than the start date
+    if (currentDate < startDate) {
+      // Display an alert
+      alert('End Date cannot be earlier than Start Date');
     } else {
-      setEndMonth(month);
-      setEndDay("");
-
-      if (month === "2" && isLeapYear(parseInt(endYear, 10))) {
-        setMaxEndDay(29);
-      } else {
-        setMaxEndDay(monthsMaxDays[month]);
-      }
+      setEndDate(currentDate);
     }
   };
 
-  const handleYearChange = (year, isStart) => {
-    if (isStart) {
-      setStartYear(year);
-      setStartDay("");
+  const showStartDatePickerModal = () => {
+    setShowStartDatePicker(true);
+  };
 
-      if (startMonth === "2" && isLeapYear(parseInt(year, 10))) {
-        setMaxStartDay(29);
+  const showEndDatePickerModal = () => {
+    setShowEndDatePicker(true);
+  };
+
+  const formatDateString = (date) => {
+    return date.toLocaleDateString('en-US', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+  };
+
+  const dummyData = [
+    {
+      "caseNumber": "123-ABC-456",
+      "dogName": "Buddy",
+      "photoUrl": "https://example.com/buddy.jpg"
+    },
+    {
+      "caseNumber": "789-XYZ-012",
+      "dogName": "Charlie",
+      "photoUrl": "https://example.com/charlie.jpg"
+    },
+    {
+      "caseNumber": "456-PQR-789",
+      "dogName": "Max",
+      "photoUrl": "https://example.com/max.jpg"
+    },
+    {
+      "caseNumber": "321-LMN-654",
+      "dogName": "Lucy",
+      "photoUrl": "https://example.com/lucy.jpg"
+    }
+  ];
+
+  const save = async (uri, filename, mimetype) => {
+    if (Platform.OS === "android") {
+      const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+      if (permissions.granted) {
+        const base64 = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 });
+        await FileSystem.StorageAccessFramework.createFileAsync(permissions.directoryUri, filename, mimetype)
+          .then(async (uri) => {
+            await FileSystem.writeAsStringAsync(uri, base64, { encoding: FileSystem.EncodingType.Base64 });
+          })
+          .catch(e => console.log(e));
       } else {
-        setMaxStartDay(monthsMaxDays[startMonth]);
+        shareAsync(uri);
       }
     } else {
-      setEndYear(year);
-      setEndDay("");
-
-      if (endMonth === "2" && isLeapYear(parseInt(year, 10))) {
-        setMaxEndDay(29);
-      } else {
-        setMaxEndDay(monthsMaxDays[endMonth]);
-      }
+      shareAsync(uri);
     }
   };
 
-  const handleDayChange = (day, isStart) => {
-    if (isStart) {
-      setStartDay(day);
-    } else {
-      setEndDay(day);
-    }
-  };
+  const downloadReport = async (dogId, dogName) => {
+    const token = await getAccessToken();
+
+    const filename = `${dogName} (${dogId}).xlsx`
+    const res = await FileSystem.downloadAsync(
+      API_URL + `/dog/${dogId}/report/xlsx`,
+      FileSystem.documentDirectory + filename,
+      {
+        headers: {
+          Authorization: token
+        }
+      }
+    )
+
+    save(res.uri, filename, res.headers["Content-Type"])
+  }
 
   const handleSubmit = () => {
-    const startDate = new Date(startYear, startMonth - 1, startDay);
-    const endDate = new Date(endYear, endMonth - 1, endDay);
-
-    const datesBetween = [];
-
-    while (startDate <= endDate) {
-      datesBetween.push(new Date(startDate));
-      startDate.setDate(startDate.getDate() + 1);
+    if (startDate && endDate) {
+      axiosRequest("/dog/report/xlsx", {
+        method: "post",
+        data: {
+          startDate: startDate.toISOString(),
+          endDate: endDate.toISOString(),
+        }
+      }, false)
+        .then(res => {
+          setDogs(res.data)
+        })
+        .catch((error) => {
+          if (error.response) {
+            alert(JSON.stringify(error.response));
+          } else if (error.request) {
+            console.log("No response received");
+          } else {
+            console.log("Error:", error.message);
+          }
+        });
     }
-
-    console.log("Dates between:", datesBetween);
-    //generate report and download CSV
-  };
-
-  const generateOptions = (start, end) => {
-    const options = [];
-    for (let i = start; i <= end; i++) {
-      options.push(i.toString());
-    }
-    return options;
   };
 
   return (
-    <div
-      style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
-    >
-      <div style={{ marginBottom: "10px" }}>
-        <h2>Start Date</h2>
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <select
-            value={startDay}
-            onChange={(e) => handleDayChange(e.target.value, true)}
-            style={{ marginRight: "10px" }}
-          >
-            <option value="">Day</option>
-            {generateOptions(1, maxStartDay).map((day) => (
-              <option key={day} value={day}>
-                {day}
-              </option>
+    <ScrollView>
+      <View style={styles.container}>
+        <View style={styles.dateContainer}>
+          <Text style={styles.heading} onPress={showStartDatePickerModal}>
+            Start Date : {formatDateString(startDate)}
+          </Text>
+          {showStartDatePicker && (
+            <DateTimePicker
+              value={startDate}
+              mode="date"
+              display="default"
+              onChange={handleStartDateChange}
+            />
+          )}
+        </View>
+        <View style={styles.dateContainer}>
+          <Text style={styles.heading} onPress={showEndDatePickerModal}>
+            End Date : {formatDateString(endDate)}
+          </Text>
+          {showEndDatePicker && (
+            <DateTimePicker
+              value={endDate}
+              mode="date"
+              display="default"
+              onChange={handleEndDateChange}
+            />
+          )}
+        </View>
+        <TouchableOpacity onPress={handleSubmit} style={styles.button}>
+          <Text style={styles.buttonText}>Generate Report</Text>
+        </TouchableOpacity>
+
+        {dogs.length > 0 ? (
+          <View style={{ width: "85%", marginTop: 20 }}>
+            <Text style={{ fontSize: 20, marginBottom: 10 }}>Dogs Found : </Text>
+            {dogs?.map((dog, idx) => (
+              <View key={idx} style={styles.dogContainer}>
+                <Image
+                  source={{ uri: API_URL + '/' + dog?.catcherDetails?.spotPhoto?.path }}
+                  style={{ width: 100, height: 100, borderRadius: 50, marginBottom: 20 }}
+                />
+                <Text>Case Number: {dog.caseNumber}</Text>
+                <Text>Dog's Name: {dog.dogName}</Text>
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={() => downloadReport(dog._id, dog.dogName)}
+                >
+                  <Text>Download Report</Text>
+                </TouchableOpacity>
+              </View>
             ))}
-          </select>
-          <select
-            value={startMonth}
-            onChange={(e) => handleMonthChange(e.target.value, true)}
-            style={{ marginRight: "10px" }}
-          >
-            <option value="1">January</option>
-            <option value="2">February</option>
-            <option value="3">March</option>
-            <option value="4">April</option>
-            <option value="5">May</option>
-            <option value="6">June</option>
-            <option value="7">July</option>
-            <option value="8">August</option>
-            <option value="9">September</option>
-            <option value="10">October</option>
-            <option value="11">November</option>
-            <option value="12">December</option>
-          </select>
-          <select
-            value={startYear}
-            onChange={(e) => handleYearChange(e.target.value, true)}
-          >
-            {generateOptions(2000, 2100).map((year) => (
-              <option key={year} value={year}>
-                {year}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-      <div>
-        <h2>End Date</h2>
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <select
-            value={endDay}
-            onChange={(e) => handleDayChange(e.target.value, false)}
-            style={{ marginRight: "10px" }}
-          >
-            <option value="">Day</option>
-            {generateOptions(1, maxEndDay).map((day) => (
-              <option key={day} value={day}>
-                {day}
-              </option>
-            ))}
-          </select>
-          <select
-            value={endMonth}
-            onChange={(e) => handleMonthChange(e.target.value, false)}
-            style={{ marginRight: "10px" }}
-          >
-            <option value="1">January</option>
-            <option value="2">February</option>
-            <option value="3">March</option>
-            <option value="4">April</option>
-            <option value="5">May</option>
-            <option value="6">June</option>
-            <option value="7">July</option>
-            <option value="8">August</option>
-            <option value="9">September</option>
-            <option value="10">October</option>
-            <option value="11">November</option>
-            <option value="12">December</option>
-          </select>
-          <select
-            value={endYear}
-            onChange={(e) => handleYearChange(e.target.value, false)}
-          >
-            {generateOptions(2000, 2100).map((year) => (
-              <option key={year} value={year}>
-                {year}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-      <button
-        onClick={handleSubmit}
-        style={{
-          padding: "10px 20px",
-          fontSize: "16px",
-          backgroundColor: "#007BFF",
-          color: "white",
-          border: "none",
-          borderRadius: "5px",
-          cursor: "pointer",
-          marginTop: "20px",
-        }}
-      >
-        Generate Report
-      </button>
-    </div>
+          </View>
+        ) : null}
+      </View>
+    </ScrollView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dateContainer: {
+    marginBottom: 20,
+  },
+  heading: {
+    fontSize: 20,
+    marginBottom: 10,
+    textDecorationLine: 'underline',
+    color: '#007BFF',
+  },
+  button: {
+    padding: 10,
+    fontSize: 16,
+    backgroundColor: '#007BFF',
+    color: 'white',
+    borderRadius: 5,
+    marginTop: 20,
+  },
+  buttonText: {
+    color: 'white',
+  },
+  dogContainer: {
+    marginBottom: 20,
+    backgroundColor: "#FFF",
+    padding: 10,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: "#CCC",
+  },
+  releaseButton: {
+    backgroundColor: "#DC3545",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 5,
+    marginTop: 10,
+  },
+});
+
+const cardStyles = StyleSheet.create({
+  cardContainer: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    margin: 10,
+    padding: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  photo: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+  },
+  detailsContainer: {
+    flex: 1,
+    marginLeft: 10,
+  },
+  caseNumber: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  dogName: {
+    fontSize: 14,
+  },
+  downloadButton: {
+    backgroundColor: '#007BFF',
+    padding: 10,
+    borderRadius: 5,
+  },
+  buttonText: {
+    color: 'white',
+    textAlign: 'center',
+  },
+});
 
 export default Report;

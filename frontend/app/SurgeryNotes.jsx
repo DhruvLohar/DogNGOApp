@@ -51,7 +51,7 @@ export default function SurgeryNotes() {
 
     if (Object.keys(errors).length === 0) {
       axiosRequest(
-        `/dogkennel/${kennelNumber}`,
+        `/dog/kennel/${kennelNumber}`,
         {
           method: "get",
         },
@@ -59,6 +59,7 @@ export default function SurgeryNotes() {
       )
         .then((res) => {
           setDogModalInfo(res.data)
+          setModalVisible(true);
         })
         .catch((error) => {
           if (error.response) {
@@ -69,7 +70,6 @@ export default function SurgeryNotes() {
             console.log("Error:", error.message);
           }
         });
-      setModalVisible(true);
     }
     // Implement API call to retrieve dog's information based on kennelNumber
   };
@@ -94,8 +94,8 @@ export default function SurgeryNotes() {
     const formattedTime =
       hours >= 12
         ? `${hours === 12 ? 12 : hours - 12}:${minutes
-            .toString()
-            .padStart(2, "0")} PM`
+          .toString()
+          .padStart(2, "0")} PM`
         : `${hours}:${minutes.toString().padStart(2, "0")} AM`;
 
     return formattedTime;
@@ -177,20 +177,55 @@ export default function SurgeryNotes() {
     setTemperatureError(errors.temperatureError || "");
 
     if (Object.keys(errors).length === 0) {
-      // All fields are valid, proceed with submission
-      console.log(
-        kennelNumber,
-        caseNumber,
-        date,
-        time,
-        photo,
-        additionalPhotos,
-        notes,
-        weight,
-        temperature
-      );
 
-      
+      const formData = new FormData();
+      // Merge date and time into one Date object (Akshar this wont work idky)
+      // let dateString = `${date} ${time}`
+      // const surgeryDate = new Date(dateString);
+      // console.log(new Date(dateString))
+
+      const data = {
+        surgeryDate: date,
+        observations: notes,
+        dogWeight: weight,
+        temperature: temperature
+      }
+      formData.append("vetDetails", JSON.stringify(data));
+
+      const ext = photo.split(".").pop()
+      formData.append("surgeryNotesPhoto", {
+          uri: photo,
+          type: `image/${ext}`,
+          name: `surgeryPhoto.${ext}`
+      })
+
+      additionalPhotos.forEach((photo, index) => {
+        let ext = photo.split(".").pop();
+        formData.append("additionalNotesPhotos[]", {
+          uri: photo,
+          type: `image/${ext}`,
+          name: `surgeryAdditionalPhoto_${index}.${ext}`,
+        });
+      });
+
+
+      axiosRequest(`/dog/${dogInfo._id}/update/vet`, {
+        method: "put",
+        data: formData,
+      }, true)
+        .then((res) => {
+          console.log(res.data)
+          alert("Surgery Notes Updated Successfully!");
+        })
+        .catch((error) => {
+          if (error.response) {
+            alert(JSON.stringify(error.response));
+          } else if (error.request) {
+            console.log("No response received");
+          } else {
+            console.log("Error:", error.message);
+          }
+        });
 
       // Reset form fields
       setKennelNumber("");
@@ -238,7 +273,7 @@ export default function SurgeryNotes() {
               <View>
                 <Text style={styles.modalText}>Dog Information</Text>
                 <Text>Case Number: {dogModalInfo.caseNumber}</Text>
-                <Text>Caught on : {dogModalInfo.createdAt.splice(0,10)}</Text>
+                <Text>Caught on : {dogModalInfo?.createdAt}</Text>
                 <View style={styles.buttonContainer}>
                   <TouchableOpacity
                     style={[styles.modalButton, styles.confirmButton]}

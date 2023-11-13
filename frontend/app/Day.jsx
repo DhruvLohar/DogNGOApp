@@ -10,6 +10,7 @@ import {
   Modal,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import { axiosRequest } from "../service/api";
 
 export default function Day() {
   const [kennel, setKennel] = useState("");
@@ -43,15 +44,27 @@ export default function Day() {
     setKennelError(errors.kennelError || "");
 
     if (Object.keys(errors).length === 0) {
-      const dummyDogData = {
-        name: "Max",
-        breed: "Labrador",
-        age: 5,
-      };
-      setDogModalInfo(dummyDogData);
-      setModalVisible(true);
+      const dog = axiosRequest(
+        `/dog/kennel/${kennel}`,
+        {
+          method: "get",
+        },
+        false
+      )
+        .then((res) => {
+          setDogModalInfo(res.data);
+          setModalVisible(true);
+        })
+        .catch((error) => {
+          if (error.response) {
+            alert(JSON.stringify(error.response.data.message));
+          } else if (error.request) {
+            console.log("No response received");
+          } else {
+            console.log("Error:", error.message);
+          }
+        });
     }
-    // Implement API call to retrieve dog's information based on kennelNumber
   };
 
   const handleModalClose = () => {
@@ -123,16 +136,40 @@ export default function Day() {
 
     if (Object.keys(errors).length === 0) {
       // All fields are valid, proceed with submission
-      console.log(
-        kennel,
-        date,
-        foodIntake,
-        waterIntake,
-        painkiller,
-        antibiotics,
-        photo,
-        caseNumber
-      );
+      const formData = new FormData();
+      formData.append("foodIntake", foodIntake)
+      formData.append("waterIntake", waterIntake)
+      formData.append("painkiller", painkiller)
+      formData.append("antibiotics", antibiotics)
+      formData.append("date", date)
+
+      const photoExt = photo.split(".").pop()
+      formData.append("photo", {
+        uri: photo,
+        type: `image/${photoExt}`,
+        name: `reportPhoto_${dogInfo._id}.${photoExt}`
+      })
+
+      axiosRequest(
+        `/dog/${dogInfo._id}/caretaker/report`,
+        {
+          method: "post",
+          data: formData,
+        },
+        true
+      )
+        .then((res) => {
+          alert("Daily Report Added successfully");
+        })
+        .catch((error) => {
+          if (error.response) {
+            alert(JSON.stringify(error.response.data.message));
+          } else if (error.request) {
+            console.log("No response received");
+          } else {
+            console.log("Error:", error.message);
+          }
+        });
 
       // Reset form fields
       setKennel("");
@@ -179,9 +216,8 @@ export default function Day() {
             {dogModalInfo ? (
               <View>
                 <Text style={styles.modalText}>Dog Information</Text>
-                <Text>Name: {dogModalInfo.name}</Text>
-                <Text>Breed: {dogModalInfo.breed}</Text>
-                <Text>Age: {dogModalInfo.age}</Text>
+                <Text>Case Number: {dogModalInfo?.caseNumber}</Text>
+                <Text>Caught on : {dogModalInfo?.createdAt}</Text>
                 <View style={styles.buttonContainer}>
                   <TouchableOpacity
                     style={[styles.modalButton, styles.confirmButton]}

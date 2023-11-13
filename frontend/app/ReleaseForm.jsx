@@ -44,6 +44,25 @@ const ReleaseForm = () => {
 
   const handleRelease = (dog) => {
     setReleasedKennels((prev) => prev.filter((kennel) => kennel !== dog));
+    axiosRequest(
+      `/dog/${id}/release`,
+      {
+        method: "post",
+      },
+      false
+    )
+      .then((res) => {
+        alert(res.data.message);
+      })
+      .catch((error) => {
+        if (error.response) {
+          alert(JSON.stringify(error.response));
+        } else if (error.request) {
+          console.log("No response received");
+        } else {
+          console.log("Error:", error.message);
+        }
+      });
   };
 
   useEffect(() => {
@@ -89,13 +108,35 @@ const ReleaseForm = () => {
   }, [])
 
   const handleSubmit = () => {
-    const newKennels = kennels.filter(
-      (kennel) => !selectedKennels.includes(kennel)
-    );
-    setReleasedKennels(selectedKennels);
-    setKennels(newKennels);
+    // const newKennels = kennels.filter(
+    //   (kennel) => !selectedKennels.includes(kennel)
+    // );
+    // setReleasedKennels(selectedKennels);
+    // setKennels(newKennels);
 
-    // setShowReleaseSheet(true);
+    selectedKennels.map(dog => {
+      axiosRequest(
+        `/dog/${id}/dispatch`,
+        {
+          method: "post",
+        },
+        false
+      )
+        .then((res) => {
+          console.log(res.data)
+          // alert(res.data.message);
+        })
+        .catch((error) => {
+          if (error.response) {
+            alert(JSON.stringify(error.response));
+          } else if (error.request) {
+            console.log("No response received");
+          } else {
+            console.log("Error:", error.message);
+          }
+        });
+    })
+    alert('Release Sheet updated.')
   };
 
   return (
@@ -106,10 +147,9 @@ const ReleaseForm = () => {
           key={dog._id}
           style={[
             styles.kennelContainer,
-            selectedKennels.includes(kennel) &&
-            styles.selectedKennelContainer,
+            selectedKennels.includes(dog._id) && styles.selectedKennelContainer,
           ]}
-          onPress={() => handleKennelPress(kennel)}
+          onPress={() => handleKennelPress(dog._id)}
         >
           <Text>Kennel ID: {dog?.kennel?._id}</Text>
           <Text>Dog Photo: {dog?.catcherDetails?.spotPhoto?.path}</Text>
@@ -130,13 +170,13 @@ const ReleaseForm = () => {
       {showReleaseSheet && (
         <Modal animationType="slide" transparent={false} visible={true}>
           <View style={styles.releaseSheet}>
-            {releasedKennels.map((dog) => (
-              <View key={dog.id} style={styles.dogContainer}>
-                <Text>Dog Photo: {dog.dogPhoto}</Text>
-                <Text>Caretaker: {dog.caretaker}</Text>
-                <Text>Phone Number: {dog.phoneNumber}</Text>
+            {releasableDogs.map((dog) => (
+              <View key={dog._id} style={styles.dogContainer}>
+                <Text>Dog Photo: {dog?.catcherDetails?.spotPhoto?.path}</Text>
+                <Text>Caretaker: {dog?.careTakerDetails?.caretaker?.name}</Text>
+                <Text>Phone Number: {dog?.careTakerDetails?.caretaker?.contactNumber}</Text>
                 <TouchableOpacity
-                  onPress={() => handleRelease(dog)}
+                  onPress={() => handleRelease(dog._id)}
                   style={styles.releaseButton}
                 >
                   <Text>Release</Text>

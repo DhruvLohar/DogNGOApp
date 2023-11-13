@@ -140,7 +140,7 @@ router.get("/kennel/:id", authenticateToken, async (req, res) => {
           select: "_id name contactNumber role",
         },
       })
-      .populate("kennel"); 
+      .populate("kennel");
 
     res.status(200).json(dog);
   } catch (error) {
@@ -250,7 +250,9 @@ router.post("/:id/initialObservations", authenticateToken, fileUpload.fields([
       mainColor,
       description,
       gender,
-      aggression
+      aggression,
+      dogName,
+      breed
     } = req.body;
 
     const kennel = await Kennel.findOne({ kennelId: kennelId })
@@ -298,6 +300,8 @@ router.post("/:id/initialObservations", authenticateToken, fileUpload.fields([
       description,
       gender,
       aggression,
+      dogName,
+      breed,
       kennelPhoto: imageRefs[0]
     })
 
@@ -322,7 +326,6 @@ router.put("/:id/update/catcher", authenticateToken, async (req, res) => {
     const dogId = req.params.id;
     const catcherDetails = req.body.catcherDetails;
 
-    console.log(catcherDetails);
     const dog = await Dog.findById(dogId);
     if (!dog) {
       res.status(404).json({ error: "Dog not found" });
@@ -346,10 +349,13 @@ router.put("/:id/update/catcher", authenticateToken, async (req, res) => {
 router.put("/:id/update/vet", authenticateToken, fileUpload.fields([
   { name: 'surgeryPhoto', maxCount: 1 },
   { name: 'additionalPhotos[]', maxCount: 4 },
+  { name: 'surgeryNotesPhoto', maxCount: 1 },
+  { name: 'additionalNotesPhotos[]', maxCount: 4 },
 ]), async (req, res) => {
   try {
     const dogId = req.params.id;
-    const vetDetailsData = req.body.vetDetails;
+    const vetDetailsData = JSON.parse(req.body.vetDetails);
+    console.log(vetDetailsData)
 
     if (["vet", "admin"].includes(req.user.role)) {
 
@@ -364,6 +370,18 @@ router.put("/:id/update/vet", authenticateToken, fileUpload.fields([
       // Save the kennelPhoto to the database
       if (req.files['surgeryPhoto'] && req.files['surgeryPhoto'].length > 0) {
         const spotPhoto = req.files['surgeryPhoto'][0];
+        // Assuming you have an Image model to save image details, create and save it
+        const image = new Image({
+          name: spotPhoto.originalname,
+          filename: spotPhoto.filename,
+          path: spotPhoto.path,
+        });
+        await image.save();
+        imageRefs.push(image._id);
+      }
+
+      if (req.files['surgeryNotesPhoto'] && req.files['surgeryNotesPhoto'].length > 0) {
+        const spotPhoto = req.files['surgeryNotesPhoto'][0];
         // Assuming you have an Image model to save image details, create and save it
         const image = new Image({
           name: spotPhoto.originalname,
@@ -389,7 +407,22 @@ router.put("/:id/update/vet", authenticateToken, fileUpload.fields([
         }
       }
 
-      const vetDetails = null;
+      if (req.files['additionalNotesPhotos[]'] && req.files['additionalNotesPhotos[]'].length > 0) {
+        const additionalPhotos = req.files['additionalNotesPhotos[]'];
+        for (const photo of additionalPhotos) {
+          // Create and save each additional photo to the Image model
+          const image = new Image({
+            name: photo.originalname,
+            filename: photo.filename,
+            path: photo.path,
+          });
+          await image.save();
+          imageRefs.push(image._id);
+        }
+      }
+
+
+      let vetDetails = null;
 
       if (!dog.vetDetails) {
         // Create a new vetDetails document and link it to the dog
@@ -409,33 +442,47 @@ router.put("/:id/update/vet", authenticateToken, fileUpload.fields([
         );
       }
 
-      vetDetails.surgeryPhoto = imageRefs[0]
-      for (let i of imageRefs.slice(1)) {
-        vetDetails.additionalPhotos.push(i)
+      if (imageRefs && imageRefs.length > 0) {
+        if (req.files['surgeryPhoto'] && req.files['additionalPhotos[]']) {
+          vetDetails.surgeryPhoto = imageRefs[0]
+          for (let i of imageRefs.slice(1)) {
+            vetDetails.additionalPhotos.push(i)
+          }
+        } else {
+          vetDetails.surgeryNotesPhoto = imageRefs[0]
+          for (let i of imageRefs.slice(1)) {
+            vetDetails.additionalNotesPhotos.push(i)
+          }
+        }
       }
 
       await vetDetails.save();
       await dog.save();
+      res.status(200).json({ message: "Updated the details successfully" })
+
     } else {
       return res
         .status(403)
         .json({ message: "Unauthorized Access Requested." });
     }
-
-    return res
-      .status(200)
-      .json({ message: "Vet details updated successfully" });
   } catch (error) {
-    return res.status(500).json({ error: "Error updating vet details" });
+    return res.status(500).json({ error: "Error updating vet details : " + error.message });
   }
 });
 
 // Add or Update caretaker reports in dog and add to caretakerDetails's reports
-router.post("/:id/caretaker/report", authenticateToken, async (req, res) => {
+router.post("/:id/caretaker/report", authenticateToken, fileUpload.fields([
+  { name: 'photo', maxCount: 1 }
+]), async (req, res) => {
   try {
     const dogId = req.params.id;
-    const careTakerDetails = req.body.careTakerDetails;
-    const reportData = req.body.reportData;
+
+    const { foodIntake,
+      waterIntake,
+      antibiotics,
+      painkiller,
+      // observations,
+      date } = req.body;
 
     if (["caretaker", "admin"].includes(req.user.role)) {
       let dog = await Dog.findById(dogId);
@@ -451,7 +498,28 @@ router.post("/:id/caretaker/report", authenticateToken, async (req, res) => {
 
         dog.careTakerDetails = careTakerDetails._id;
       }
-      const dailyReport = new DailyMonitoring(reportData);
+
+      let reportImage = null;
+
+      // Save the kennelPhoto to the database
+      if (req.files['photo'] && req.files['photo'].length > 0) {
+        const spotPhoto = req.files['photo'][0];
+        // Assuming you have an Image model to save image details, create and save it
+        const image = new Image({
+          name: spotPhoto.originalname,
+          filename: spotPhoto.filename,
+          path: spotPhoto.path,
+        });
+        await image.save();
+
+        reportImage = image._id;
+      }
+
+      const dailyReport = new DailyMonitoring({ foodIntake, waterIntake, antibiotics, painkiller, date });
+      if (reportImage) {
+        dailyReport.photo = reportImage; 
+      }
+
       await dailyReport.save();
 
       dog = await dog.populate("careTakerDetails");
@@ -459,307 +527,13 @@ router.post("/:id/caretaker/report", authenticateToken, async (req, res) => {
 
       await dog.careTakerDetails.save();
       await dog.save();
-      res.status(200).json({ message: "Created new report" });
+      res.status(200).json({ message: "New report created" });
     } else {
       res.status(403).json({ message: "Unauthorized Access" });
     }
   } catch (error) {
     return res.status(500).json({
-      error: "Error updating careTakerDetails in do :" + error.message,
-    });
-  }
-});
-
-
-/*
-MISC ROUTES
-*/
-
-// Get : Download the report in xlsx format (for admin)
-router.get("/:id/report/xlsx", async (req, res) => {
-  try {
-    if (req) {
-      const dogId = req.params.id;
-      const dog = await Dog.findById(dogId)
-        .populate([
-          {
-            path: "catcherDetails",
-            populate: [{
-              path: "catcher",
-              select: "_id name contactNumber role",
-            },
-            {
-              path: 'spotPhoto',
-              select: 'path'
-            }]
-          },
-          {
-            path: "vetDetails",
-            populate: {
-              path: "vet",
-              select: "_id name contactNumber role",
-            },
-          },
-          {
-            path: "careTakerDetails",
-            populate: {
-              path: "careTaker",
-              select: "_id name contactNumber role",
-            },
-          },
-          {
-            path: "kennel",
-          },
-        ]);
-
-      if (!dog) {
-        return res.status(404).json({ error: 'Dog not found' });
-      }
-
-      const workBook = XLSX.utils.book_new();
-
-      const dogDetails = [
-        {
-          "Dog ID": dog._id.toString(),
-          "Dog Name": dog.dogName,
-          "Dog's Main Color": dog.mainColor,
-          "Dog Gender": dog.gender,
-          "Description": dog.description,
-          "Is Agressive?": dog.agression,
-        }
-      ]
-      const ddws = XLSX.utils.json_to_sheet(dogDetails);
-      XLSX.utils.book_append_sheet(workBook, ddws, "Dog Details");
-
-      if (dog.catcherDetails) {
-        const catcherDetails = [
-          {
-            "Catcher ID": dog.catcherDetails.catcher._id.toString(),
-            "Name": dog.catcherDetails.catcher.name,
-            "Contact Number": dog.catcherDetails.catcher.contactNumber,
-            "Catching Location": dog.catcherDetails.catchingLocation,
-            "Catching Location Details": dog.catcherDetails.locationDetails,
-            "Releasing Location": dog.catcherDetails.releasingLocation,
-            "Catched At": dog.catcherDetails.createdAt.toString(),
-            "Spot Photo": {
-              t: "s",
-              v: "Click to open photo",
-              l: { Target: "http://192.168.1.5:3500/" + dog.catcherDetails.spotPhoto.path },
-              s: { font: { color: { rgb: "0000FFFF" }, underline: true } }
-            }
-          }
-        ]
-        const cdws = XLSX.utils.json_to_sheet(catcherDetails);
-        XLSX.utils.book_append_sheet(workBook, cdws, "Catcher Details");
-      }
-
-      if (dog.vetDetails) {
-        const vetDetails = [
-          {
-            "Vet ID": dog.vetDetails.vet._id.toString(),
-            "Name": dog.vetDetails.vet.name,
-            "Contact Number": dog.vetDetails.vet.contactNumber,
-            "Surgery date": dog.vetDetails.surgeryDate.toString(),
-
-            "Surgery Photo": {
-              t: "s",
-              v: "Click to open photo",
-              l: { Target: "http://192.168.1.5:3500/" + dog.vetDetails.surgeryPhoto.path },
-              s: { font: { color: { rgb: "0000FFFF" }, underline: true } }
-            }
-          }
-        ]
-        Object.keys(dog.vetDetails).map(key, i => {
-          if (!key in ['surgeyPhoto', 'additionalPhotos', 'surgeryDate']) {
-            vetDetails[0][key] = dog.vetDetails[key]
-          }
-        })
-        const vdws = XLSX.utils.json_to_sheet(vetDetails);
-        XLSX.utils.book_append_sheet(workBook, vdws, "Vet Details");
-      }
-
-      if (dog.careTakerDetails) {
-        const careTakerDetails = [
-          {
-            "Caretaker ID": dog.vetDetails.vet._id.toString(),
-            "Name": dog.vetDetails.vet.name,
-            "Contact Number": dog.vetDetails.vet.contactNumber,
-          }
-        ]
-
-        const reportsDetails = []
-        dog.careTakerDetails.reports.map(report => {
-          reportsDetails.push({
-            "Report ID": report._id.toString(),
-            "Water Intake": report.waterIntake,
-            "Antibiotics": report.anitbiotics,
-            "Painkiller": report.painkiller,
-
-            "Observations": report.observations,
-            "Photo": {
-              t: "s",
-              v: "Click to open photo",
-              l: { Target: "http://192.168.1.5:3500/" + report.photo.path },
-              s: { font: { color: { rgb: "0000FFFF" }, underline: true } }
-            },
-            "Date": report.date.toString()
-          })
-        })
-
-        const ctws = XLSX.utils.json_to_sheet([...careTakerDetails, ...reportsDetails], { header: 1 });
-        XLSX.utils.book_append_sheet(workBook, ctws, "Caretaker Details");
-      }
-
-      XLSX.writeFile(workBook, `${dog.dogName} (${dog._id.toString()}).xlsx`);
-
-      // res.setHeader('Content-Disposition', 'attachment; filename=dog_details.xlsx');
-      // res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-
-      // XLSX.write(workbook, { bookType: 'xlsx', type: 'buffer' }, (err, data) => {
-      //   if (err) {
-      //     console.error(err);
-      //     return res.status(500).json({ error: 'Error generating XLSX file' });
-      //   }
-      //   res.end(data);
-      // });
-      res.status(200).json({ message: "Report generated successfully" })
-
-    } else {
-      res.status(403).json({ message: "Unauthorized Access" })
-    }
-
-  } catch (error) {
-    res.status(500).json({ error: "Error generating a report : " + error.message });
-  }
-});
-
-// Get : dogs for inital observations (dogs with no kennel)
-router.get("/observable", authenticateToken, async (req, res) => {
-  console.log("aaya bhi ni")
-  try {
-    const dogs = await Dog.find({ kennel: { $exists: false } })
-      .populate({
-        path: "catcherDetails",
-        select: "catchingLocation",
-        populate: {
-          path: "spotPhoto",
-          model: "Image"
-        },
-      })
-      .populate({
-        path: "careTakerDetails",
-        populate: {
-          path: "caretaker",
-          select: "_id name contactNumber",
-        },
-      })
-      .populate('kennel')
-
-    res.status(200).json(dogs);
-  } catch (error) {
-    res.status(500).json({ error: "Error retrieving dogs : " + error.message });
-  }
-});
-
-// Get : dogs whose surgery date has past 3 days
-router.get("/dispatchable", authenticateToken, async (req, res) => {
-  try {
-    // Calculate the date 3 days ago from the current date
-    const threeDaysAgo = new Date();
-    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
-
-    // Find dogs with surgery date in the past 3 days
-    const dogs = await Dog.find({
-      "vetDetails.surgeryDate": { $lte: threeDaysAgo }
-    })
-      .populate({
-        path: "catcherDetails",
-        select: "catchingLocation",
-        populate: {
-          path: "spotPhoto",
-          model: "Image"
-        },
-      })
-      .populate({
-        path: "careTakerDetails",
-        populate: {
-          path: "caretaker",
-          select: "_id name contactNumber",
-        },
-      })
-      .populate('kennel')
-
-    res.status(200).json(dogs);
-  } catch (error) {
-    res.status(500).json({ error: "Error retrieving dogs : " + error.message });
-  }
-});
-
-// Get : dogs whose isDispatched status is true
-router.get("/releasable", authenticateToken, async (req, res) => {
-  try {
-    const dogs = await Dog.find({ isDispatched: true })
-      .populate([{
-        path: "catcherDetails",
-        select: "catchingLocation",
-        populate: {
-          path: "spotPhoto",
-          model: "Image"
-        },
-      }, {
-        path: "careTakerDetails",
-        select: "_id name contactNumber",
-      }, {
-        path: 'kennel'
-      }])
-
-    res.status(200).json(dogs);
-  } catch (error) {
-    res.status(500).json({ error: "Error retrieving dogs" });
-  }
-});
-
-// Post : dog id sent in post, should be marked as dispatched
-router.post("/:id/dispatch", authenticateToken, async (req, res) => {
-  try {
-    const dogId = req.params.id;
-
-    const dog = await Dog.findById(dogId);
-    if (!dog) {
-      res.status(404).json({ error: "Dog not found" });
-    }
-
-    dog.isDispatched = true;
-    await dog.save();
-
-    res.status(200).json(updatedDog);
-  } catch (error) {
-    res.status(500).json({
-      error: "Error dispatching dog : " + error.message,
-    });
-  }
-});
-
-// Post : dog id sent in post, should be marked as released
-router.post("/:id/release", authenticateToken, async (req, res) => {
-  try {
-    const dogId = req.params.id;
-    const { releaseLocation } = req.body;
-
-    const dog = await Dog.findById(dogId);
-    if (!dog) {
-      res.status(404).json({ error: "Dog not found" });
-    }
-
-    dog.isReleased = true;
-    dog.releaseDate = new Date(); // set current date
-    dog.releaseLocation = releaseLocation;
-    await dog.save();
-
-    res.status(200).json(updatedDog);
-  } catch (error) {
-    res.status(500).json({
-      error: "Error dispatching dog : " + error.message,
+      error: "Error updating careTakerDetails :" + error.message,
     });
   }
 });

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -8,11 +8,24 @@ import {
 } from "react-native";
 import Axios from "axios";
 import { useNavigation } from "@react-navigation/native";
-import { API_URL, axiosAuthorized } from "../service/api";
+import { API_URL, axiosAuthorized, getUserRole } from "../service/api";
+import { useRouter } from "expo-router";
 
 const Index = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const navigation = useNavigation();
+  const router = useRouter()
+
+  const role = async () => {
+    let r = await getUserRole();
+    if (r) {
+      router.replace("/FormPage")
+    }
+  };
+
+  useEffect(() => {
+    role();
+  }, [])
 
   const handleLogin = () => {
     //if user logging in for the first time router.push("/setPin")

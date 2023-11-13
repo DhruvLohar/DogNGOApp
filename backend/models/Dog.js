@@ -14,18 +14,6 @@ const catcherSchema = new mongoose.Schema({
 
 }, { timestamps: true, versionKey: false });
 
-const dailyMonitoringSchema = new mongoose.Schema({
-    foodIntake: Number,
-    waterIntake: Number,
-    antibiotics: Boolean,
-    painkiller: Boolean,
-
-    observations: String,
-    photo: { type: mongoose.Schema.Types.ObjectId, ref: 'Image' },
-    date: Date
-
-}, {timestamps: true, versionKey: false});
-
 const doctorSchema = new mongoose.Schema({
     vet: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 
@@ -50,7 +38,10 @@ const doctorSchema = new mongoose.Schema({
     dicrysticin: String,
 
     surgeryPhoto: { type: mongoose.Schema.Types.ObjectId, ref: 'Image' },
-    additionalPhotos: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Image' }]
+    additionalPhotos: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Image' }],
+
+    surgeryNotesPhoto: { type: mongoose.Schema.Types.ObjectId, ref: 'Image' },
+    additionalNotesPhotos: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Image' }]
 
 }, { timestamps: true, versionKey: false });
 
@@ -60,6 +51,18 @@ const careTakerSchema = new mongoose.Schema({
     reports: [{ type: mongoose.Schema.Types.ObjectId, ref: 'DailyMonitoring' }] // Many-to-many relation to DailyMonitoringSchema
 
 }, { timestamps: true, versionKey: false });
+
+const dailyMonitoringSchema = new mongoose.Schema({
+    foodIntake: String,
+    waterIntake: String,
+    antibiotics: String,
+    painkiller: String,
+
+    observations: String,
+    photo: { type: mongoose.Schema.Types.ObjectId, ref: 'Image' },
+    date: Date
+
+}, {timestamps: true, versionKey: false});
 
 const dogSchema = new mongoose.Schema({
     caseNumber: { type: String, unique: true },

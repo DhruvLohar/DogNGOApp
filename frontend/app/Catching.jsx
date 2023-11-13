@@ -155,7 +155,7 @@ export default function Catching() {
       const formData = new FormData();
       formData.append("catchingLocation", catchingLocation);
       formData.append("locationDetails", locationDetails);
-      formData.append("catchingDate", new Date(`${date}T${time}:00`))
+      formData.append("catchingDate", date)
       formData.append("spotPhoto", spotPhoto);
 
       additionalPhotos.forEach((photo, index) => {

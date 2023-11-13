@@ -22,6 +22,8 @@ export default function InitialObservations() {
 
     const [kennelNumber, setKennelNumber] = useState("");
     const [caseNumber, setCaseNumber] = useState("");
+    const [dogName, setDogName] = useState("");
+    const [breed, setBreed] = useState("");
     const [mainColor, setMainColor] = useState("");
     const [description, setDescription] = useState("");
     const [gender, setGender] = useState("");
@@ -31,6 +33,8 @@ export default function InitialObservations() {
 
     //error states
     const [kennelNumberError, setKennelNumberError] = useState("");
+    const [dogNameError, setDogNameError] = useState("");
+    const [breedError, setBreedError] = useState("");
     const [mainColorError, setMainColorError] = useState("");
     const [descriptionError, setDescriptionError] = useState("");
     const [genderError, setGenderError] = useState("");
@@ -106,6 +110,12 @@ export default function InitialObservations() {
             errors.kennelNumberError = "Please enter a kennel number.";
         }
 
+        if (!dogName) {
+            errors.dogNameError = "Please enter dog's name"
+        }
+
+        if (!breed) errors.breedError = "Please enter dog's breed"
+
         if (!mainColor) {
             errors.mainColorError = "Please select a main color.";
         }
@@ -127,6 +137,8 @@ export default function InitialObservations() {
         }
 
         setKennelNumberError(errors.kennelNumberError || "");
+        setDogNameError(errors.dogNameError || "")
+        setBreedError(errors.breedError || "")
         setMainColorError(errors.mainColorError || "");
         setDescriptionError(errors.descriptionError || "");
         setGenderError(errors.genderError || "");
@@ -134,18 +146,10 @@ export default function InitialObservations() {
         setKennelPhotoError(errors.kennelPhotoError || "");
 
         if (Object.keys(errors).length === 0) {
-            // All fields are valid, proceed with submission
-            console.log(
-                kennelNumber,
-                mainColor,
-                description,
-                gender,
-                aggression,
-                kennelPhoto,
-                additionalPhotos
-            );
             const formData = new FormData();
             formData.append("kennelId", kennelNumber);
+            formData.append("dogName", dogName);
+            formData.append("breed", breed);
             formData.append("mainColor", mainColor);
             formData.append("description", description);
             formData.append("gender", gender);
@@ -191,6 +195,8 @@ export default function InitialObservations() {
             // Reset form fields
             setKennelNumber("");
             setMainColor("");
+            setDogName("");
+            setBreed("");
             setDescription("");
             setGender("");
             setAggression("");
@@ -227,6 +233,34 @@ export default function InitialObservations() {
                     placeholder={caseNumber}
                     editable={false}
                 />
+            </View>
+
+            {/* Dog Name */}
+            <View style={styles.fieldContainer}>
+                <Text>
+                    Dog's Name <Text style={styles.required}>*</Text>
+                </Text>
+                <TextInput
+                    style={styles.input}
+                    value={dogName}
+                    onChangeText={(text) => setDogName(text)}
+                    placeholder="Enter Dog's name"
+                />
+                <Text style={styles.error}>{dogNameError}</Text>
+            </View>
+
+            {/* Dog Breed */}
+            <View style={styles.fieldContainer}>
+                <Text>
+                    Dog's Breed <Text style={styles.required}>*</Text>
+                </Text>
+                <TextInput
+                    style={styles.input}
+                    value={breed}
+                    onChangeText={(text) => setBreed(text)}
+                    placeholder="Enter Dog's Breed"
+                />
+                <Text style={styles.error}>{breedError}</Text>
             </View>
 
             {/* Main Color */}

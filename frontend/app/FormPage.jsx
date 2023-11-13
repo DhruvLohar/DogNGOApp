@@ -63,6 +63,7 @@ const FormPage = () => {
       style={styles.backgroundImage}
     >
       <ScrollView>
+        <Button title="Logout User" onPress={() => handleLogout()}></Button>
         <View style={styles.container}>
           {userRole === "admin" || userRole === "catcher" ? (
             <>
@@ -97,7 +98,7 @@ const FormPage = () => {
               <FormCard
                 image={Surgery}
                 title="Medicines"
-                navigate={() => navigateToForm("/SurgeryDetails")}
+                navigate={() => navigateToForm("/Medicines")}
               />
             </>
           ) : null}
@@ -121,8 +122,6 @@ const FormPage = () => {
             />
           ) : null}
         </View>
-        <Button title="Logout User" onPress={() => handleLogout()}>
-        </Button>
       </ScrollView>
     </ImageBackground>
   );
