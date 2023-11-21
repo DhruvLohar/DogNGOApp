@@ -9,6 +9,7 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const corsOptions = require("./config/corsOptions");
 const { default: mongoose } = require("mongoose");
+require("dotenv").config();
 
 app.use(logger);
 app.use(cors(corsOptions));
@@ -21,6 +22,7 @@ app.use("/", require("./routes/root"));
 app.use("/user", require("./routes/UserRoutes"));
 app.use("/dog", require("./routes/DogRoutes"));
 app.use("/dog", require("./routes/DogMiscRoutes"));
+const encodedPassword = encodeURIComponent(process.env.DB_PASS);
 
 app.all("*", (req, res) => {
   res.status(404);
@@ -37,10 +39,13 @@ app.use(errorHandler);
 
 mongoose.set("strictQuery", false);
 mongoose
-  .connect("mongodb://localhost:27017/DogNGOApp")
+  .connect(
+    `mongodb+srv://manojcaselaws:${encodedPassword}@jeevraksha.1mvtc5m.mongodb.net/?retryWrites=true&w=majority`,
+    { useNewUrlParser: true, useUnifiedTopology: true }
+  )
   .then(() => {
     console.log("MongoDB Connected");
-    app.listen(PORT, "192.168.1.7", () =>
+    app.listen(PORT, "103.191.208.227", () =>
       console.log(`Server running on port ${PORT}`)
     );
   })
