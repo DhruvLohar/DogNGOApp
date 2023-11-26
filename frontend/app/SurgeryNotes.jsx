@@ -10,7 +10,7 @@ import {
   Modal,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-
+const moment = require("moment");
 import { axiosRequest } from "../service/api";
 
 export default function SurgeryNotes() {
@@ -58,7 +58,7 @@ export default function SurgeryNotes() {
         false
       )
         .then((res) => {
-          setDogModalInfo(res.data)
+          setDogModalInfo(res.data);
           setModalVisible(true);
         })
         .catch((error) => {
@@ -83,7 +83,6 @@ export default function SurgeryNotes() {
     // Logic for when user confirms the dog info
     setDogInfo(dogModalInfo);
     setModalVisible(false);
-
   };
 
   const formatTime = () => {
@@ -94,8 +93,8 @@ export default function SurgeryNotes() {
     const formattedTime =
       hours >= 12
         ? `${hours === 12 ? 12 : hours - 12}:${minutes
-          .toString()
-          .padStart(2, "0")} PM`
+            .toString()
+            .padStart(2, "0")} PM`
         : `${hours}:${minutes.toString().padStart(2, "0")} AM`;
 
     return formattedTime;
@@ -139,6 +138,7 @@ export default function SurgeryNotes() {
 
   const handleSubmit = () => {
     let errors = {};
+    const formData = new FormData();
 
     if (!kennelNumber) {
       errors.kennelNumberError = "Please enter a kennel number.";
@@ -147,7 +147,13 @@ export default function SurgeryNotes() {
     if (!date) {
       errors.dateError = "Please enter a date.";
     }
-
+    const momentObject = moment(date, "DD/MM/YYYY");
+    if (momentObject.isValid()) {
+      const dateObject = momentObject.toDate();
+      formData.append("surgeryDate", dateObject);
+    } else {
+      errors.dateError = "Please enter a date.";
+    }
     if (!time) {
       errors.timeError = "Please enter a time.";
     }
@@ -177,27 +183,24 @@ export default function SurgeryNotes() {
     setTemperatureError(errors.temperatureError || "");
 
     if (Object.keys(errors).length === 0) {
-
-      const formData = new FormData();
       // Merge date and time into one Date object (Akshar this wont work idky)
       // let dateString = `${date} ${time}`
       // const surgeryDate = new Date(dateString);
       // console.log(new Date(dateString))
 
       const data = {
-        surgeryDate: date,
         observations: notes,
         dogWeight: weight,
-        temperature: temperature
-      }
+        temperature: temperature,
+      };
       formData.append("vetDetails", JSON.stringify(data));
 
-      const ext = photo.split(".").pop()
+      const ext = photo.split(".").pop();
       formData.append("surgeryNotesPhoto", {
-          uri: photo,
-          type: `image/${ext}`,
-          name: `surgeryPhoto.${ext}`
-      })
+        uri: photo,
+        type: `image/${ext}`,
+        name: `surgeryPhoto.${ext}`,
+      });
 
       additionalPhotos.forEach((photo, index) => {
         let ext = photo.split(".").pop();
@@ -208,13 +211,16 @@ export default function SurgeryNotes() {
         });
       });
 
-
-      axiosRequest(`/dog/${dogInfo._id}/update/vet`, {
-        method: "put",
-        data: formData,
-      }, true)
+      axiosRequest(
+        `/dog/${dogInfo._id}/update/vet`,
+        {
+          method: "put",
+          data: formData,
+        },
+        true
+      )
         .then((res) => {
-          console.log(res.data)
+          console.log(res.data);
           alert("Surgery Notes Updated Successfully!");
         })
         .catch((error) => {
@@ -431,6 +437,7 @@ export default function SurgeryNotes() {
               style={styles.input}
               value={temperature}
               onChangeText={(text) => setTemperature(text)}
+              keyboardType="numeric"
               placeholder="Enter temperature"
             />
             <Text style={styles.error}>{temperatureError}</Text>

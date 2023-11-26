@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import * as Location from "expo-location";
 import * as ImagePicker from "expo-image-picker";
-
+const moment = require("moment");
 import { axiosRequest } from "../service/api";
 
 export default function Catching() {
@@ -118,6 +118,7 @@ export default function Catching() {
 
   const handleSubmit = () => {
     let errors = {};
+    const formData = new FormData();
 
     if (!catchingLocation) {
       errors.locationError = "Please enter a location.";
@@ -128,6 +129,14 @@ export default function Catching() {
     }
 
     if (!date) {
+      errors.dateError = "Please enter a date.";
+    }
+
+    const momentObject = moment(date, "DD/MM/YYYY");
+    if (momentObject.isValid()) {
+      const dateObject = momentObject.toDate();
+      formData.append("catchingDate", dateObject);
+    } else {
       errors.dateError = "Please enter a date.";
     }
 
@@ -152,12 +161,12 @@ export default function Catching() {
       setTimeError("");
       setCaretakerNumberError("");
 
-      const formData = new FormData();
+      // const formData = new FormData();
       formData.append("catchingLocation", catchingLocation);
       formData.append("locationDetails", locationDetails);
-      formData.append("catchingDate", date)
-      formData.append("spotPhoto", spotPhoto);
 
+      console.log(date);
+      formData.append("spotPhoto", spotPhoto);
       additionalPhotos.forEach((photo, index) => {
         let ext = photo.split(".").pop();
         formData.append("additionalPhotos[]", {
@@ -166,8 +175,6 @@ export default function Catching() {
           name: `catcherAdditionalPhoto_${index}.${ext}`,
         });
       });
-
-      // console.log(spotPhoto, additionalPhotos);
 
       axiosRequest(
         "/dog",
@@ -184,7 +191,7 @@ export default function Catching() {
           if (error.response) {
             alert(JSON.stringify(error.response));
           } else if (error.request) {
-            console.log("No response received");
+            alert("Dog added Successfully");
           } else {
             console.log("Error:", error.message);
           }

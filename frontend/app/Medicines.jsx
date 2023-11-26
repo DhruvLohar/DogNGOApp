@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { axiosRequest } from "../service/api";
+const moment = require("moment");
 
 export default function Medicines() {
   const [kennelNumber, setKennelNumber] = useState("");
@@ -78,7 +79,7 @@ export default function Medicines() {
     )
       .then((res) => {
         setDogModalInfo(res.data);
-        setWeight(res.data.vetDetails.dogWeight)
+        setWeight(res.data.vetDetails.dogWeight);
         setModalVisible(true);
       })
       .catch((error) => {
@@ -111,8 +112,8 @@ export default function Medicines() {
     const formattedTime =
       hours >= 12
         ? `${hours === 12 ? 12 : hours - 12}:${minutes
-          .toString()
-          .padStart(2, "0")} PM`
+            .toString()
+            .padStart(2, "0")} PM`
         : `${hours}:${minutes.toString().padStart(2, "0")} AM`;
 
     return formattedTime;
@@ -246,9 +247,16 @@ export default function Medicines() {
     if (Object.keys(errors).length === 0) {
       // All fields are valid, proceed with submission
       const formData = new FormData();
+      const momentObject = moment(date, "DD/MM/YYYY");
+      let dateObject;
+      if (momentObject.isValid()) {
+        dateObject = momentObject.toDate();
+      } else {
+        errors.dateError = "Please enter a date.";
+      }
 
       const formDataObject = {
-        surgeryDate: date,
+        surgeryDate: dateObject,
         arv: arv,
         additionalPhotos: additionalPhotos,
         xylazine: xylazine,
@@ -262,17 +270,16 @@ export default function Medicines() {
         dicrysticin: dicrysticin,
         procedure: procedure,
         earNotched: earNotched,
-        observations: observations
+        observations: observations,
       };
-      formData.append("vetDetails", JSON.stringify(formDataObject))
+      formData.append("vetDetails", JSON.stringify(formDataObject));
 
-
-      const photoExt = photo.split(".").pop()
+      const photoExt = photo.split(".").pop();
       formData.append("surgeryPhoto", {
         uri: photo,
         type: `image/${photoExt}`,
-        name: `surgeryPhoto.${photoExt}`
-      })
+        name: `surgeryPhoto.${photoExt}`,
+      });
 
       additionalPhotos.forEach((photo, index) => {
         let ext = photo.split(".").pop();
