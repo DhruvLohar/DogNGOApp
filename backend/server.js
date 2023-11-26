@@ -39,13 +39,10 @@ app.use(errorHandler);
 
 mongoose.set("strictQuery", false);
 mongoose
-  .connect(
-    `mongodb+srv://manojcaselaws:${encodedPassword}@jeevraksha.1mvtc5m.mongodb.net/?retryWrites=true&w=majority`,
-    { useNewUrlParser: true, useUnifiedTopology: true }
-  )
+  .connect(`mongodb://localhost:27017/DogNGOApp`)
   .then(() => {
     console.log("MongoDB Connected");
-    app.listen(PORT, "103.191.208.227", () =>
+    app.listen(PORT, "localhost", () =>
       console.log(`Server running on port ${PORT}`)
     );
   })
