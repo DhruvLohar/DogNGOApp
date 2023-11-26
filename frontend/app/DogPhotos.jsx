@@ -40,35 +40,6 @@ const DogPhotos = () => {
       });
   }, []);
 
-  // Sample data of dogs (                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 )
-  const dogs = [
-    {
-      id: 1,
-      name: "Max",
-      breed: "Labrador",
-      age: 5,
-      photoUrl: "https://example.com/max.jpg",
-      kennelNumber: null,
-    },
-    {
-      id: 2,
-      name: "Buddy",
-      breed: "Golden Retriever",
-      age: 3,
-      photoUrl: "https://example.com/buddy.jpg",
-      kennelNumber: "K001",
-    },
-    {
-      id: 3,
-      name: "Charlie",
-      breed: "Poodle",
-      age: 4,
-      photoUrl: "https://example.com/charlie.jpg",
-      kennelNumber: null,
-    },
-    // Add more dog objects here
-  ];
-
   const handleSelectDog = (dogId) => {
     setSelectedDogId(dogId);
   };
@@ -100,7 +71,9 @@ const DogPhotos = () => {
           >
             <View style={{ marginBottom: 10 }}>
               <Image
-                source={{ uri: API_URL + "/" + dog?.catcherDetails?.spotPhoto?.path }}
+                source={{
+                  uri: API_URL + "/" + dog?.catcherDetails?.spotPhoto?.path,
+                }}
                 style={{ width: 100, height: 100, borderRadius: 50 }}
               />
             </View>

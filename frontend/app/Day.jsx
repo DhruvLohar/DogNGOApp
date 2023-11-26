@@ -10,6 +10,7 @@ import {
   Modal,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+const moment = require("moment");
 import { axiosRequest } from "../service/api";
 
 export default function Day() {
@@ -97,12 +98,20 @@ export default function Day() {
 
   const handleSubmit = () => {
     let errors = {};
+    const formData = new FormData();
 
     if (!kennel) {
       errors.kennelError = "Please enter a kennel number.";
     }
 
     if (!date) {
+      errors.dateError = "Please enter a date.";
+    }
+    const momentObject = moment(date, "DD/MM/YYYY");
+    if (momentObject.isValid()) {
+      const dateObject = momentObject.toDate();
+      formData.append("date", dateObject);
+    } else {
       errors.dateError = "Please enter a date.";
     }
 
@@ -136,19 +145,17 @@ export default function Day() {
 
     if (Object.keys(errors).length === 0) {
       // All fields are valid, proceed with submission
-      const formData = new FormData();
-      formData.append("foodIntake", foodIntake)
-      formData.append("waterIntake", waterIntake)
-      formData.append("painkiller", painkiller)
-      formData.append("antibiotics", antibiotics)
-      formData.append("date", date)
+      formData.append("foodIntake", foodIntake);
+      formData.append("waterIntake", waterIntake);
+      formData.append("painkiller", painkiller);
+      formData.append("antibiotics", antibiotics);
 
-      const photoExt = photo.split(".").pop()
+      const photoExt = photo.split(".").pop();
       formData.append("photo", {
         uri: photo,
         type: `image/${photoExt}`,
-        name: `reportPhoto_${dogInfo._id}.${photoExt}`
-      })
+        name: `reportPhoto_${dogInfo._id}.${photoExt}`,
+      });
 
       axiosRequest(
         `/dog/${dogInfo._id}/caretaker/report`,
