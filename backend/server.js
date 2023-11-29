@@ -37,12 +37,14 @@ app.all("*", (req, res) => {
 
 app.use(errorHandler);
 
+// mongo pass : ol0pSSmYqa6KTbiU
+
 mongoose.set("strictQuery", false);
 mongoose
-  .connect(`mongodb://localhost:27017/DogNGOApp`)
+  .connect(`mongodb+srv://dhruvlohar09:ol0pSSmYqa6KTbiU@dogngoapp.1avq4x7.mongodb.net/?retryWrites=true&w=majority`)
   .then(() => {
     console.log("MongoDB Connected");
-    app.listen(PORT, "localhost", () =>
+    app.listen(PORT, "192.168.1.4", () =>
       console.log(`Server running on port ${PORT}`)
     );
   })

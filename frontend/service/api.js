@@ -1,7 +1,8 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export const API_URL = "http://localhost:3500";
+export const API_URL = "http://192.168.1.4:3500";
+
 const API_KEY = "3b80afc4-787c-11ee-8cbb-0200cd936042";
 
 export const sendOTP = async (mobileNumber) => {

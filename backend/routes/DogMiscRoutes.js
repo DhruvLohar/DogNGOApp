@@ -15,6 +15,7 @@ const Image = require("../models/Image");
 const Kennel = require("../models/Kennel");
 
 const authenticateToken = require("../middleware/authenticateToken");
+const { API_URL } = require("../config/constants");
 
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -53,193 +54,199 @@ router.post("/report/xlsx", async (req, res) => {
   }
 });
 
-router.get("/:id/report/xlsx", async (req, res) => {
-  const BASE_URL = `${req.protocol}://${req.hostname}:3500/`;
+const getReportData = (dog) => {
+  const BASE_URL = API_URL;
+  let dogDetail = {}
 
+  dogDetail = {
+    "Dog ID": dog._id.toString(),
+    "Dog's Main Color": dog.mainColor,
+    "Dog Gender": dog.gender,
+    "Description": dog.description,
+  }
+
+  if (dog.catcherDetails) {
+    dogDetail = {
+      ...dogDetail,
+      "Catcher ID": dog.catcherDetails.catcher._id.toString(),
+      "Catcher's Name": dog.catcherDetails.catcher.name,
+      "Catcher's Contact Number": dog.catcherDetails.catcher.contactNumber,
+      "Catching Location": dog.catcherDetails.catchingLocation,
+      "Catching Location Details": dog.catcherDetails.locationDetails,
+      "Releasing Location": dog.catcherDetails.releasingLocation,
+      "Catched At": dog.catcherDetails.createdAt.toString(),
+      "Spot Photo": {
+        t: "s",
+        v: "Click to open photo",
+        l: { Target: BASE_URL + dog.catcherDetails.spotPhoto.path },
+        s: { font: { color: { rgb: "0000FFFF" }, underline: true } },
+      },
+    }
+  }
+
+  if (dog.vetDetails) {
+    let vetDetails = {
+      "Vet ID": dog.vetDetails.vet._id.toString(),
+      "Vet's Name": dog.vetDetails.vet.name,
+      "Vet's Contact Number": dog.vetDetails.vet.contactNumber,
+      "Surgery date": dog.vetDetails.surgeryDate.toString(),
+
+      "Surgery Photo": {
+        t: "s",
+        v: "Click to open photo",
+        l: { Target: BASE_URL + dog.vetDetails.surgeryPhoto.path },
+        s: { font: { color: { rgb: "0000FFFF" }, underline: true } },
+      },
+    }
+
+    Object.keys(dog.vetDetails._doc).map((key, i) => {
+      if (
+        ![
+          "surgeryPhoto",
+          "additionalPhotos",
+          "surgeryDate",
+          "createdAt",
+          "updatedAt",
+          "additionalNotesPhotos",
+          "vet",
+          "_id"
+        ].includes(key)
+      ) {
+        vetDetails = { ...vetDetails, [key]: dog.vetDetails[key] };
+      }
+    });
+
+    dogDetail = { ...dogDetail, ...vetDetails };
+  }
+
+  if (dog.careTakerDetails) {
+    let careTakerDetails = {
+      "Caretaker ID": dog.careTakerDetails.careTaker._id.toString(),
+      "Caretaker's Name": dog.careTakerDetails.careTaker.name,
+      "Caretaker's Contact Number": dog.careTakerDetails.careTaker.contactNumber,
+    }
+
+    const reportsDetails = [];
+    dog.careTakerDetails.reports.map((report, idx) => {
+      careTakerDetails = {
+        ...careTakerDetails,
+        [`Day ${idx+1} Report ID`]: report._id.toString(),
+        [`Day ${idx+1} Food Intake`]: report.foodIntake,
+        [`Day ${idx+1} Water Intake`]: report.waterIntake,
+        [`Day ${idx+1} Antibiotics`]: report.antibiotics,
+        [`Day ${idx+1} Painkiller`]: report.painkiller,
+        [`Day ${idx+1} Photo`]: {
+          t: "s",
+          v: "Click to open photo",
+          l: { Target: BASE_URL + report.photo.path },
+          s: { font: { color: { rgb: "0000FFFF" }, underline: true } },
+        },
+        Date: report.date.toString(),
+      }
+    });
+
+    dogDetail = {
+      ...dogDetail,
+      // careTakerDetails: [...careTakerDetails, ...reportsDetails]
+      ...careTakerDetails
+    }
+  }
+
+  return dogDetail;
+}
+
+router.get("/generate/report/:dogIDS/xlsx", async (req, res) => {
   try {
     if (req) {
-      const dogId = req.params.id;
-      const dog = await Dog.findById(dogId).populate([
-        {
-          path: "catcherDetails",
-          populate: [
-            {
-              path: "catcher",
-              select: "_id name contactNumber role",
-            },
-            {
-              path: "spotPhoto",
-              select: "path",
-            },
-          ],
-        },
-        {
-          path: "vetDetails",
-          populate: [
-            {
-              path: "vet",
-              select: "_id name contactNumber role",
-            },
-            {
-              path: "surgeryPhoto",
-              select: "path",
-            },
-          ],
-        },
-        {
-          path: "careTakerDetails",
-          populate: [
-            {
-              path: "careTaker",
-              select: "_id name contactNumber role",
-            },
-            {
-              path: "reports",
-              populate: {
-                path: "photo",
-                select: "path",
-              },
-            },
-          ],
-        },
-        {
-          path: "kennel",
-        },
-      ]);
-
-      if (!dog) {
-        return res.status(404).json({ error: "Dog not found" });
-      }
-
+      const dogIDS = req.params.dogIDS.split(',')
       const workBook = XLSX.utils.book_new();
 
-      if (dog) {
-        const dogDetails = [
+      const dogPromises = dogIDS.map(async (dogId) => {
+        let dog = await Dog.findById(dogId).populate([
           {
-            "Dog ID": dog._id.toString(),
-            // "Dog Name": dog.dogName,
-            "Dog's Main Color": dog.mainColor,
-            "Dog Gender": dog.gender,
-            Description: dog.description,
-            // "Is Agressive?": dog.agression,
+            path: "catcherDetails",
+            populate: [
+              {
+                path: "catcher",
+                select: "_id name contactNumber role",
+              },
+              {
+                path: "spotPhoto",
+                select: "path",
+              },
+            ],
           },
-        ];
-        const ddws = XLSX.utils.json_to_sheet(dogDetails);
-        XLSX.utils.book_append_sheet(workBook, ddws, "Dog Details");
-      }
-
-      if (dog.catcherDetails) {
-        const catcherDetails = [
           {
-            "Catcher ID": dog.catcherDetails.catcher._id.toString(),
-            Name: dog.catcherDetails.catcher.name,
-            "Contact Number": dog.catcherDetails.catcher.contactNumber,
-            "Catching Location": dog.catcherDetails.catchingLocation,
-            "Catching Location Details": dog.catcherDetails.locationDetails,
-            "Releasing Location": dog.catcherDetails.releasingLocation,
-            "Catched At": dog.catcherDetails.createdAt.toString(),
-            "Spot Photo": {
-              t: "s",
-              v: "Click to open photo",
-              l: { Target: BASE_URL + dog.catcherDetails.spotPhoto.path },
-              s: { font: { color: { rgb: "0000FFFF" }, underline: true } },
-            },
+            path: "vetDetails",
+            populate: [
+              {
+                path: "vet",
+                select: "_id name contactNumber role",
+              },
+              {
+                path: "surgeryPhoto",
+                select: "path",
+              },
+            ],
           },
-        ];
-        const cdws = XLSX.utils.json_to_sheet(catcherDetails);
-        XLSX.utils.book_append_sheet(workBook, cdws, "Catcher Details");
-      }
-
-      if (dog.vetDetails) {
-        const vetDetails = [
           {
-            "Vet ID": dog.vetDetails.vet._id.toString(),
-            Name: dog.vetDetails.vet.name,
-            "Contact Number": dog.vetDetails.vet.contactNumber,
-            "Surgery date": dog.vetDetails.surgeryDate.toString(),
-
-            "Surgery Photo": {
-              t: "s",
-              v: "Click to open photo",
-              l: { Target: BASE_URL + dog.vetDetails.surgeryPhoto.path },
-              s: { font: { color: { rgb: "0000FFFF" }, underline: true } },
-            },
+            path: "careTakerDetails",
+            populate: [
+              {
+                path: "careTaker",
+                select: "_id name contactNumber role",
+              },
+              {
+                path: "reports",
+                populate: {
+                  path: "photo",
+                  select: "path",
+                },
+              },
+            ],
           },
-        ];
-        Object.keys(dog.vetDetails._doc).map((key, i) => {
-          if (
-            ![
-              "surgeryPhoto",
-              "additionalPhotos",
-              "surgeryDate",
-              "createdAt",
-              "updatedAt",
-              "additionalNotesPhotos",
-            ].includes(key)
-          ) {
-            vetDetails[0] = { ...vetDetails[0], [key]: dog.vetDetails[key] };
-          }
-        });
-        const vdws = XLSX.utils.json_to_sheet(vetDetails);
-        XLSX.utils.book_append_sheet(workBook, vdws, "Vet Details");
-      }
-
-      if (dog.careTakerDetails) {
-        const careTakerDetails = [
           {
-            "Caretaker ID": dog.careTakerDetails.careTaker._id.toString(),
-            Name: dog.careTakerDetails.careTaker.name,
-            "Contact Number": dog.careTakerDetails.careTaker.contactNumber,
+            path: "kennel",
           },
-        ];
-
-        const reportsDetails = [];
-        dog.careTakerDetails.reports.map((report) => {
-          reportsDetails.push({
-            "Report ID": report._id.toString(),
-            "Food Intake": report.foodIntake,
-            "Water Intake": report.waterIntake,
-            Antibiotics: report.antibiotics,
-            Painkiller: report.painkiller,
-
-            // "Observations": report.observations,
-            Photo: {
-              t: "s",
-              v: "Click to open photo",
-              l: { Target: BASE_URL + report.photo.path },
-              s: { font: { color: { rgb: "0000FFFF" }, underline: true } },
-            },
-            Date: report.date.toString(),
-          });
-        });
-
-        const ctws = XLSX.utils.json_to_sheet([
-          ...careTakerDetails,
-          ...reportsDetails,
         ]);
-        XLSX.utils.book_append_sheet(workBook, ctws, "Caretaker Details");
-      }
 
-      const filePath = path.join(__dirname, "../public", "dog_details.xlsx");
-      XLSX.writeFile(workBook, filePath);
-
-      res.setHeader(
-        "Content-Disposition",
-        `attachment; filename=${dog.dogName} (${dog._id.toString()}).xlsx`
-      );
-      res.setHeader(
-        "Content-Type",
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-      );
-
-      res.download(filePath, (err) => {
-        if (err) {
-          console.error("Error sending file:", err);
-          res.status(500).json({ error: "Error sending file" });
+        if (!dog) {
+          return res.status(404).json({ error: "Dog not found" });
         }
+
+        return getReportData(dog);
       });
 
-      // res.status(200).json({ message: "Report generated successfully", dog: dog })
+      Promise.all(dogPromises)
+        .then((reportDataArray) => {
+          let dogsSheet = XLSX.utils.json_to_sheet(reportDataArray);
+          XLSX.utils.book_append_sheet(workBook, dogsSheet, "Dogs Report");
+
+          const filePath = path.join(__dirname, "../public", `dog_details.xlsx`);
+          XLSX.writeFile(workBook, filePath);
+
+          res.setHeader(
+            "Content-Disposition",
+            `attachment; filename=Dogs Report (${new Date().toString()}).xlsx`
+          );
+          res.setHeader(
+            "Content-Type",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+          );
+    
+          res.download(filePath, (err) => {
+            if (err) {
+              console.error("Error sending file:", err);
+              res.status(500).json({ error: "Error sending file" });
+            }
+          });
+
+          // res.status(200).json({ message: "Report generated successfully", data: reportDataArray })
+        })
+        .catch((error) => {
+          res.status(404).json({ error: error.message });
+        });
+
     } else {
       res.status(403).json({ message: "Unauthorized Access" });
     }
@@ -279,38 +286,22 @@ router.get("/observable", authenticateToken, async (req, res) => {
 });
 
 // Get : dogs whose surgery date has past 3 days
-router.get("/dispatchable", authenticateToken, async (req, res) => {
+router.get("/dispatchable", async (req, res) => {
   try {
     // Calculate the date 3 days ago from the current date
     const threeDaysAgo = new Date();
     threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
 
     // Find dogs with surgery date in the past 3 days
-    const dogs = await Dog.find({
-      $or: [
-        { "vetDetails.surgeryDate": { $lte: threeDaysAgo } },
-        {
-          $and: [
-            // Assuming surgeryDate is stored as a string
-            { "vetDetails.surgeryDate": { $type: "string" } },
-            { "vetDetails.surgeryDate": { $lte: threeDaysAgo.toISOString() } },
-          ],
-        },
-      ],
-    })
+
+    const d = await Doctor.find({ surgeryDate: { $lte: new Date() - 3 } })
+    const dogs = await Dog.find()
       .populate({
         path: "catcherDetails",
         select: "catchingLocation",
         populate: {
           path: "spotPhoto",
           model: "Image",
-        },
-      })
-      .populate({
-        path: "careTakerDetails",
-        populate: {
-          path: "caretaker",
-          select: "_id name contactNumber",
         },
       })
       .populate("kennel");

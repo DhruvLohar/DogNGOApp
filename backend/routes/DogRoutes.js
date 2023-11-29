@@ -121,10 +121,13 @@ router.get("/kennel/:id", authenticateToken, async (req, res) => {
     const dog = await Dog.findOne({ kennel: kennel._id })
       .populate({
         path: "catcherDetails",
-        populate: {
+        populate: [{
           path: "catcher",
           select: "_id name contactNumber role",
-        },
+        }, {
+          path: "spotPhoto",
+          model: "Image",
+        },],
       })
       .populate({
         path: "vetDetails",

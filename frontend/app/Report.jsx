@@ -103,21 +103,26 @@ const Report = () => {
     }
   };
 
-  const downloadReport = async (dogId, dogName) => {
-    const token = await getAccessToken();
-
-    const filename = `${dogName} (${dogId}).xlsx`
-    const res = await FileSystem.downloadAsync(
-      API_URL + `/dog/${dogId}/report/xlsx`,
-      FileSystem.documentDirectory + filename,
-      {
-        headers: {
-          Authorization: token
+  const downloadReport = async (dogs) => {
+    try {
+      const token = await getAccessToken();
+      const dogIds = dogs.map(dog => dog._id).join(',');
+      const filename = `Dogs Report (${new Date().toString()}).xlsx`
+  
+      const res = await FileSystem.downloadAsync(
+        API_URL + `/dog/generate/report/${dogIds}/xlsx/`,
+        FileSystem.documentDirectory + filename,
+        {
+          headers: {
+            Authorization: token
+          }
         }
-      }
-    )
-
-    save(res.uri, filename, res.headers["Content-Type"])
+      )
+  
+      save(res.uri, filename, res.headers["Content-Type"])
+    } catch (err) {
+      console.log("Smmthn went wrong : " + err.message);
+    }
   }
 
   const handleSubmit = () => {
@@ -188,14 +193,14 @@ const Report = () => {
                 />
                 <Text>Case Number: {dog.caseNumber}</Text>
                 <Text>Dog's Name: {dog.dogName}</Text>
-                <TouchableOpacity
-                  style={styles.button}
-                  onPress={() => downloadReport(dog._id, dog.dogName)}
-                >
-                  <Text>Download Report</Text>
-                </TouchableOpacity>
               </View>
             ))}
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => downloadReport(dogs)}
+            >
+              <Text>Generate and Download Report</Text>
+            </TouchableOpacity>
           </View>
         ) : null}
       </View>

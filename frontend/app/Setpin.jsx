@@ -23,8 +23,8 @@ const Setpin = () => {
       password: pin,
     })
       .then((res) => {
-        // handleAccessToken(res.data.role, res.data.token)
-        router.replace("/");
+        handleAccessToken(res.data.role, res.data.token)
+        router.push("/");
       })
       .catch((error) => {
         if (error.response) {

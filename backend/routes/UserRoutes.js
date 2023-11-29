@@ -139,7 +139,6 @@ router.post("/login", async (req, res) => {
     const { contactNumber } = req.body;
 
     const user = await User.findOne({ contactNumber });
-    console.log(user, contactNumber)
 
     if (user) {
       if (user.isActive) {

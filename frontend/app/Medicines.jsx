@@ -10,7 +10,7 @@ import {
   Modal,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import { axiosRequest } from "../service/api";
+import { API_URL, axiosRequest } from "../service/api";
 const moment = require("moment");
 
 export default function Medicines() {
@@ -79,7 +79,7 @@ export default function Medicines() {
     )
       .then((res) => {
         setDogModalInfo(res.data);
-        setWeight(res.data.vetDetails.dogWeight);
+        setWeight(res.data?.vetDetails?.dogWeight);
         setModalVisible(true);
       })
       .catch((error) => {
@@ -112,8 +112,8 @@ export default function Medicines() {
     const formattedTime =
       hours >= 12
         ? `${hours === 12 ? 12 : hours - 12}:${minutes
-            .toString()
-            .padStart(2, "0")} PM`
+          .toString()
+          .padStart(2, "0")} PM`
         : `${hours}:${minutes.toString().padStart(2, "0")} AM`;
 
     return formattedTime;
@@ -365,6 +365,12 @@ export default function Medicines() {
             {dogModalInfo ? (
               <View>
                 <Text style={styles.modalText}>Dog Information</Text>
+                <Image
+                  source={{
+                    uri: API_URL + "/" + dogModalInfo?.catcherDetails?.spotPhoto?.path,
+                  }}
+                  style={{ width: 100, height: 100, borderRadius: 0 }}
+                />
                 <Text>Case Number: {dogModalInfo.caseNumber}</Text>
                 <Text>Caught on : {dogModalInfo?.createdAt}</Text>
                 <View style={styles.buttonContainer}>
