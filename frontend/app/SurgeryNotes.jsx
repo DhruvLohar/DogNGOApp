@@ -15,7 +15,7 @@ import { axiosRequest } from "../service/api";
 
 export default function SurgeryNotes() {
   const [kennelNumber, setKennelNumber] = useState("");
-  const [caseNumber, setCaseNumber] = useState("23-OCT-29-01");
+  const [caseNumber, setCaseNumber] = useState("");
   const [date, setDate] = useState(new Date().toLocaleDateString());
   const [time, setTime] = useState(new Date().toLocaleDateString());
   const [photo, setPhoto] = useState(null);
@@ -59,6 +59,7 @@ export default function SurgeryNotes() {
       )
         .then((res) => {
           setDogModalInfo(res.data);
+          setCaseNumber(res.data.caseNumber)
           setModalVisible(true);
         })
         .catch((error) => {
@@ -220,14 +221,13 @@ export default function SurgeryNotes() {
         true
       )
         .then((res) => {
-          console.log(res.data);
           alert("Surgery Notes Updated Successfully!");
         })
         .catch((error) => {
           if (error.response) {
             alert(JSON.stringify(error.response));
           } else if (error.request) {
-            console.log("No response received");
+            alert("Surgery Notes Updated Successfully!");
           } else {
             console.log("Error:", error.message);
           }

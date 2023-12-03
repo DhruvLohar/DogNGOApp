@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, Modal, StyleSheet } from "react-native";
-import { axiosRequest } from "../service/api";
+import { View, Text, TouchableOpacity, Modal, StyleSheet, Image } from "react-native";
+import { API_URL, axiosRequest } from "../service/api";
 
 const ReleaseForm = () => {
   const [kennels, setKennels] = useState([
@@ -113,7 +113,7 @@ const ReleaseForm = () => {
     // );
     // setReleasedKennels(selectedKennels);
     // setKennels(newKennels);
-
+    
     selectedKennels.map(dog => {
       axiosRequest(
         `/dog/${id}/dispatch`,
@@ -151,10 +151,16 @@ const ReleaseForm = () => {
           ]}
           onPress={() => handleKennelPress(dog._id)}
         >
-          <Text>Kennel ID: {dog?.kennel?._id}</Text>
+          <Text>Kennel ID: {dog?.kennel?.kennelId}</Text>
+          <Image
+            source={{
+              uri: API_URL + "/" + dog?.catcherDetails?.spotPhoto?.path,
+            }}
+            style={{ maxWidth: 150, maxHeight: 150, borderRadius: 0 }}
+          />
           <Text>Dog Photo: {dog?.catcherDetails?.spotPhoto?.path}</Text>
-          <Text>Caretaker: {dog?.careTakerDetails?.caretaker?.name}</Text>
-          <Text>Phone Number: {dog?.careTakerDetails?.caretaker?.contactNumber}</Text>
+          {/* <Text>Caretaker: {dog?.careTakerDetails?.caretaker?.name}</Text>
+          <Text>Phone Number: {dog?.careTakerDetails?.caretaker?.contactNumber}</Text> */}
         </TouchableOpacity>
       ))}
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -11,9 +11,12 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 const moment = require("moment");
-import { axiosRequest } from "../service/api";
+import { API_URL, axiosRequest } from "../service/api";
+import { useNavigation } from "expo-router";
 
 export default function Day() {
+  const navigation = useNavigation()
+
   const [kennel, setKennel] = useState("");
   const [date, setDate] = useState(new Date().toLocaleDateString());
   const [foodIntake, setFoodIntake] = useState("");
@@ -21,7 +24,7 @@ export default function Day() {
   const [antibiotics, setAntibiotics] = useState("");
   const [painkiller, setPainkiller] = useState("");
   const [photo, setPhoto] = useState(null);
-  const [caseNumber, setCaseNumber] = useState("23-OCT-29-01");
+  const [caseNumber, setCaseNumber] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
   const [dogInfo, setDogInfo] = useState(null);
   const [dogModalInfo, setDogModalInfo] = useState(null);
@@ -34,6 +37,12 @@ export default function Day() {
   const [antibioticsError, setAntibioticsError] = useState("");
   const [painkillerError, setPainkillerError] = useState("");
   const [photoError, setPhotoError] = useState("");
+
+  useEffect(() => {
+    navigation.setOptions({
+      title: "Daily Monitoring Report"
+    })
+  }, [])
 
   const handleModalOpen = () => {
     let errors = {};
@@ -54,6 +63,7 @@ export default function Day() {
       )
         .then((res) => {
           setDogModalInfo(res.data);
+          setCaseNumber(res?.data?.caseNumber)
           setModalVisible(true);
         })
         .catch((error) => {
@@ -107,7 +117,7 @@ export default function Day() {
     if (!date) {
       errors.dateError = "Please enter a date.";
     }
-    const momentObject = moment(date, "DD/MM/YYYY");
+    const momentObject = moment(date, "MM/DD/YYYY");
     if (momentObject.isValid()) {
       const dateObject = momentObject.toDate();
       formData.append("date", dateObject);
@@ -172,7 +182,7 @@ export default function Day() {
           if (error.response) {
             alert(JSON.stringify(error.response.data.message));
           } else if (error.request) {
-            console.log("No response received");
+            alert("Daily Report Added successfully");
           } else {
             console.log("Error:", error.message);
           }
@@ -223,6 +233,12 @@ export default function Day() {
             {dogModalInfo ? (
               <View>
                 <Text style={styles.modalText}>Dog Information</Text>
+                <Image
+                  source={{
+                    uri: API_URL + "/" + dogModalInfo?.catcherDetails?.spotPhoto?.path,
+                  }}
+                  style={{ maxWidth: 150, aspectRatio: "auto", borderRadius: 0 }}
+                />
                 <Text>Case Number: {dogModalInfo?.caseNumber}</Text>
                 <Text>Caught on : {dogModalInfo?.createdAt}</Text>
                 <View style={styles.buttonContainer}>
@@ -442,7 +458,7 @@ export default function Day() {
             >
               {photo ? null : (
                 <View style={styles.placeholderImage}>
-                  <Text style={styles.placeholderText}>Upload Photo</Text>
+                  <Text style={styles.placeholderText}>Click Picture</Text>
                 </View>
               )}
             </TouchableOpacity>
@@ -537,7 +553,8 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     alignItems: "center",
-    marginTop: 16,
+    marginTop: 0,
+    marginBottom: 12
   },
   submitText: {
     color: "#fff",

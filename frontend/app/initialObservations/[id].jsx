@@ -110,9 +110,9 @@ export default function InitialObservations() {
             errors.kennelNumberError = "Please enter a kennel number.";
         }
 
-        if (!dogName) {
-            errors.dogNameError = "Please enter dog's name"
-        }
+        // if (!dogName) {
+        //     errors.dogNameError = "Please enter dog's name"
+        // }
 
         if (!breed) errors.breedError = "Please enter dog's breed"
 
@@ -137,7 +137,7 @@ export default function InitialObservations() {
         }
 
         setKennelNumberError(errors.kennelNumberError || "");
-        setDogNameError(errors.dogNameError || "")
+        // setDogNameError(errors.dogNameError || "")
         setBreedError(errors.breedError || "")
         setMainColorError(errors.mainColorError || "");
         setDescriptionError(errors.descriptionError || "");
@@ -148,7 +148,7 @@ export default function InitialObservations() {
         if (Object.keys(errors).length === 0) {
             const formData = new FormData();
             formData.append("kennelId", kennelNumber);
-            formData.append("dogName", dogName);
+            // formData.append("dogName", dogName);
             formData.append("breed", breed);
             formData.append("mainColor", mainColor);
             formData.append("description", description);
@@ -236,7 +236,7 @@ export default function InitialObservations() {
             </View>
 
             {/* Dog Name */}
-            <View style={styles.fieldContainer}>
+            {/* <View style={styles.fieldContainer}>
                 <Text>
                     Dog's Name <Text style={styles.required}>*</Text>
                 </Text>
@@ -247,7 +247,7 @@ export default function InitialObservations() {
                     placeholder="Enter Dog's name"
                 />
                 <Text style={styles.error}>{dogNameError}</Text>
-            </View>
+            </View> */}
 
             {/* Dog Breed */}
             <View style={styles.fieldContainer}>
@@ -273,11 +273,11 @@ export default function InitialObservations() {
                     onValueChange={(itemValue) => setMainColor(itemValue)}
                 >
                     <Picker.Item label="Select Color" value="" />
-                    <Picker.Item label="Black" value="BL" />
-                    <Picker.Item label="White" value="WH" />
-                    <Picker.Item label="Dark Brown" value="DB" />
-                    <Picker.Item label="Light Brown" value="LB" />
-                    <Picker.Item label="Total Mix" value="TM" />
+                    <Picker.Item label="Black" value="Black" />
+                    <Picker.Item label="White" value="White" />
+                    <Picker.Item label="Dark Brown" value="Dark Brown" />
+                    <Picker.Item label="Light Brown" value="Light Brown" />
+                    <Picker.Item label="Total Mix" value="Total Mix" />
                 </Picker>
                 <Text style={styles.error}>{mainColorError}</Text>
             </View>

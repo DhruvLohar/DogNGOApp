@@ -130,10 +130,9 @@ const FormPage = () => {
 const styles = StyleSheet.create({
   backgroundImage: {
     flex: 1,
-    // resizeMode: "cover", // or "stretch"
     width: "100%",
     justifyContent: "center",
-    objectFit: "contain"
+    objectFit: "cover",
   },
   container: {
     flex: 1,

@@ -54,37 +54,40 @@ const DogPhotos = () => {
   return (
     <View style={{ padding: 20 }}>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        {Dogs.map((dog) => (
-          <TouchableOpacity
-            key={dog._id}
-            onPress={() => handleSelectDog(dog._id)}
-            style={{
-              borderColor: selectedDogId === dog._id ? "#007BFF" : "grey",
-              borderWidth: 2,
-              borderRadius: 10,
-              padding: 10,
-              margin: 10,
-              alignItems: "center",
-              minWidth: 120,
-              maxWidth: 160, // Adjust the max width as needed
-            }}
-          >
-            <View style={{ marginBottom: 10 }}>
-              <Image
-                source={{
-                  uri: API_URL + "/" + dog?.catcherDetails?.spotPhoto?.path,
-                }}
-                style={{ width: 100, height: 100, borderRadius: 50 }}
-              />
-            </View>
-            <Text style={{ fontWeight: "bold", fontSize: 14 }}>
-              Case Number: {dog?.caseNumber}
-            </Text>
-            <Text style={{ fontWeight: "bold", fontSize: 14 }}>
-              Caught: {dog?.createdAt?.slice(0, 10)}
-            </Text>
-          </TouchableOpacity>
-        ))}
+        {Dogs.length === 0
+          ? <Text style={{marginBottom: 20}}>No dogs found for Initial Observations</Text>
+          : Dogs.map((dog) => (
+            <TouchableOpacity
+              key={dog._id}
+              onPress={() => handleSelectDog(dog._id)}
+              style={{
+                borderColor: selectedDogId === dog._id ? "#007BFF" : "grey",
+                borderWidth: 2,
+                borderRadius: 10,
+                padding: 10,
+                margin: 10,
+                alignItems: "center",
+                minWidth: 120,
+                maxWidth: 160, // Adjust the max width as needed
+              }}
+            >
+              <View style={{ marginBottom: 10 }}>
+                <Image
+                  source={{
+                    uri: API_URL + "/" + dog?.catcherDetails?.spotPhoto?.path,
+                  }}
+                  style={{ width: 100, height: 100, borderRadius: 50 }}
+                />
+              </View>
+              <Text style={{ fontWeight: "bold", fontSize: 14 }}>
+                Case Number: {dog?.caseNumber}
+              </Text>
+              <Text style={{ fontWeight: "bold", fontSize: 14 }}>
+                Caught: {dog?.createdAt?.slice(0, 10)}
+              </Text>
+            </TouchableOpacity>
+          ))}
+
       </ScrollView>
       <Button title="Submit" onPress={handleSubmit} disabled={!selectedDogId} />
     </View>

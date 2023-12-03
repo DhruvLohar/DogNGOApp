@@ -247,7 +247,7 @@ export default function Medicines() {
     if (Object.keys(errors).length === 0) {
       // All fields are valid, proceed with submission
       const formData = new FormData();
-      const momentObject = moment(date, "DD/MM/YYYY");
+      const momentObject = moment(date, "MM/DD/YYYY");
       let dateObject;
       if (momentObject.isValid()) {
         dateObject = momentObject.toDate();

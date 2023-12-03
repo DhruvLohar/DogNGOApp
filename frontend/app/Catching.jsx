@@ -50,7 +50,7 @@ export default function Catching() {
       if (data.results && data.results.length > 0) {
         // Assuming the first result contains the region information
         const region = data.results[0].formatted_address;
-        setLocation(region);
+        setCatchingLocation(region);
       }
     })();
     setTime(formatTime());
@@ -132,7 +132,7 @@ export default function Catching() {
       errors.dateError = "Please enter a date.";
     }
 
-    const momentObject = moment(date, "DD/MM/YYYY");
+    const momentObject = moment(date, "MM/DD/YYYY");
     if (momentObject.isValid()) {
       const dateObject = momentObject.toDate();
       formData.append("catchingDate", dateObject);
@@ -321,7 +321,7 @@ export default function Catching() {
       </View>
 
       {/* Caretaker */}
-      <View style={styles.fieldContainer}>
+      {/* <View style={styles.fieldContainer}>
         <Text>Caretaker</Text>
         <TextInput
           style={styles.input}
@@ -329,10 +329,10 @@ export default function Catching() {
           onChangeText={(text) => setCaretaker(text)}
           placeholder="Enter caretaker name"
         />
-      </View>
+      </View> */}
 
       {/* Caretaker Number */}
-      <View style={styles.fieldContainer}>
+      {/* <View style={styles.fieldContainer}>
         <Text>Caretaker Number</Text>
         <TextInput
           style={styles.input}
@@ -343,7 +343,7 @@ export default function Catching() {
           maxLength={10}
         />
         <Text style={styles.error}>{caretakerNumberError}</Text>
-      </View>
+      </View> */}
 
       {/* Submit */}
       <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
