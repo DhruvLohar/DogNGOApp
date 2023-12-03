@@ -16,9 +16,8 @@ import InitialObservations from "../assets/initialObservations.png";
 import Release from "../assets/release.png";
 import Surgery from "../assets/surgery.png";
 import Treatment from "../assets/treatment.png";
-import addUser from "../assets/addUser.png";
-import generateReports from "../assets/generateReports.png";
-import Logo from "../assets/logo.jpg";
+import AddUser from "../assets/adduser.png";
+import Reports from "../assets/reports.png";
 
 const FormCard = ({ title, navigate, image }) => {
   return (
@@ -37,19 +36,19 @@ const FormPage = () => {
 
   const role = async () => {
     let r = await getUserRole();
-    console.log(r)
+    console.log(r);
     if (r) {
       setRole(r);
     }
   };
 
   const handleLogout = () => {
-    logOutUser().then(res => {
+    logOutUser().then((res) => {
       if (res) {
-        router.replace('/')
+        router.replace("/");
       }
     });
-  }
+  };
 
   useEffect(() => {
     role();
@@ -113,14 +112,14 @@ const FormPage = () => {
           ) : null}
           {userRole === "admin" ? (
             <FormCard
-              image={addUser}
+              image={AddUser}
               title="Add a User"
               navigate={() => navigateToForm("/LoginAdmin")}
             />
           ) : null}
           {userRole === "admin" ? (
             <FormCard
-              image={generateReports}
+              image={Reports}
               title="Generate Reports"
               navigate={() => navigateToForm("/Report")}
             />
@@ -134,9 +133,10 @@ const FormPage = () => {
 const styles = StyleSheet.create({
   backgroundImage: {
     flex: 1,
-    width: "100%",
+    width: "100vw",
     justifyContent: "center",
     objectFit: "cover",
+    height: "100vh",
   },
   container: {
     flex: 1,

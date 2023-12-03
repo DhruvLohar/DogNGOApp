@@ -17,7 +17,7 @@ import { API_URL, axiosRequest } from "../service/api";
 import { useNavigation } from "expo-router";
 
 export default function Day() {
-  const navigation = useNavigation()
+  const navigation = useNavigation();
 
   const [kennel, setKennel] = useState("");
   const [date, setDate] = useState(new Date().toLocaleDateString());
@@ -42,9 +42,9 @@ export default function Day() {
 
   useEffect(() => {
     navigation.setOptions({
-      title: "Daily Monitoring Report"
-    })
-  }, [])
+      title: "Daily Monitoring Report",
+    });
+  }, []);
 
   const handleModalOpen = () => {
     let errors = {};
@@ -65,7 +65,7 @@ export default function Day() {
       )
         .then((res) => {
           setDogModalInfo(res.data);
-          setCaseNumber(res?.data?.caseNumber)
+          setCaseNumber(res?.data?.caseNumber);
           setModalVisible(true);
         })
         .catch((error) => {
@@ -245,12 +245,18 @@ export default function Day() {
             {dogModalInfo ? (
               <View>
                 <Text style={styles.modalText}>Dog Information</Text>
-                <Image
-                  source={{
-                    uri: API_URL + "/" + dogModalInfo?.catcherDetails?.spotPhoto?.path,
-                  }}
-                  style={{ maxWidth: 150, aspectRatio: "auto", borderRadius: 0 }}
-                />
+                <View style={{ aspectRatio: 1 }}>
+                  <Image
+                    source={{
+                      uri:
+                        API_URL +
+                        "/" +
+                        dogModalInfo?.catcherDetails?.spotPhoto?.path,
+                    }}
+                    style={{ flex: 1, width: undefined, height: undefined }}
+                    resizeMode="contain"
+                  />
+                </View>
                 <Text>Case Number: {dogModalInfo?.caseNumber}</Text>
                 <Text>Caught on : {dogModalInfo?.createdAt}</Text>
                 <View style={styles.buttonContainer}>
@@ -566,7 +572,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: "center",
     marginTop: 0,
-    marginBottom: 12
+    marginBottom: 12,
   },
   submitText: {
     color: "#fff",

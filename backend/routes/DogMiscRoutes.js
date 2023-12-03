@@ -49,17 +49,21 @@ router.post("/report/xlsx", async (req, res) => {
     res.status(200).json(dogs);
   } catch (error) {
     res
-      .status(500)
+      .status(400)
       .json({ message: "Error generating reports : " + error.message });
   }
 });
 
 const getReportData = (dog) => {
+  // Sr No, Dog Catching Date, Address, Photo (url), Color, Gender
+  // Surgery Date, Release Date
+
+
   const BASE_URL = API_URL;
   let dogDetail = {}
 
   dogDetail = {
-    "Dog ID": dog._id.toString(),
+    "Sr. No.": dog._id.toString(),
     "Dog's Main Color": dog.mainColor,
     "Dog Gender": dog.gender,
     "Description": dog.description,
@@ -147,7 +151,6 @@ const getReportData = (dog) => {
 
     dogDetail = {
       ...dogDetail,
-      // careTakerDetails: [...careTakerDetails, ...reportsDetails]
       ...careTakerDetails
     }
   }
@@ -270,18 +273,10 @@ router.get("/observable", authenticateToken, async (req, res) => {
           model: "Image",
         },
       })
-      .populate({
-        path: "careTakerDetails",
-        populate: {
-          path: "caretaker",
-          select: "_id name contactNumber",
-        },
-      })
-      .populate("kennel");
 
     res.status(200).json(dogs);
   } catch (error) {
-    res.status(500).json({ error: "Error retrieving dogs : " + error.message });
+    res.status(400).json({ error: "Error retrieving dogs : " + error.message });
   }
 });
 

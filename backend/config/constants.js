@@ -1,3 +1,3 @@
-const API_URL = "http://192.168.1.4:3500" 
+const API_URL = "http://13.235.31.125/" 
 
 module.exports = API_URL

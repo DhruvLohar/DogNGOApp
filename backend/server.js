@@ -38,10 +38,11 @@ app.all("*", (req, res) => {
 app.use(errorHandler);
 
 // mongo pass for my db : ol0pSSmYqa6KTbiU
+const connectionString = `mongodb+srv://manojcaselaws:${encodedPassword}@jeevraksha.1mvtc5m.mongodb.net/?retryWrites=true&w=majority`
 
 mongoose.set("strictQuery", false);
 mongoose
-  .connect(`mongodb+srv://manojcaselaws:${encodedPassword}@jeevraksha.1mvtc5m.mongodb.net/?retryWrites=true&w=majority`)
+  .connect(connectionString)
   .then(() => {
     console.log("MongoDB Connected");
     app.listen(PORT, "127.0.0.1", () =>
