@@ -10,8 +10,8 @@ import {
   Modal,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import * as FileSystem from "expo-image-picker";
-import {useRouter} from "expo-router";
+import * as FileSystem from "expo-file-system";
+import { useRouter } from "expo-router";
 import { API_URL, axiosRequest } from "../service/api";
 const moment = require("moment");
 
@@ -72,27 +72,29 @@ export default function Medicines() {
     }
     setKennelNumberError(errors.kennelNumberError || "");
 
-    const dog = axiosRequest(
-      `/dog/kennel/${kennelNumber}`,
-      {
-        method: "get",
-      },
-      false
-    )
-      .then((res) => {
-        setDogModalInfo(res.data);
-        setWeight(res.data?.vetDetails?.dogWeight);
-        setModalVisible(true);
-      })
-      .catch((error) => {
-        if (error.response) {
-          alert(JSON.stringify(error.response));
-        } else if (error.request) {
-          console.log("No response received");
-        } else {
-          console.log("Error:", error.message);
-        }
-      });
+    if (kennelNumber) {
+      const dog = axiosRequest(
+        `/dog/kennel/${kennelNumber}`,
+        {
+          method: "get",
+        },
+        false
+      )
+        .then((res) => {
+          setDogModalInfo(res.data);
+          setWeight(res.data?.vetDetails?.dogWeight);
+          setModalVisible(true);
+        })
+        .catch((error) => {
+          if (error.response) {
+            alert(JSON.stringify(error.response));
+          } else if (error.request) {
+            console.log("No response received");
+          } else {
+            console.log("Error:", error.message);
+          }
+        });
+    }
   };
 
   const handleModalClose = () => {
@@ -114,8 +116,8 @@ export default function Medicines() {
     const formattedTime =
       hours >= 12
         ? `${hours === 12 ? 12 : hours - 12}:${minutes
-            .toString()
-            .padStart(2, "0")} PM`
+          .toString()
+          .padStart(2, "0")} PM`
         : `${hours}:${minutes.toString().padStart(2, "0")} AM`;
 
     return formattedTime;
@@ -144,7 +146,7 @@ export default function Medicines() {
 
     if (!result.canceled) {
       const uri = result.assets[0].uri;
-      
+
       const fileInfo = await FileSystem.getInfoAsync(uri);
       const fileSizeInMB = fileInfo.size / (1024 * 1024);
       if (fileSizeInMB > 3) {
@@ -377,18 +379,16 @@ export default function Medicines() {
             {dogModalInfo ? (
               <View>
                 <Text style={styles.modalText}>Dog Information</Text>
-                <View style={{ aspectRatio: 1 }}>
-                  <Image
-                    source={{
-                      uri:
-                        API_URL +
-                        "/" +
-                        dogModalInfo?.catcherDetails?.spotPhoto?.path,
-                    }}
-                    style={{ flex: 1, width: undefined, height: undefined }}
-                    resizeMode="contain"
-                  />
-                </View>
+                <Image
+                  source={{
+                    uri:
+                      API_URL +
+                      "/" +
+                      dogModalInfo?.catcherDetails?.spotPhoto?.path,
+                  }}
+                  style={{ width: 200, height: 200, aspectRatio: 9 / 16 }}
+                  resizeMode="contain"
+                />
                 <Text>Case Number: {dogModalInfo.caseNumber}</Text>
                 <Text>Caught on : {dogModalInfo?.createdAt}</Text>
                 <View style={styles.buttonContainer}>

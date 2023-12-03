@@ -192,7 +192,7 @@ const Report = () => {
                   style={{ width: 100, height: 100, borderRadius: 50, marginBottom: 20 }}
                 />
                 <Text>Case Number: {dog.caseNumber}</Text>
-                <Text>Dog's Name: {dog.dogName}</Text>
+                {/* <Text>Dog's Name: {dog.dogName}</Text> */}
               </View>
             ))}
             <TouchableOpacity
@@ -216,6 +216,7 @@ const styles = StyleSheet.create({
   },
   dateContainer: {
     marginBottom: 20,
+    marginTop: 20
   },
   heading: {
     fontSize: 20,
@@ -230,6 +231,7 @@ const styles = StyleSheet.create({
     color: 'white',
     borderRadius: 5,
     marginTop: 20,
+    marginBottom: 20
   },
   buttonText: {
     color: 'white',

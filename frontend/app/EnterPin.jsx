@@ -48,10 +48,10 @@ const Index = () => {
       <Text style={styles.heading}>Enter your PIN</Text>
       <TextInput
         style={styles.input}
-        placeholder="PIN"
+        placeholder="4-Digit PIN"
         value={pin}
         onChangeText={setPin}
-        keyboardType="phone-pad"
+        keyboardType="numeric"
         maxLength={4}
         secureTextEntry={true}
       />

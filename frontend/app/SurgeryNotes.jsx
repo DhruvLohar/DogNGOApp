@@ -291,18 +291,16 @@ export default function SurgeryNotes() {
             {dogModalInfo ? (
               <View>
                 <Text style={styles.modalText}>Dog Information</Text>
-                <View style={{ aspectRatio: 1 }}>
-                  <Image
-                    source={{
-                      uri:
-                        API_URL +
-                        "/" +
-                        dogModalInfo?.catcherDetails?.spotPhoto?.path,
-                    }}
-                    style={{ flex: 1, width: undefined, height: undefined }}
-                    resizeMode="contain"
-                  />
-                </View>
+                <Image
+                  source={{
+                    uri:
+                      API_URL +
+                      "/" +
+                      dogModalInfo?.catcherDetails?.spotPhoto?.path,
+                  }}
+                  style={{ width: 200, height: 200, aspectRatio: 9 / 16 }}
+                  resizeMode="contain"
+                />
                 <Text>Case Number: {dogModalInfo.caseNumber}</Text>
                 <Text>Caught on : {dogModalInfo?.createdAt}</Text>
                 <View style={styles.buttonContainer}>

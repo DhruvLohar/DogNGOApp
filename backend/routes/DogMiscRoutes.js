@@ -55,107 +55,109 @@ router.post("/report/xlsx", async (req, res) => {
 });
 
 const getReportData = (dog) => {
-  // Sr No, Dog Catching Date, Address, Photo (url), Color, Gender
-  // Surgery Date, Release Date
-
-
-  const BASE_URL = API_URL;
-  let dogDetail = {}
-
-  dogDetail = {
-    "Sr. No.": dog._id.toString(),
-    "Dog's Main Color": dog.mainColor,
-    "Dog Gender": dog.gender,
-    "Description": dog.description,
-  }
-
-  if (dog.catcherDetails) {
+  try {
+    const BASE_URL = API_URL;
+    let dogDetail = {}
+  
     dogDetail = {
-      ...dogDetail,
-      "Catcher ID": dog.catcherDetails.catcher._id.toString(),
-      "Catcher's Name": dog.catcherDetails.catcher.name,
-      "Catcher's Contact Number": dog.catcherDetails.catcher.contactNumber,
-      "Catching Location": dog.catcherDetails.catchingLocation,
-      "Catching Location Details": dog.catcherDetails.locationDetails,
-      "Releasing Location": dog.catcherDetails.releasingLocation,
-      "Catched At": dog.catcherDetails.createdAt.toString(),
-      "Spot Photo": {
-        t: "s",
-        v: "Click to open photo",
-        l: { Target: BASE_URL + dog.catcherDetails.spotPhoto.path },
-        s: { font: { color: { rgb: "0000FFFF" }, underline: true } },
-      },
+      "Sr. No.": dog._id.toString(),
+      "Dog's Main Color": dog.mainColor,
+      "Dog Gender": dog.gender,
+      "Description": dog.description,
     }
-  }
-
-  if (dog.vetDetails) {
-    let vetDetails = {
-      "Vet ID": dog.vetDetails.vet._id.toString(),
-      "Vet's Name": dog.vetDetails.vet.name,
-      "Vet's Contact Number": dog.vetDetails.vet.contactNumber,
-      "Surgery date": dog.vetDetails.surgeryDate.toString(),
-
-      "Surgery Photo": {
-        t: "s",
-        v: "Click to open photo",
-        l: { Target: BASE_URL + dog.vetDetails.surgeryPhoto.path },
-        s: { font: { color: { rgb: "0000FFFF" }, underline: true } },
-      },
-    }
-
-    Object.keys(dog.vetDetails._doc).map((key, i) => {
-      if (
-        ![
-          "surgeryPhoto",
-          "additionalPhotos",
-          "surgeryDate",
-          "createdAt",
-          "updatedAt",
-          "additionalNotesPhotos",
-          "vet",
-          "_id"
-        ].includes(key)
-      ) {
-        vetDetails = { ...vetDetails, [key]: dog.vetDetails[key] };
-      }
-    });
-
-    dogDetail = { ...dogDetail, ...vetDetails };
-  }
-
-  if (dog.careTakerDetails) {
-    let careTakerDetails = {
-      "Caretaker ID": dog.careTakerDetails.careTaker._id.toString(),
-      "Caretaker's Name": dog.careTakerDetails.careTaker.name,
-      "Caretaker's Contact Number": dog.careTakerDetails.careTaker.contactNumber,
-    }
-
-    const reportsDetails = [];
-    dog.careTakerDetails.reports.map((report, idx) => {
-      careTakerDetails = {
-        ...careTakerDetails,
-        [`Day ${idx+1} Report ID`]: report._id.toString(),
-        [`Day ${idx+1} Food Intake`]: report.foodIntake,
-        [`Day ${idx+1} Water Intake`]: report.waterIntake,
-        [`Day ${idx+1} Antibiotics`]: report.antibiotics,
-        [`Day ${idx+1} Painkiller`]: report.painkiller,
-        [`Day ${idx+1} Photo`]: {
+  
+    if (dog.catcherDetails) {
+      dogDetail = {
+        ...dogDetail,
+        "Catcher ID": dog.catcherDetails.catcher._id.toString(),
+        "Catcher's Name": dog.catcherDetails.catcher.name,
+        "Catcher's Contact Number": dog.catcherDetails.catcher.contactNumber,
+        "Catching Location": dog.catcherDetails.catchingLocation,
+        "Catching Location Details": dog.catcherDetails.locationDetails,
+        "Releasing Location": dog.catcherDetails.releasingLocation,
+        "Catched At": dog.catcherDetails.createdAt.toString(),
+        "Spot Photo": {
           t: "s",
           v: "Click to open photo",
-          l: { Target: BASE_URL + report.photo.path },
+          l: { Target: BASE_URL + dog.catcherDetails.spotPhoto.path },
           s: { font: { color: { rgb: "0000FFFF" }, underline: true } },
         },
-        Date: report.date.toString(),
       }
-    });
-
-    dogDetail = {
-      ...dogDetail,
-      ...careTakerDetails
     }
+  
+    if (dog.vetDetails) {
+      let vetDetails = {
+        "Vet ID": dog.vetDetails.vet._id.toString(),
+        "Vet's Name": dog.vetDetails.vet.name,
+        "Vet's Contact Number": dog.vetDetails.vet.contactNumber,
+        "Surgery date": dog.vetDetails.surgeryDate.toString(),
+  
+        "Surgery Photo": {
+          t: "s",
+          v: "Click to open photo",
+          l: { Target: BASE_URL + dog.vetDetails.surgeryPhoto.path },
+          s: { font: { color: { rgb: "0000FFFF" }, underline: true } },
+        },
+      }
+  
+      Object.keys(dog.vetDetails._doc).map((key, i) => {
+        if (
+          ![
+            "surgeryPhoto",
+            "additionalPhotos",
+            "surgeryDate",
+            "createdAt",
+            "updatedAt",
+            "additionalNotesPhotos",
+            "vet",
+            "_id"
+          ].includes(key)
+        ) {
+          vetDetails = { ...vetDetails, [key]: dog.vetDetails[key] };
+        }
+      });
+  
+      dogDetail = { ...dogDetail, ...vetDetails };
+    }
+  
+    if (dog.careTakerDetails) {
+      let careTakerDetails = {
+        "Caretaker ID": dog.careTakerDetails.careTaker._id.toString(),
+        "Caretaker's Name": dog.careTakerDetails.careTaker.name,
+        "Caretaker's Contact Number": dog.careTakerDetails.careTaker.contactNumber,
+      }
+  
+      const reportsDetails = [];
+      dog.careTakerDetails.reports.map((report, idx) => {
+        careTakerDetails = {
+          ...careTakerDetails,
+          [`Day ${idx+1} Report ID`]: report._id.toString(),
+          [`Day ${idx+1} Food Intake`]: report.foodIntake,
+          [`Day ${idx+1} Water Intake`]: report.waterIntake,
+          [`Day ${idx+1} Antibiotics`]: report.antibiotics,
+          [`Day ${idx+1} Painkiller`]: report.painkiller,
+          [`Day ${idx+1} Photo`]: {
+            t: "s",
+            v: "Click to open photo",
+            l: { Target: BASE_URL + report.photo.path },
+            s: { font: { color: { rgb: "0000FFFF" }, underline: true } },
+          },
+          Date: report.date.toString(),
+        }
+      });
+  
+      dogDetail = {
+        ...dogDetail,
+        ...careTakerDetails
+      }
+    }
+  
+    return dogDetail;
+  } catch (err) {
+    console.log("Error generating : " + err.message)
+    return {};
   }
 
-  return dogDetail;
 }
 
 router.get("/generate/report/:dogIDS/xlsx", async (req, res) => {
@@ -222,6 +224,7 @@ router.get("/generate/report/:dogIDS/xlsx", async (req, res) => {
 
       Promise.all(dogPromises)
         .then((reportDataArray) => {
+
           let dogsSheet = XLSX.utils.json_to_sheet(reportDataArray);
           XLSX.utils.book_append_sheet(workBook, dogsSheet, "Dogs Report");
 

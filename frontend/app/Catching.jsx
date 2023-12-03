@@ -46,11 +46,11 @@ export default function Catching() {
       const { latitude, longitude } = location.coords;
 
       // Make a request to the Geocoding API
-      const apiKey = "YOUR_API_KEY";
+      const apiKey = "AIzaSyBjfILytDucr1FHSAOwR4pwDHuY4Q9D8C4";
       const response = await fetch(
         `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`
       );
-
+      
       const data = await response.json();
       if (data.results && data.results.length > 0) {
         // Assuming the first result contains the region information

@@ -376,9 +376,6 @@ router.put(
     try {
       const dogId = req.params.id;
       const vetDetailsData = JSON.parse(req.body.vetDetails);
-      vetDetailsData.surgeryDate = req.body.surgeryDate;
-
-      console.log(vetDetailsData);
 
       if (["vet", "admin"].includes(req.user.role)) {
         // Check if the dog has an existing vetDetails
