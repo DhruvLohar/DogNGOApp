@@ -470,12 +470,12 @@ router.put(
         }
 
         if (imageRefs && imageRefs.length > 0) {
-          if (req.files["surgeryPhoto"] && req.files["additionalPhotos[]"]) {
+          if (req.files["surgeryPhoto"] || req.files["additionalPhotos[]"]) {
             vetDetails.surgeryPhoto = imageRefs[0];
             for (let i of imageRefs.slice(1)) {
               vetDetails.additionalPhotos.push(i);
             }
-          } else {
+          } else if (req.files["surgeryNotesPhoto"] || req.files["additionalNotesPhotos"]) {
             vetDetails.surgeryNotesPhoto = imageRefs[0];
             for (let i of imageRefs.slice(1)) {
               vetDetails.additionalNotesPhotos.push(i);

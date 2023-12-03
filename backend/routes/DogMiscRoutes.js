@@ -373,7 +373,11 @@ router.post("/:id/release", authenticateToken, async (req, res) => {
     dog.releaseDate = new Date(); // set current date
     dog.releaseLocation = releaseLocation;
     await dog.save();
-
+    
+    const kennel = await Kennel.findById(dog.kennel._id);
+    kennel.isOccupied = false;
+    await kennel.save();
+    
     res.status(200).json({ message: "Dog was released" });
   } catch (error) {
     res.status(500).json({

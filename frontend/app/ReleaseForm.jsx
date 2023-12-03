@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, Modal, StyleSheet, Image, ScrollView } from "react-native";
 import { API_URL, axiosRequest } from "../service/api";
+import { toFormData } from "axios";
 
 const ReleaseForm = () => {
   const [kennels, setKennels] = useState([
@@ -48,6 +49,7 @@ const ReleaseForm = () => {
       `/dog/${id}/release`,
       {
         method: "post",
+        data: toFormData({releaseLocation: "Releasing Location Should be Sent"})
       },
       false
     )

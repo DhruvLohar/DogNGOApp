@@ -162,7 +162,6 @@ export default function SurgeryNotes() {
     const momentObject = moment(date, "DD/MM/YYYY");
     if (momentObject.isValid()) {
       const dateObject = momentObject.toDate();
-      formData.append("surgeryDate", dateObject);
     } else {
       errors.dateError = "Please enter a date.";
     }
@@ -211,7 +210,7 @@ export default function SurgeryNotes() {
       formData.append("surgeryNotesPhoto", {
         uri: photo,
         type: `image/${ext}`,
-        name: `surgeryPhoto.${ext}`,
+        name: `surgeryNotesPhoto.${ext}`,
       });
 
       additionalPhotos.forEach((photo, index) => {

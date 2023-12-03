@@ -130,7 +130,7 @@ export default function Day() {
     const momentObject = moment(date, "MM/DD/YYYY");
     if (momentObject.isValid()) {
       const dateObject = momentObject.toDate();
-      formData.append("date", dateObject);
+      formData.append("date", dateObject.toISOString());
     } else {
       errors.dateError = "Please enter a date.";
     }
