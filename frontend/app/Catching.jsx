@@ -10,10 +10,15 @@ import {
 } from "react-native";
 import * as Location from "expo-location";
 import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system";
+import {useRouter} from "expo-router";
 const moment = require("moment");
 import { axiosRequest } from "../service/api";
 
 export default function Catching() {
+
+  const router = useRouter()
+
   const [catchingLocation, setCatchingLocation] = useState("");
   const [locationError, setLocationError] = useState("");
   const [locationDetails, setLocationDetails] = useState("");
@@ -60,19 +65,27 @@ export default function Catching() {
     let result = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: false,
-      aspect: [4, 3],
-      quality: 1,
+      aspect: [9, 16],
+      quality: .6,
     });
 
-    const uri = result.assets[0].uri;
-    const ext = uri.split(".").pop();
-
+    
     if (!result.canceled) {
-      setSpotPhoto({
-        uri: uri,
-        type: `${result.assets[0].type}/${ext}`,
-        name: `spotPhoto.${ext}`,
-      });
+      const uri = result.assets[0].uri;
+      
+      const fileInfo = await FileSystem.getInfoAsync(uri);
+      const fileSizeInMB = fileInfo.size / (1024 * 1024);
+      if (fileSizeInMB > 3) {
+        alert("Image size should be less then 3MB.")
+      } else {
+        const ext = uri.split(".").pop();
+  
+        setSpotPhoto({
+          uri: uri,
+          type: `${result.assets[0].type}/${ext}`,
+          name: `spotPhoto.${ext}`,
+        });
+      }
     }
   };
 
@@ -186,25 +199,27 @@ export default function Catching() {
       )
         .then((res) => {
           alert("Dog added Successfully!");
+          router.back()
         })
         .catch((error) => {
           if (error.response) {
             alert(JSON.stringify(error.response));
           } else if (error.request) {
             alert("Dog added Successfully");
+            router.back()
           } else {
             console.log("Error:", error.message);
           }
         });
 
-      setCatchingLocation("");
-      setLocationDetails("");
-      setSpotPhoto(null);
-      setAdditionalPhotos([]);
-      setDate(new Date().toLocaleDateString());
-      setTime(formatTime());
-      setCaretaker("");
-      setCaretakerNumber("");
+      // setCatchingLocation("");
+      // setLocationDetails("");
+      // setSpotPhoto(null);
+      // setAdditionalPhotos([]);
+      // setDate(new Date().toLocaleDateString());
+      // setTime(formatTime());
+      // setCaretaker("");
+      // setCaretakerNumber("");
     }
   };
 

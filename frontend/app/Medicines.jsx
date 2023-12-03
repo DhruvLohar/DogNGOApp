@@ -10,6 +10,8 @@ import {
   Modal,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-image-picker";
+import {useRouter} from "expo-router";
 import { API_URL, axiosRequest } from "../service/api";
 const moment = require("moment");
 
@@ -136,12 +138,20 @@ export default function Medicines() {
     let result = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: false,
-      aspect: [4, 3],
-      quality: 1,
+      aspect: [9, 16],
+      quality: .6,
     });
 
     if (!result.canceled) {
-      setPhoto(result.assets[0].uri);
+      const uri = result.assets[0].uri;
+      
+      const fileInfo = await FileSystem.getInfoAsync(uri);
+      const fileSizeInMB = fileInfo.size / (1024 * 1024);
+      if (fileSizeInMB > 3) {
+        alert("Image size should be less then 3MB.")
+      } else {
+        setPhoto(uri);
+      }
     }
   };
 
@@ -300,12 +310,14 @@ export default function Medicines() {
       )
         .then((res) => {
           alert("Medicines Details updated successfully");
+          setDogInfo(null)
         })
         .catch((error) => {
           if (error.response) {
             alert(JSON.stringify(error.response));
           } else if (error.request) {
             console.log("No response received");
+            setDogInfo(null)
           } else {
             console.log("Error:", error.message);
           }

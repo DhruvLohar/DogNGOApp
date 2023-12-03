@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, Modal, StyleSheet, Image } from "react-native";
+import { View, Text, TouchableOpacity, Modal, StyleSheet, Image, ScrollView } from "react-native";
 import { API_URL, axiosRequest } from "../service/api";
 
 const ReleaseForm = () => {
@@ -113,10 +113,10 @@ const ReleaseForm = () => {
     // );
     // setReleasedKennels(selectedKennels);
     // setKennels(newKennels);
-    
+
     selectedKennels.map(dog => {
       axiosRequest(
-        `/dog/${id}/dispatch`,
+        `/dog/${dog}/dispatch`,
         {
           method: "post",
         },
@@ -124,7 +124,6 @@ const ReleaseForm = () => {
       )
         .then((res) => {
           console.log(res.data)
-          // alert(res.data.message);
         })
         .catch((error) => {
           if (error.response) {
@@ -140,65 +139,96 @@ const ReleaseForm = () => {
   };
 
   return (
-    <View style={styles.container}>
-
-      {dispatchableDogs.map(dog => (
-        <TouchableOpacity
-          key={dog._id}
-          style={[
-            styles.kennelContainer,
+    <ScrollView>
+      <View style={styles.container}>
+        {dispatchableDogs.map((dog, idx) => (
+          <TouchableOpacity
+            key={dog._id}
+            style={[{
+              borderColor: "grey",
+              borderWidth: 2,
+              borderRadius: 10,
+              padding: 10,
+              marginBottom: 10,
+              alignItems: "center",
+              width: "100%"
+            },
             selectedKennels.includes(dog._id) && styles.selectedKennelContainer,
-          ]}
-          onPress={() => handleKennelPress(dog._id)}
-        >
-          <Text>Kennel ID: {dog?.kennel?.kennelId}</Text>
-          <Image
-            source={{
-              uri: API_URL + "/" + dog?.catcherDetails?.spotPhoto?.path,
-            }}
-            style={{ maxWidth: 150, maxHeight: 150, borderRadius: 0 }}
-          />
-          <Text>Dog Photo: {dog?.catcherDetails?.spotPhoto?.path}</Text>
-          {/* <Text>Caretaker: {dog?.careTakerDetails?.caretaker?.name}</Text>
-          <Text>Phone Number: {dog?.careTakerDetails?.caretaker?.contactNumber}</Text> */}
-        </TouchableOpacity>
-      ))}
+            ]}
+            onPress={() => handleKennelPress(dog._id)}
+          >
+            <View style={{ marginBottom: 10 }}>
+              <Image
+                source={{
+                  uri: API_URL + "/" + dog?.catcherDetails?.spotPhoto?.path,
+                }}
+                style={{ width: 200, height: 200, aspectRatio: 9 / 16, objectFit: "contain" }}
+              />
+            </View>
+            <Text style={{ fontWeight: "bold", fontSize: 14 }}>
+              Kennel ID: {dog?.kennel?.kennelId}
+            </Text>
+            <Text style={{ fontWeight: "bold", fontSize: 14 }}>
+              Case Number: {dog?.caseNumber}
+            </Text>
+          </TouchableOpacity>
+        ))}
 
-      <TouchableOpacity onPress={handleSubmit} style={styles.submitButton}>
-        <Text>Submit</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.releaseSheetButton}
-        onPress={() => setShowReleaseSheet((prev) => !prev)}
-      >
-        <Text>Show Release Sheet</Text>
-      </TouchableOpacity>
-      {showReleaseSheet && (
-        <Modal animationType="slide" transparent={false} visible={true}>
-          <View style={styles.releaseSheet}>
-            {releasableDogs.map((dog) => (
-              <View key={dog._id} style={styles.dogContainer}>
-                <Text>Dog Photo: {dog?.catcherDetails?.spotPhoto?.path}</Text>
-                <Text>Caretaker: {dog?.careTakerDetails?.caretaker?.name}</Text>
-                <Text>Phone Number: {dog?.careTakerDetails?.caretaker?.contactNumber}</Text>
+        <TouchableOpacity onPress={handleSubmit} style={styles.submitButton}>
+          <Text>Dispatch Dogs</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.releaseSheetButton}
+          onPress={() => setShowReleaseSheet((prev) => !prev)}
+        >
+          <Text>Show Release Sheet</Text>
+        </TouchableOpacity>
+        {showReleaseSheet && (
+          <Modal animationType="slide" transparent={false} visible={true}>
+            <View style={styles.releaseSheet}>
+              {releasableDogs.map((dog) => (
                 <TouchableOpacity
-                  onPress={() => handleRelease(dog._id)}
-                  style={styles.releaseButton}
+                  key={dog._id}
+                  style={[{
+                    borderColor: "grey",
+                    borderWidth: 2,
+                    borderRadius: 10,
+                    padding: 10,
+                    marginBottom: 10,
+                    alignItems: "center",
+                    width: "80%"
+                  },
+                  selectedKennels.includes(dog._id) && styles.selectedKennelContainer,
+                  ]}
+                  onPress={() => handleKennelPress(dog._id)}
                 >
-                  <Text>Release</Text>
+                  <View style={{ marginBottom: 10 }}>
+                    <Image
+                      source={{
+                        uri: API_URL + "/" + dog?.catcherDetails?.spotPhoto?.path,
+                      }}
+                      style={{ width: 200, height: 200, aspectRatio: 9 / 16, objectFit: "contain" }}
+                    />
+                  </View>
+                  <Text style={{ fontWeight: "bold", fontSize: 14 }}>
+                    Kennel ID: {dog?.kennel?.kennelId}
+                  </Text>
+                  <Text style={{ fontWeight: "bold", fontSize: 14 }}>
+                    Case Number: {dog?.caseNumber}
+                  </Text>
                 </TouchableOpacity>
-              </View>
-            ))}
-            <TouchableOpacity
-              onPress={() => setShowReleaseSheet(false)}
-              style={styles.closeButton}
-            >
-              <Text>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </Modal>
-      )}
-    </View>
+              ))}
+              <TouchableOpacity
+                onPress={() => setShowReleaseSheet(false)}
+                style={styles.closeButton}
+              >
+                <Text>Close</Text>
+              </TouchableOpacity>
+            </View>
+          </Modal>
+        )}
+      </View>
+    </ScrollView>
   );
 };
 

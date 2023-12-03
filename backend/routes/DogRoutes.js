@@ -235,13 +235,12 @@ router.post(
       });
 
       dog.caseNumber = await Dog.generateCaseNumber();
-      console.log(dog.caseNumber);
       await dog.save();
 
       res.status(201).json({ message: "Case generated successfully" });
     } catch (error) {
       res
-        .status(500)
+        .status(400)
         .json({ error: "Error creating a dog case : " + error.message });
     }
   }

@@ -16,6 +16,8 @@ import InitialObservations from "../assets/initialObservations.png";
 import Release from "../assets/release.png";
 import Surgery from "../assets/surgery.png";
 import Treatment from "../assets/treatment.png";
+import addUser from "../assets/addUser.png";
+import generateReports from "../assets/generateReports.png";
 import Logo from "../assets/logo.jpg";
 
 const FormCard = ({ title, navigate, image }) => {
@@ -111,12 +113,14 @@ const FormPage = () => {
           ) : null}
           {userRole === "admin" ? (
             <FormCard
+              image={addUser}
               title="Add a User"
               navigate={() => navigateToForm("/LoginAdmin")}
             />
           ) : null}
           {userRole === "admin" ? (
             <FormCard
+              image={generateReports}
               title="Generate Reports"
               navigate={() => navigateToForm("/Report")}
             />
