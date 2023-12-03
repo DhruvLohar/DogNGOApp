@@ -8,7 +8,6 @@ const API_KEY = "3b80afc4-787c-11ee-8cbb-0200cd936042";
 
 export const sendOTP = async (mobileNumber) => {
   try {
-    const random = Math.floor(10000 + Math.random() * 90000);
     const response = await axios.post(
       "https://2factor.in/API/V1/" +
         API_KEY +
