@@ -112,8 +112,8 @@ export default function Medicines() {
     const formattedTime =
       hours >= 12
         ? `${hours === 12 ? 12 : hours - 12}:${minutes
-          .toString()
-          .padStart(2, "0")} PM`
+            .toString()
+            .padStart(2, "0")} PM`
         : `${hours}:${minutes.toString().padStart(2, "0")} AM`;
 
     return formattedTime;
@@ -300,14 +300,18 @@ export default function Medicines() {
       )
         .then((res) => {
           alert("Medicines Details updated successfully");
+          window.location.reload();
         })
         .catch((error) => {
           if (error.response) {
             alert(JSON.stringify(error.response));
+            window.location.reload();
           } else if (error.request) {
             console.log("No response received");
+            window.location.reload();
           } else {
             console.log("Error:", error.message);
+            window.location.reload();
           }
         });
       // Reset form fields
@@ -365,12 +369,18 @@ export default function Medicines() {
             {dogModalInfo ? (
               <View>
                 <Text style={styles.modalText}>Dog Information</Text>
-                <Image
-                  source={{
-                    uri: API_URL + "/" + dogModalInfo?.catcherDetails?.spotPhoto?.path,
-                  }}
-                  style={{ width: 100, height: 100, borderRadius: 0 }}
-                />
+                <View style={{ aspectRatio: 1 }}>
+                  <Image
+                    source={{
+                      uri:
+                        API_URL +
+                        "/" +
+                        dogModalInfo?.catcherDetails?.spotPhoto?.path,
+                    }}
+                    style={{ flex: 1, width: undefined, height: undefined }}
+                    resizeMode="contain"
+                  />
+                </View>
                 <Text>Case Number: {dogModalInfo.caseNumber}</Text>
                 <Text>Caught on : {dogModalInfo?.createdAt}</Text>
                 <View style={styles.buttonContainer}>
@@ -480,7 +490,7 @@ export default function Medicines() {
             >
               {photo ? null : (
                 <View style={styles.placeholderImage}>
-                  <Text style={styles.placeholderText}>Upload Photo</Text>
+                  <Text style={styles.placeholderText}>Click Photo</Text>
                 </View>
               )}
             </TouchableOpacity>
@@ -507,7 +517,7 @@ export default function Medicines() {
               ) : (
                 <View style={styles.placeholderImage}>
                   <Text style={styles.placeholderText}>
-                    Upload Additional Photos
+                    Click Additional Photos
                   </Text>
                 </View>
               )}

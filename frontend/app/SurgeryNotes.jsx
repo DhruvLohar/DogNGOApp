@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 const moment = require("moment");
-import { axiosRequest } from "../service/api";
+import { API_URL, axiosRequest } from "../service/api";
 
 export default function SurgeryNotes() {
   const [kennelNumber, setKennelNumber] = useState("");
@@ -59,7 +59,7 @@ export default function SurgeryNotes() {
       )
         .then((res) => {
           setDogModalInfo(res.data);
-          setCaseNumber(res.data.caseNumber)
+          setCaseNumber(res.data.caseNumber);
           setModalVisible(true);
         })
         .catch((error) => {
@@ -222,14 +222,18 @@ export default function SurgeryNotes() {
       )
         .then((res) => {
           alert("Surgery Notes Updated Successfully!");
+          window.location.reload();
         })
         .catch((error) => {
           if (error.response) {
             alert(JSON.stringify(error.response));
+            window.location.reload();
           } else if (error.request) {
             alert("Surgery Notes Updated Successfully!");
+            window.location.reload();
           } else {
             console.log("Error:", error.message);
+            window.location.reload();
           }
         });
 
@@ -278,6 +282,18 @@ export default function SurgeryNotes() {
             {dogModalInfo ? (
               <View>
                 <Text style={styles.modalText}>Dog Information</Text>
+                <View style={{ aspectRatio: 1 }}>
+                  <Image
+                    source={{
+                      uri:
+                        API_URL +
+                        "/" +
+                        dogModalInfo?.catcherDetails?.spotPhoto?.path,
+                    }}
+                    style={{ flex: 1, width: undefined, height: undefined }}
+                    resizeMode="contain"
+                  />
+                </View>
                 <Text>Case Number: {dogModalInfo.caseNumber}</Text>
                 <Text>Caught on : {dogModalInfo?.createdAt}</Text>
                 <View style={styles.buttonContainer}>
@@ -363,7 +379,7 @@ export default function SurgeryNotes() {
             >
               {photo ? null : (
                 <View style={styles.placeholderImage}>
-                  <Text style={styles.placeholderText}>Upload Photo</Text>
+                  <Text style={styles.placeholderText}>Click Photo</Text>
                 </View>
               )}
             </TouchableOpacity>
@@ -389,7 +405,7 @@ export default function SurgeryNotes() {
               ) : (
                 <View style={styles.placeholderImage}>
                   <Text style={styles.placeholderText}>
-                    Upload Additional Photos
+                    Click Additional Photos
                   </Text>
                 </View>
               )}

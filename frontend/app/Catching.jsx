@@ -257,7 +257,7 @@ export default function Catching() {
         >
           {spotPhoto ? null : (
             <View style={styles.placeholderImage}>
-              <Text style={styles.placeholderText}>Upload Spot Photo</Text>
+              <Text style={styles.placeholderText}>Click Spot Photo</Text>
             </View>
           )}
         </TouchableOpacity>
@@ -282,7 +282,7 @@ export default function Catching() {
           ) : (
             <View style={styles.placeholderImage}>
               <Text style={styles.placeholderText}>
-                Upload Additional Photos
+                Click Additional Photos
               </Text>
             </View>
           )}
