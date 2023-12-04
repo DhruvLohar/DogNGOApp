@@ -57,15 +57,15 @@ router.post("/report/xlsx", async (req, res) => {
 const getReportData = (dog) => {
   try {
     const BASE_URL = API_URL;
-    let dogDetail = {}
-  
+    let dogDetail = {};
+
     dogDetail = {
       "Sr. No.": dog._id.toString(),
       "Dog's Main Color": dog.mainColor,
       "Dog Gender": dog.gender,
-      "Description": dog.description,
-    }
-  
+      Description: dog.description,
+    };
+
     if (dog.catcherDetails) {
       dogDetail = {
         ...dogDetail,
@@ -82,24 +82,24 @@ const getReportData = (dog) => {
           l: { Target: BASE_URL + dog.catcherDetails.spotPhoto.path },
           s: { font: { color: { rgb: "0000FFFF" }, underline: true } },
         },
-      }
+      };
     }
-  
+
     if (dog.vetDetails) {
       let vetDetails = {
         "Vet ID": dog.vetDetails.vet._id.toString(),
         "Vet's Name": dog.vetDetails.vet.name,
         "Vet's Contact Number": dog.vetDetails.vet.contactNumber,
         "Surgery date": dog.vetDetails.surgeryDate.toString(),
-  
+
         "Surgery Photo": {
           t: "s",
           v: "Click to open photo",
           l: { Target: BASE_URL + dog.vetDetails.surgeryPhoto.path },
           s: { font: { color: { rgb: "0000FFFF" }, underline: true } },
         },
-      }
-  
+      };
+
       Object.keys(dog.vetDetails._doc).map((key, i) => {
         if (
           ![
@@ -110,60 +110,60 @@ const getReportData = (dog) => {
             "updatedAt",
             "additionalNotesPhotos",
             "vet",
-            "_id"
+            "_id",
           ].includes(key)
         ) {
           vetDetails = { ...vetDetails, [key]: dog.vetDetails[key] };
         }
       });
-  
+
       dogDetail = { ...dogDetail, ...vetDetails };
     }
-  
+
     if (dog.careTakerDetails) {
       let careTakerDetails = {
         "Caretaker ID": dog.careTakerDetails.careTaker._id.toString(),
         "Caretaker's Name": dog.careTakerDetails.careTaker.name,
-        "Caretaker's Contact Number": dog.careTakerDetails.careTaker.contactNumber,
-      }
-  
+        "Caretaker's Contact Number":
+          dog.careTakerDetails.careTaker.contactNumber,
+      };
+
       const reportsDetails = [];
       dog.careTakerDetails.reports.map((report, idx) => {
         careTakerDetails = {
           ...careTakerDetails,
-          [`Day ${idx+1} Report ID`]: report._id.toString(),
-          [`Day ${idx+1} Food Intake`]: report.foodIntake,
-          [`Day ${idx+1} Water Intake`]: report.waterIntake,
-          [`Day ${idx+1} Antibiotics`]: report.antibiotics,
-          [`Day ${idx+1} Painkiller`]: report.painkiller,
-          [`Day ${idx+1} Photo`]: {
+          [`Day ${idx + 1} Report ID`]: report._id.toString(),
+          [`Day ${idx + 1} Food Intake`]: report.foodIntake,
+          [`Day ${idx + 1} Water Intake`]: report.waterIntake,
+          [`Day ${idx + 1} Antibiotics`]: report.antibiotics,
+          [`Day ${idx + 1} Painkiller`]: report.painkiller,
+          [`Day ${idx + 1} Photo`]: {
             t: "s",
             v: "Click to open photo",
             l: { Target: BASE_URL + report.photo.path },
             s: { font: { color: { rgb: "0000FFFF" }, underline: true } },
           },
           Date: report.date.toString(),
-        }
+        };
       });
-  
+
       dogDetail = {
         ...dogDetail,
-        ...careTakerDetails
-      }
+        ...careTakerDetails,
+      };
     }
-  
+
     return dogDetail;
   } catch (err) {
-    console.log("Error generating : " + err.message)
+    console.log("Error generating : " + err.message);
     return {};
   }
-
-}
+};
 
 router.get("/generate/report/:dogIDS/xlsx", async (req, res) => {
   try {
     if (req) {
-      const dogIDS = req.params.dogIDS.split(',')
+      const dogIDS = req.params.dogIDS.split(",");
       const workBook = XLSX.utils.book_new();
 
       const dogPromises = dogIDS.map(async (dogId) => {
@@ -224,11 +224,14 @@ router.get("/generate/report/:dogIDS/xlsx", async (req, res) => {
 
       Promise.all(dogPromises)
         .then((reportDataArray) => {
-
           let dogsSheet = XLSX.utils.json_to_sheet(reportDataArray);
           XLSX.utils.book_append_sheet(workBook, dogsSheet, "Dogs Report");
 
-          const filePath = path.join(__dirname, "../public", `dog_details.xlsx`);
+          const filePath = path.join(
+            __dirname,
+            "../public",
+            `dog_details.xlsx`
+          );
           XLSX.writeFile(workBook, filePath);
 
           res.setHeader(
@@ -239,7 +242,7 @@ router.get("/generate/report/:dogIDS/xlsx", async (req, res) => {
             "Content-Type",
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
           );
-    
+
           res.download(filePath, (err) => {
             if (err) {
               console.error("Error sending file:", err);
@@ -252,7 +255,6 @@ router.get("/generate/report/:dogIDS/xlsx", async (req, res) => {
         .catch((error) => {
           res.status(404).json({ error: error.message });
         });
-
     } else {
       res.status(403).json({ message: "Unauthorized Access" });
     }
@@ -267,15 +269,14 @@ router.get("/generate/report/:dogIDS/xlsx", async (req, res) => {
 // Get : dogs for inital observations (dogs with no kennel)
 router.get("/observable", authenticateToken, async (req, res) => {
   try {
-    const dogs = await Dog.find({ kennel: { $exists: false } })
-      .populate({
-        path: "catcherDetails",
-        select: "catchingLocation",
-        populate: {
-          path: "spotPhoto",
-          model: "Image",
-        },
-      })
+    const dogs = await Dog.find({ kennel: { $exists: false } }).populate({
+      path: "catcherDetails",
+      select: "catchingLocation",
+      populate: {
+        path: "spotPhoto",
+        model: "Image",
+      },
+    });
 
     res.status(200).json(dogs);
   } catch (error) {
@@ -286,14 +287,14 @@ router.get("/observable", authenticateToken, async (req, res) => {
 // Get : dogs whose surgery date has past 3 days
 router.get("/dispatchable", async (req, res) => {
   try {
-    // Calculate the date 3 days ago from the current date
-    const threeDaysAgo = new Date();
-    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+    const vetDetailsArray = await Doctor.find(
+      { surgeryDate: { $lte: new Date() - 3 } },
+      { _id: 1 }
+    );
 
-    // Find dogs with surgery date in the past 3 days
+    const vetDetailsIds = vetDetailsArray.map((vetDetails) => vetDetails._id);
 
-    const d = await Doctor.find({ surgeryDate: { $lte: new Date() - 3 } })
-    const dogs = await Dog.find()
+    const dogs = await Dog.find({ vetDetails: { $in: vetDetailsIds } })
       .populate({
         path: "catcherDetails",
         select: "catchingLocation",
@@ -302,7 +303,18 @@ router.get("/dispatchable", async (req, res) => {
           model: "Image",
         },
       })
-      .populate("kennel");
+      .populate("kennel")
+      .populate({
+        path: "vetDetails",
+        populate: [
+          { path: "surgeryPhoto", model: "Image" },
+          { path: "additionalPhotos", model: "Image" },
+          { path: "surgeryNotesPhoto", model: "Image" },
+          { path: "additionalNotesPhotos", model: "Image" },
+        ],
+      });
+
+    // const d = await Doctor.find({ dogWeight: { $lte: 15 } });
 
     res.status(200).json(dogs);
   } catch (error) {
@@ -373,11 +385,11 @@ router.post("/:id/release", authenticateToken, async (req, res) => {
     dog.releaseDate = new Date(); // set current date
     dog.releaseLocation = releaseLocation;
     await dog.save();
-    
+
     const kennel = await Kennel.findById(dog.kennel._id);
     kennel.isOccupied = false;
     await kennel.save();
-    
+
     res.status(200).json({ message: "Dog was released" });
   } catch (error) {
     res.status(500).json({
