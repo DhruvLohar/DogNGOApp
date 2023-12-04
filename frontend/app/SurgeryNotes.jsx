@@ -109,16 +109,16 @@ export default function SurgeryNotes() {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: false,
       aspect: [9, 16],
-      quality: .6,
+      quality: 0.6,
     });
 
     if (!result.canceled) {
       const uri = result.assets[0].uri;
-      
+
       const fileInfo = await FileSystem.getInfoAsync(uri);
       const fileSizeInMB = fileInfo.size / (1024 * 1024);
       if (fileSizeInMB > 3) {
-        alert("Image size should be less then 3MB.")
+        alert("Image size should be less then 3MB.");
       } else {
         setPhoto(uri);
       }
@@ -232,14 +232,14 @@ export default function SurgeryNotes() {
       )
         .then((res) => {
           alert("Surgery Notes Updated Successfully!");
-          setDogInfo(null)
+          setDogInfo(null);
         })
         .catch((error) => {
           if (error.response) {
             alert(JSON.stringify(error.response));
           } else if (error.request) {
             alert("Surgery Notes Updated Successfully!");
-            setDogInfo(null)
+            setDogInfo(null);
           } else {
             console.log("Error:", error.message);
           }
@@ -290,18 +290,33 @@ export default function SurgeryNotes() {
             {dogModalInfo ? (
               <View>
                 <Text style={styles.modalText}>Dog Information</Text>
-                <Image
-                  source={{
-                    uri:
-                      API_URL +
-                      "/" +
-                      dogModalInfo?.catcherDetails?.spotPhoto?.path,
+                <View
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
                   }}
-                  style={{ width: 200, height: 200, aspectRatio: 9 / 16 }}
-                  resizeMode="contain"
-                />
-                <Text>Case Number: {dogModalInfo.caseNumber}</Text>
-                <Text>Caught on : {dogModalInfo?.createdAt}</Text>
+                >
+                  <Image
+                    source={{
+                      uri:
+                        API_URL +
+                        "/" +
+                        dogModalInfo?.catcherDetails?.spotPhoto?.path,
+                    }}
+                    style={{
+                      width: 200,
+                      height: 200,
+                      aspectRatio: 9 / 16,
+                    }}
+                    resizeMode="contain"
+                  />
+                  <Text>Case Number: {dogModalInfo?.caseNumber}</Text>
+                  <Text>
+                    Caught on :{" "}
+                    {moment(dogModalInfo?.createdAt).format("DD/MM/YYYY")}
+                  </Text>
+                </View>
                 <View style={styles.buttonContainer}>
                   <TouchableOpacity
                     style={[styles.modalButton, styles.confirmButton]}

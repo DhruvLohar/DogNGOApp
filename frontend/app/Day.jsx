@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
-import {useRouter} from "expo-router";
+import { useRouter } from "expo-router";
 const moment = require("moment");
 import { API_URL, axiosRequest } from "../service/api";
 import { useNavigation } from "expo-router";
@@ -96,16 +96,16 @@ export default function Day() {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: false,
       aspect: [9, 16],
-      quality: .6,
+      quality: 0.6,
     });
 
     if (!result.canceled) {
       const uri = result.assets[0].uri;
-      
+
       const fileInfo = await FileSystem.getInfoAsync(uri);
       const fileSizeInMB = fileInfo.size / (1024 * 1024);
       if (fileSizeInMB > 3) {
-        alert("Image size should be less then 3MB.")
+        alert("Image size should be less then 3MB.");
       } else {
         setPhoto(uri);
       }
@@ -187,14 +187,14 @@ export default function Day() {
       )
         .then((res) => {
           alert("Daily Report Added successfully");
-          setDogInfo(null)
+          setDogInfo(null);
         })
         .catch((error) => {
           if (error.response) {
             alert(JSON.stringify(error.response.data.message));
           } else if (error.request) {
             alert("Daily Report Added successfully");
-            setDogInfo(null)
+            setDogInfo(null);
           } else {
             console.log("Error:", error.message);
           }
@@ -245,18 +245,33 @@ export default function Day() {
             {dogModalInfo ? (
               <View>
                 <Text style={styles.modalText}>Dog Information</Text>
-                <Image
-                  source={{
-                    uri:
-                      API_URL +
-                      "/" +
-                      dogModalInfo?.catcherDetails?.spotPhoto?.path,
+                <View
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
                   }}
-                  style={{ width: 200, height: 200, aspectRatio: 9 / 16 }}
-                  resizeMode="contain"
-                />
-                <Text>Case Number: {dogModalInfo?.caseNumber}</Text>
-                <Text>Caught on : {dogModalInfo?.createdAt}</Text>
+                >
+                  <Image
+                    source={{
+                      uri:
+                        API_URL +
+                        "/" +
+                        dogModalInfo?.catcherDetails?.spotPhoto?.path,
+                    }}
+                    style={{
+                      width: 200,
+                      height: 200,
+                      aspectRatio: 9 / 16,
+                    }}
+                    resizeMode="contain"
+                  />
+                  <Text>Case Number: {dogModalInfo?.caseNumber}</Text>
+                  <Text>
+                    Caught on :{" "}
+                    {moment(dogModalInfo?.createdAt).format("DD/MM/YYYY")}
+                  </Text>
+                </View>
                 <View style={styles.buttonContainer}>
                   <TouchableOpacity
                     style={[styles.modalButton, styles.confirmButton]}
@@ -272,10 +287,16 @@ export default function Day() {
                   </TouchableOpacity>
                 </View>
               </View>
-            ) : dogInfo === "Not Found" ? (
-              <Text>Kennel is Vacant</Text>
             ) : (
-              <Text>Loading dog information...</Text>
+              <View>
+                <Text style={{ marginBottom: 15 }}>Kennel is Vacant</Text>
+                <TouchableOpacity
+                  style={[styles.modalButton, styles.confirmButton]}
+                  onPress={handleModalClose}
+                >
+                  <Text style={styles.buttonText}>Choose another Kennel</Text>
+                </TouchableOpacity>
+              </View>
             )}
           </View>
         </View>
