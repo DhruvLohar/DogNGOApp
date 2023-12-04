@@ -4,6 +4,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { API_URL, axiosRequest, getAccessToken } from '../service/api';
 import * as FileSystem from 'expo-file-system';
 import { shareAsync } from 'expo-sharing';
+import axios from 'axios';
 
 const DogCard = ({ caseNumber, dogName, photoUrl, onDownloadReport }) => {
   return (
@@ -28,18 +29,19 @@ const Report = () => {
 
   const [dogs, setDogs] = useState([])
 
+  const isWeb = Platform.OS === "web"
+
   const handleStartDateChange = (event, selectedDate) => {
     setShowStartDatePicker(Platform.OS === 'ios');
-    const currentDate = selectedDate || startDate;
+    const currentDate = selectedDate || new Date(event.target.value) || startDate;
     setStartDate(currentDate);
   };
 
   const handleEndDateChange = (event, selectedDate) => {
     setShowEndDatePicker(Platform.OS === 'ios');
-    const currentDate = selectedDate || endDate;
+    const currentDate = selectedDate || new Date(event.target.value) || endDate;
     // Check if the selected end date is not earlier than the start date
     if (currentDate < startDate) {
-      // Display an alert
       alert('End Date cannot be earlier than Start Date');
     } else {
       setEndDate(currentDate);
@@ -62,31 +64,8 @@ const Report = () => {
     });
   };
 
-  const dummyData = [
-    {
-      "caseNumber": "123-ABC-456",
-      "dogName": "Buddy",
-      "photoUrl": "https://example.com/buddy.jpg"
-    },
-    {
-      "caseNumber": "789-XYZ-012",
-      "dogName": "Charlie",
-      "photoUrl": "https://example.com/charlie.jpg"
-    },
-    {
-      "caseNumber": "456-PQR-789",
-      "dogName": "Max",
-      "photoUrl": "https://example.com/max.jpg"
-    },
-    {
-      "caseNumber": "321-LMN-654",
-      "dogName": "Lucy",
-      "photoUrl": "https://example.com/lucy.jpg"
-    }
-  ];
-
   const save = async (uri, filename, mimetype) => {
-    if (Platform.OS === "android") {
+    if (!isWeb) {
       const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
       if (permissions.granted) {
         const base64 = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 });
@@ -104,22 +83,45 @@ const Report = () => {
   };
 
   const downloadReport = async (dogs) => {
+
     try {
       const token = await getAccessToken();
       const dogIds = dogs.map(dog => dog._id).join(',');
-      const filename = `Dogs Report (${new Date().toString()}).xlsx`
-  
-      const res = await FileSystem.downloadAsync(
-        API_URL + `/dog/generate/report/${dogIds}/xlsx/`,
-        FileSystem.documentDirectory + filename,
-        {
-          headers: {
-            Authorization: token
+      const url = API_URL + `/dog/generate/report/${dogIds}/xlsx/`
+      const header = {
+        Authorization: token
+      }
+      const filename = `Dogs Report (${startDate.toDateString()} - ${endDate.toDateString()}).xlsx`
+
+      if (isWeb) {
+        const res = await axios.get(url, {
+          headers: header, responseType: 'blob'
+        })
+
+        const blob = new Blob([res.data], { type: res.headers['Content-Type'] });
+
+        // Create a download link and trigger download
+        const downloadLink = document.createElement('a');
+        downloadLink.href = window.URL.createObjectURL(blob);
+        downloadLink.download = filename;
+
+        // Append the anchor element to the body and trigger the download
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+
+        // Clean up: Remove the anchor element
+        document.body.removeChild(downloadLink);
+      } else {
+        const res = await FileSystem.downloadAsync(
+          url,
+          FileSystem.documentDirectory + filename,
+          {
+            headers: header
           }
-        }
-      )
-  
-      save(res.uri, filename, res.headers["Content-Type"])
+        )
+
+        save(res.uri, filename, res.headers["Content-Type"])
+      }
     } catch (err) {
       console.log("Smmthn went wrong : " + err.message);
     }
@@ -156,7 +158,11 @@ const Report = () => {
           <Text style={styles.heading} onPress={showStartDatePickerModal}>
             Start Date : {formatDateString(startDate)}
           </Text>
-          {showStartDatePicker && (
+
+          {isWeb && (
+            <input type="date" value={startDate.toISOString().split('T')[0]} onChange={handleStartDateChange} name="startDate" id="startDate" />
+          )}
+          {!isWeb && showStartDatePicker && (
             <DateTimePicker
               value={startDate}
               mode="date"
@@ -169,7 +175,10 @@ const Report = () => {
           <Text style={styles.heading} onPress={showEndDatePickerModal}>
             End Date : {formatDateString(endDate)}
           </Text>
-          {showEndDatePicker && (
+          {isWeb && (
+            <input type="date" value={endDate.toISOString().split('T')[0]} onChange={handleEndDateChange} name="endDate" id="endDate" />
+          )}
+          {!isWeb && showEndDatePicker && (
             <DateTimePicker
               value={endDate}
               mode="date"

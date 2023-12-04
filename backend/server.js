@@ -45,7 +45,7 @@ mongoose
   .connect(connectionString)
   .then(() => {
     console.log("MongoDB Connected");
-    app.listen(PORT, "127.0.0.1", () =>
+    app.listen(PORT, "192.168.1.6", () =>
       console.log(`Server running on port ${PORT}`)
     );
   })

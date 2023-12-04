@@ -58,14 +58,14 @@ const getReportData = (dog) => {
   try {
     const BASE_URL = API_URL;
     let dogDetail = {}
-  
+
     dogDetail = {
       "Sr. No.": dog._id.toString(),
       "Dog's Main Color": dog.mainColor,
       "Dog Gender": dog.gender,
       "Description": dog.description,
     }
-  
+
     if (dog.catcherDetails) {
       dogDetail = {
         ...dogDetail,
@@ -84,14 +84,14 @@ const getReportData = (dog) => {
         },
       }
     }
-  
+
     if (dog.vetDetails) {
       let vetDetails = {
         "Vet ID": dog.vetDetails.vet._id.toString(),
         "Vet's Name": dog.vetDetails.vet.name,
         "Vet's Contact Number": dog.vetDetails.vet.contactNumber,
         "Surgery date": dog.vetDetails.surgeryDate.toString(),
-  
+
         "Surgery Photo": {
           t: "s",
           v: "Click to open photo",
@@ -99,7 +99,7 @@ const getReportData = (dog) => {
           s: { font: { color: { rgb: "0000FFFF" }, underline: true } },
         },
       }
-  
+
       Object.keys(dog.vetDetails._doc).map((key, i) => {
         if (
           ![
@@ -116,27 +116,27 @@ const getReportData = (dog) => {
           vetDetails = { ...vetDetails, [key]: dog.vetDetails[key] };
         }
       });
-  
+
       dogDetail = { ...dogDetail, ...vetDetails };
     }
-  
+
     if (dog.careTakerDetails) {
       let careTakerDetails = {
         "Caretaker ID": dog.careTakerDetails.careTaker._id.toString(),
         "Caretaker's Name": dog.careTakerDetails.careTaker.name,
         "Caretaker's Contact Number": dog.careTakerDetails.careTaker.contactNumber,
       }
-  
+
       const reportsDetails = [];
       dog.careTakerDetails.reports.map((report, idx) => {
         careTakerDetails = {
           ...careTakerDetails,
-          [`Day ${idx+1} Report ID`]: report._id.toString(),
-          [`Day ${idx+1} Food Intake`]: report.foodIntake,
-          [`Day ${idx+1} Water Intake`]: report.waterIntake,
-          [`Day ${idx+1} Antibiotics`]: report.antibiotics,
-          [`Day ${idx+1} Painkiller`]: report.painkiller,
-          [`Day ${idx+1} Photo`]: {
+          [`Day ${idx + 1} Report ID`]: report._id.toString(),
+          [`Day ${idx + 1} Food Intake`]: report.foodIntake,
+          [`Day ${idx + 1} Water Intake`]: report.waterIntake,
+          [`Day ${idx + 1} Antibiotics`]: report.antibiotics,
+          [`Day ${idx + 1} Painkiller`]: report.painkiller,
+          [`Day ${idx + 1} Photo`]: {
             t: "s",
             v: "Click to open photo",
             l: { Target: BASE_URL + report.photo.path },
@@ -145,13 +145,13 @@ const getReportData = (dog) => {
           Date: report.date.toString(),
         }
       });
-  
+
       dogDetail = {
         ...dogDetail,
         ...careTakerDetails
       }
     }
-  
+
     return dogDetail;
   } catch (err) {
     console.log("Error generating : " + err.message)
@@ -239,7 +239,7 @@ router.get("/generate/report/:dogIDS/xlsx", async (req, res) => {
             "Content-Type",
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
           );
-    
+
           res.download(filePath, (err) => {
             if (err) {
               console.error("Error sending file:", err);
@@ -291,8 +291,13 @@ router.get("/dispatchable", async (req, res) => {
     threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
 
     // Find dogs with surgery date in the past 3 days
+    const past3days = new Date();
+    past3days.setDate(past3days.getDate() + 3)
 
-    const d = await Doctor.find({ surgeryDate: { $lte: new Date() - 3 } })
+    const d = await Dog.find({ "vetDetails.surgeryDate": { $lte: past3days } })
+
+    console.log(d)
+
     const dogs = await Dog.find()
       .populate({
         path: "catcherDetails",
@@ -373,11 +378,11 @@ router.post("/:id/release", authenticateToken, async (req, res) => {
     dog.releaseDate = new Date(); // set current date
     dog.releaseLocation = releaseLocation;
     await dog.save();
-    
+
     const kennel = await Kennel.findById(dog.kennel._id);
     kennel.isOccupied = false;
     await kennel.save();
-    
+
     res.status(200).json({ message: "Dog was released" });
   } catch (error) {
     res.status(500).json({

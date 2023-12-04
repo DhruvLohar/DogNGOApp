@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, Modal, StyleSheet, Image, ScrollView } from "react-native";
 import { API_URL, axiosRequest } from "../service/api";
 import { toFormData } from "axios";
+import * as Location from "expo-location";
 
 const ReleaseForm = () => {
   const [kennels, setKennels] = useState([
@@ -35,6 +36,8 @@ const ReleaseForm = () => {
   const [releasedKennels, setReleasedKennels] = useState([]);
   const [showReleaseSheet, setShowReleaseSheet] = useState(false);
 
+  const [releaseLocation, setReleaseLocation] = useState("")
+
   const handleKennelPress = (kennel) => {
     if (selectedKennels.includes(kennel)) {
       setSelectedKennels(selectedKennels.filter((item) => item !== kennel));
@@ -43,13 +46,40 @@ const ReleaseForm = () => {
     }
   };
 
+  const catchLocation = async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      alert("Permission to access location was denied");
+      return;
+    }
+
+    let location = await Location.getCurrentPositionAsync({});
+    const { latitude, longitude } = location.coords;
+
+    // Make a request to the Geocoding API
+    const apiKey = "AIzaSyBjfILytDucr1FHSAOwR4pwDHuY4Q9D8C4";
+    const response = await fetch(
+      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`
+    );
+
+    const data = await response.json();
+    if (data.results && data.results.length > 0) {
+      // Assuming the first result contains the region information
+      const region = data.results[0].formatted_address;
+      setReleaseLocation(region);
+    }
+  }
+
   const handleRelease = (dog) => {
     setReleasedKennels((prev) => prev.filter((kennel) => kennel !== dog));
+
+    catchLocation()
+
     axiosRequest(
       `/dog/${id}/release`,
       {
         method: "post",
-        data: toFormData({releaseLocation: "Releasing Location Should be Sent"})
+        data: toFormData({ releaseLocation: releaseLocation || "" })
       },
       false
     )
