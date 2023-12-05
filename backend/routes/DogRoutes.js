@@ -118,7 +118,7 @@ router.get("/kennel/:id", authenticateToken, async (req, res) => {
       return res.status(404).json({ message: "Kennel not found" });
     }
 
-    const dog = await Dog.findOne({ kennel: kennel._id })
+    const dog = await Dog.findOne({ kennel: kennel._id, isReleased: false })
       .populate({
         path: "catcherDetails",
         populate: [{

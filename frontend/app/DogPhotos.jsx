@@ -26,7 +26,6 @@ const DogPhotos = () => {
       true
     )
       .then((res) => {
-        console.log(res.data);
         setDogs(res.data);
       })
       .catch((error) => {

@@ -81,13 +81,14 @@ const ReleaseForm = () => {
           });
       })
       alert("Dogs were released.")
+      refreshDogs();
     } else {
       alert("No dogs selected")
     }
 
   };
 
-  useEffect(() => {
+  const refreshDogs = () => {
     axiosRequest(
       "/dog/dispatchable",
       {
@@ -127,6 +128,10 @@ const ReleaseForm = () => {
           console.log("Error:", error.message);
         }
       });
+  }
+
+  useEffect(() => {
+    refreshDogs();
   }, [])
 
   const handleSubmit = () => {
@@ -153,6 +158,7 @@ const ReleaseForm = () => {
           });
       })
       alert('Release Sheet updated.')
+      refreshDogs();
     } else {
       alert("No dogs selected.")
     }
@@ -210,40 +216,40 @@ const ReleaseForm = () => {
           <Modal animationType="slide" transparent={false} visible={true}>
             <View style={styles.releaseSheet}>
               {releasableDogs.length > 0 ? (
-              <>
-                {releasableDogs.map((dog) => (
-                  <TouchableOpacity
-                    key={dog._id}
-                    style={[{
-                      borderColor: "grey",
-                      borderWidth: 2,
-                      borderRadius: 10,
-                      padding: 10,
-                      marginBottom: 10,
-                      alignItems: "center",
-                      width: "80%"
-                    },
-                    releasedKennels.includes(dog._id) && styles.selectedKennelContainer,
-                    ]}
-                    onPress={() => handleReleaseKennelPress(dog._id)}
-                  >
-                    <View style={{ marginBottom: 10 }}>
-                      <Image
-                        source={{
-                          uri: API_URL + "/" + dog?.catcherDetails?.spotPhoto?.path,
-                        }}
-                        style={{ width: 200, height: 200, aspectRatio: 9 / 16, objectFit: "contain" }}
-                      />
-                    </View>
-                    <Text style={{ fontWeight: "bold", fontSize: 14 }}>
-                      Kennel ID: {dog?.kennel?.kennelId}
-                    </Text>
-                    <Text style={{ fontWeight: "bold", fontSize: 14 }}>
-                      Case Number: {dog?.caseNumber}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </>
+                <>
+                  {releasableDogs.map((dog) => (
+                    <TouchableOpacity
+                      key={dog._id}
+                      style={[{
+                        borderColor: "grey",
+                        borderWidth: 2,
+                        borderRadius: 10,
+                        padding: 10,
+                        marginBottom: 10,
+                        alignItems: "center",
+                        width: "80%"
+                      },
+                      releasedKennels.includes(dog._id) && styles.selectedKennelContainer,
+                      ]}
+                      onPress={() => handleReleaseKennelPress(dog._id)}
+                    >
+                      <View style={{ marginBottom: 10 }}>
+                        <Image
+                          source={{
+                            uri: API_URL + "/" + dog?.catcherDetails?.spotPhoto?.path,
+                          }}
+                          style={{ width: 200, height: 200, aspectRatio: 9 / 16, objectFit: "contain" }}
+                        />
+                      </View>
+                      <Text style={{ fontWeight: "bold", fontSize: 14 }}>
+                        Kennel ID: {dog?.kennel?.kennelId}
+                      </Text>
+                      <Text style={{ fontWeight: "bold", fontSize: 14 }}>
+                        Case Number: {dog?.caseNumber}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </>
               ) : (<Text>No dogs found.</Text>)}
               <TouchableOpacity
                 onPress={() => handleRelease()}

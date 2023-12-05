@@ -15,7 +15,6 @@ const Image = require("../models/Image");
 const Kennel = require("../models/Kennel");
 
 const authenticateToken = require("../middleware/authenticateToken");
-const { API_URL } = require("../config/constants");
 
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -56,7 +55,7 @@ router.post("/report/xlsx", async (req, res) => {
 
 const getReportData = (dog) => {
   try {
-    const BASE_URL = API_URL;
+    const BASE_URL = "http://13.235.31.125/";
     let dogDetail = {};
 
     dogDetail = {
