@@ -8,6 +8,7 @@ import {
   Image,
   Button,
 } from "react-native";
+import { StatusBar } from 'expo-status-bar';
 import { API_URL, axiosRequest } from "../service/api";
 
 const DogPhotos = () => {
@@ -52,6 +53,8 @@ const DogPhotos = () => {
 
   return (
     <View style={{ padding: 20 }}>
+      <StatusBar style="dark" />
+
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         {Dogs.length === 0
           ? <Text style={{marginBottom: 20}}>No dogs found for Initial Observations</Text>

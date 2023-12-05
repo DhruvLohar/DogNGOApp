@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from "react-native";
+import { StatusBar } from 'expo-status-bar';
 import Axios from "axios";
 import { API_URL, handleAccessToken } from "../service/api";
 
@@ -39,6 +40,8 @@ const Setpin = () => {
 
   return (
     <View style={styles.container}>
+      <StatusBar style="dark" />
+
       <Text style={styles.heading}>Set 4-Digit PIN</Text>
       <TextInput
         style={styles.input}

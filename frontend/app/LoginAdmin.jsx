@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Picker } from "@react-native-picker/picker";
+import { StatusBar } from 'expo-status-bar';
 import Axios from "axios";
 import { API_URL } from "../service/api";
 
@@ -56,6 +57,8 @@ const Register = () => {
 
   return (
     <View style={styles.container}>
+      <StatusBar style="dark" />
+
       <Text style={styles.heading}>Add New User</Text>
 
       <View style={styles.fieldContainer}>

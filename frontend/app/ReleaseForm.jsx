@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, Modal, StyleSheet, Image, ScrollView } from "react-native";
+import { StatusBar } from 'expo-status-bar';
 import { API_URL, axiosRequest } from "../service/api";
 import { toFormData } from "axios";
 import * as Location from "expo-location";
@@ -166,6 +167,7 @@ const ReleaseForm = () => {
 
   return (
     <ScrollView>
+      <StatusBar style="dark" />
       <View style={styles.container}>
         {dispatchableDogs.length > 0 ? (
           <>

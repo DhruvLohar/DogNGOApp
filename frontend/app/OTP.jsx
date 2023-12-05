@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from "react-native";
+import { StatusBar } from 'expo-status-bar';
 import { sendOTP, verifyOTP } from "../service/api";
 
 const OTP = () => {
@@ -41,6 +42,7 @@ const OTP = () => {
 
   return (
     <View style={styles.container}>
+      <StatusBar style="dark" />
       <Text style={styles.heading}>OTP Verification</Text>
       <TextInput
         style={styles.input}

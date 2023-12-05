@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from "react-native";
+import { StatusBar } from 'expo-status-bar';
 import Axios from "axios";
 import { useNavigation } from "@react-navigation/native";
 import { API_URL, axiosAuthorized, getUserRole } from "../service/api";
@@ -57,6 +58,8 @@ const Index = () => {
 
   return (
     <View style={styles.container}>
+      <StatusBar style={"dark"} />
+
       <Text style={styles.heading}>Login</Text>
       <TextInput
         style={styles.input}

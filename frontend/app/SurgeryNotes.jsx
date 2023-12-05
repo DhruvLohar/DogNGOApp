@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
-import { useRouter } from "expo-router";
+import { StatusBar } from 'expo-status-bar';
 
 const moment = require("moment");
 import { API_URL, axiosRequest } from "../service/api";
@@ -259,6 +259,7 @@ export default function SurgeryNotes() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      <StatusBar style="dark" />
       {/* Kennel Number */}
       <View style={styles.fieldContainer}>
         <Text>

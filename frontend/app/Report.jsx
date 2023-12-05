@@ -8,6 +8,7 @@ import {
   ScrollView,
   Image,
 } from "react-native";
+import { StatusBar } from 'expo-status-bar';
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { API_URL, axiosRequest, getAccessToken } from "../service/api";
 import * as FileSystem from "expo-file-system";
@@ -180,6 +181,7 @@ const Report = () => {
 
   return (
     <ScrollView>
+      <StatusBar style="dark" />
       <View style={styles.container}>
         <View style={styles.dateContainer}>
           <Text style={styles.heading} onPress={showStartDatePickerModal}>

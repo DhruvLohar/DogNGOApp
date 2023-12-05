@@ -9,9 +9,9 @@ import {
   ScrollView,
   Modal,
 } from "react-native";
+import { StatusBar } from 'expo-status-bar';
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
-import { useRouter } from "expo-router";
 const moment = require("moment");
 import { API_URL, axiosRequest } from "../service/api";
 import { useNavigation } from "expo-router";
@@ -214,6 +214,7 @@ export default function Day() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      <StatusBar style={"dark"} />
       {/* Kennel */}
       <View style={styles.fieldContainer}>
         <Text>

@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from "react-native";
+import { StatusBar } from 'expo-status-bar';
 import Axios from "axios";
 import { useRoute } from "@react-navigation/native";
 import { API_URL, handleAccessToken } from "../service/api";
@@ -45,6 +46,8 @@ const Index = () => {
 
   return (
     <View style={styles.container}>
+      <StatusBar style="dark" />
+
       <Text style={styles.heading}>Enter your PIN</Text>
       <TextInput
         style={styles.input}

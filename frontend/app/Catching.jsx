@@ -6,8 +6,9 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
-  StyleSheet,
+  StyleSheet
 } from "react-native";
+import { StatusBar } from 'expo-status-bar';
 import * as Location from "expo-location";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
@@ -225,6 +226,8 @@ export default function Catching() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      <StatusBar style={"dark"} />
+
       {/* Location */}
       <View style={styles.fieldContainer}>
         <Text>

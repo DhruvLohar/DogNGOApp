@@ -9,6 +9,7 @@ import {
   StyleSheet,
   Modal,
 } from "react-native";
+import { StatusBar } from 'expo-status-bar';
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
 import { useRouter } from "expo-router";
@@ -348,6 +349,7 @@ export default function Medicines() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      <StatusBar style="dark" />
       {/* Kennel Number */}
       <View style={styles.fieldContainer}>
         <Text>

@@ -8,6 +8,7 @@ import {
   Button,
   ScrollView,
 } from "react-native";
+import { StatusBar } from 'expo-status-bar';
 import { React, useState, useEffect } from "react";
 import { useRouter } from "expo-router";
 import { getUserRole, logOutUser } from "../service/api";
@@ -63,6 +64,7 @@ const FormPage = () => {
       source={require("../assets/logo.jpg")}
       style={styles.backgroundImage}
     >
+      <StatusBar style="dark" />
       <ScrollView>
         <Button title="Logout User" onPress={() => handleLogout()}></Button>
         <View style={styles.container}>
