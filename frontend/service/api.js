@@ -1,8 +1,8 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// export const API_URL = "http://13.235.31.125";
-export const API_URL = "http://192.168.1.6:3500";
+export const API_URL = "http://13.235.31.125";
+// export const API_URL = "http://192.168.1.6:3500";
 
 // eas build -p android --profile preview
 
