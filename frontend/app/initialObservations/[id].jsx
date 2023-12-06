@@ -72,36 +72,81 @@ export default function InitialObservations() {
   }, []);
 
   const handleKennelPhotoUpload = async () => {
-    let result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: false,
-      aspect: [9, 16],
-      quality: .6,
-    });
-
-    if (!result.canceled) {
-      const uri = result.assets[0].uri;
-      
-      const fileInfo = await FileSystem.getInfoAsync(uri);
-      const fileSizeInMB = fileInfo.size / (1024 * 1024);
-      if (fileSizeInMB > 3) {
-        alert("Image size should be less then 3MB.")
-      } else {
-        setKennelPhoto(uri);
+    let result;
+    if (Platform.OS === "web") {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/*";
+      input.addEventListener("change", async (event) => {
+        const file = event.target.files[0];
+        if (file) {
+          setKennelPhoto({
+            uri: URL.createObjectURL(file),
+            type: file.type,
+            name: file.name,
+          });
+        }
+      });
+      document.body.appendChild(input);
+      input.click();
+      document.body.removeChild(input);
+    } else {
+      result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: false,
+        aspect: [9, 16],
+        quality: 0.6,
+      });
+      if (!result.canceled) {
+        const uri = result.assets[0].uri;
+        const fileInfo = await FileSystem.getInfoAsync(uri);
+        const fileSizeInMB = fileInfo.size / (1024 * 1024);
+        if (fileSizeInMB > 3) {
+          alert("Image size should be less than 3MB.");
+        } else {
+          const ext = uri.split(".").pop();
+          setKennelPhoto({
+            uri: uri,
+            type: `${result.assets[0].type}/${ext}`,
+            name: `kennelPhoto.${ext}`,
+          });
+        }
       }
     }
   };
 
   const handleAdditionalPhotoUpload = async () => {
-    let result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: false,
-      aspect: [4, 3],
-      quality: 1,
-    });
+    if (Platform.OS === "web") {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/*";
+      input.multiple = true;
+      input.addEventListener("change", async (event) => {
+        const files = event.target.files;
+        if (files && files.length > 0) {
+          const newPhotos = Array.from(files).map((file) => ({
+            uri: URL.createObjectURL(file),
+            type: file.type,
+            name: file.name,
+          }));
+          setAdditionalPhotos([...additionalPhotos, ...newPhotos]);
+        }
+      });
+      document.body.appendChild(input);
+      input.click();
+      document.body.removeChild(input);
+    } else {
+      let result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: false,
+        aspect: [4, 3],
+        quality: 1,
+      });
 
-    if (!result.canceled) {
-      setAdditionalPhotos([...additionalPhotos, result.assets[0].uri]);
+      if (!result.canceled) {
+        const uri = result.assets[0].uri;
+        setAdditionalPhotos([...additionalPhotos, uri]);
+      }
     }
   };
 
@@ -193,14 +238,14 @@ export default function InitialObservations() {
       )
         .then((res) => {
           alert("Initial Observations Noted Successfully!");
-          router.push('/FormPage')
+          router.push("/FormPage");
         })
         .catch((error) => {
           if (error.response) {
             alert(JSON.stringify(error.response.data.message));
           } else if (error.request) {
             alert("Initial Observations Noted Successfully!");
-            router.push('/FormPage')
+            router.push("/FormPage");
           } else {
             console.log("Error:", error.message);
           }

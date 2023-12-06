@@ -9,7 +9,7 @@ import {
   StyleSheet,
   Modal,
 } from "react-native";
-import { StatusBar } from 'expo-status-bar';
+import { StatusBar } from "expo-status-bar";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
 import { useRouter } from "expo-router";
@@ -88,7 +88,7 @@ export default function Medicines() {
         })
         .catch((error) => {
           if (error.response) {
-            alert(JSON.stringify(error.response));
+            alert(JSON.stringify(error.response.data.error));
           } else if (error.request) {
             console.log("No response received");
           } else {
@@ -125,35 +125,77 @@ export default function Medicines() {
   };
 
   const handleAdditionalPhotoUpload = async () => {
-    let result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: false,
-      aspect: [4, 3],
-      quality: 1,
-    });
+    if (Platform.OS === "web") {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/*";
+      input.multiple = true;
+      input.addEventListener("change", async (event) => {
+        const files = event.target.files;
+        if (files && files.length > 0) {
+          const newPhotos = Array.from(files).map((file) => ({
+            uri: URL.createObjectURL(file),
+            type: file.type,
+            name: file.name,
+          }));
+          setAdditionalPhotos([...additionalPhotos, ...newPhotos]);
+        }
+      });
+      document.body.appendChild(input);
+      input.click();
+      document.body.removeChild(input);
+    } else {
+      let result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: false,
+        aspect: [4, 3],
+        quality: 1,
+      });
 
-    if (!result.canceled) {
-      setAdditionalPhotos([...additionalPhotos, result.assets[0].uri]);
+      if (!result.canceled) {
+        const uri = result.assets[0].uri;
+        setAdditionalPhotos([...additionalPhotos, uri]);
+      }
     }
   };
 
   const handlephotoUpload = async () => {
-    let result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: false,
-      aspect: [9, 16],
-      quality: 0.6,
-    });
-
-    if (!result.canceled) {
-      const uri = result.assets[0].uri;
-
-      const fileInfo = await FileSystem.getInfoAsync(uri);
-      const fileSizeInMB = fileInfo.size / (1024 * 1024);
-      if (fileSizeInMB > 3) {
-        alert("Image size should be less then 3MB.");
-      } else {
-        setPhoto(uri);
+    let result;
+    if (Platform.OS === "web") {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/*";
+      input.addEventListener("change", async (event) => {
+        const file = event.target.files[0];
+        if (file) {
+          setPhoto({
+            uri: URL.createObjectURL(file),
+            type: file.type,
+            name: file.name,
+          });
+        }
+      });
+      document.body.appendChild(input);
+      input.click();
+      document.body.removeChild(input);
+    } else {
+      result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: false,
+        aspect: [9, 16],
+        quality: 0.6,
+      });
+      if (!result.canceled) {
+        const uri = result.assets[0].uri;
+        const fileInfo = await FileSystem.getInfoAsync(uri);
+        const fileSizeInMB = fileInfo.size / (1024 * 1024);
+        if (fileSizeInMB > 3) {
+          alert("Image size should be less than 3MB.");
+        } else {
+          setPhoto({
+            uri: uri,
+          });
+        }
       }
     }
   };
@@ -366,7 +408,11 @@ export default function Medicines() {
       </View>
 
       {/* Add logic to open the modal */}
-      <TouchableOpacity style={styles.submitButton} onPress={handleModalOpen} disabled={!kennelNumber}>
+      <TouchableOpacity
+        style={styles.submitButton}
+        onPress={handleModalOpen}
+        disabled={!kennelNumber}
+      >
         <Text style={styles.submitText}>Retrieve Dog Info</Text>
       </TouchableOpacity>
 

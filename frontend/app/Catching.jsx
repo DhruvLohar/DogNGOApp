@@ -6,19 +6,19 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
-  StyleSheet
+  StyleSheet,
+  Platform,
 } from "react-native";
-import { StatusBar } from 'expo-status-bar';
+import { StatusBar } from "expo-status-bar";
 import * as Location from "expo-location";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
-import {useRouter} from "expo-router";
+import { useRouter } from "expo-router";
 const moment = require("moment");
 import { axiosRequest } from "../service/api";
 
 export default function Catching() {
-
-  const router = useRouter()
+  const router = useRouter();
 
   const [catchingLocation, setCatchingLocation] = useState("");
   const [locationError, setLocationError] = useState("");
@@ -51,7 +51,7 @@ export default function Catching() {
       const response = await fetch(
         `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`
       );
-      
+
       const data = await response.json();
       if (data.results && data.results.length > 0) {
         // Assuming the first result contains the region information
@@ -63,29 +63,45 @@ export default function Catching() {
   }, []);
 
   const handleSpotPhotoUpload = async () => {
-    let result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: false,
-      aspect: [9, 16],
-      quality: .6,
-    });
-
-    
-    if (!result.canceled) {
-      const uri = result.assets[0].uri;
-      
-      const fileInfo = await FileSystem.getInfoAsync(uri);
-      const fileSizeInMB = fileInfo.size / (1024 * 1024);
-      if (fileSizeInMB > 3) {
-        alert("Image size should be less then 3MB.")
-      } else {
-        const ext = uri.split(".").pop();
-  
-        setSpotPhoto({
-          uri: uri,
-          type: `${result.assets[0].type}/${ext}`,
-          name: `spotPhoto.${ext}`,
-        });
+    let result;
+    if (Platform.OS === "web") {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/*";
+      input.addEventListener("change", async (event) => {
+        const file = event.target.files[0];
+        if (file) {
+          setSpotPhoto({
+            uri: URL.createObjectURL(file),
+            type: file.type,
+            name: file.name,
+          });
+        }
+      });
+      document.body.appendChild(input);
+      input.click();
+      document.body.removeChild(input);
+    } else {
+      result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: false,
+        aspect: [9, 16],
+        quality: 0.6,
+      });
+      if (!result.canceled) {
+        const uri = result.assets[0].uri;
+        const fileInfo = await FileSystem.getInfoAsync(uri);
+        const fileSizeInMB = fileInfo.size / (1024 * 1024);
+        if (fileSizeInMB > 3) {
+          alert("Image size should be less than 3MB.");
+        } else {
+          const ext = uri.split(".").pop();
+          setSpotPhoto({
+            uri: uri,
+            type: `${result.assets[0].type}/${ext}`,
+            name: `spotPhoto.${ext}`,
+          });
+        }
       }
     }
   };
@@ -95,17 +111,37 @@ export default function Catching() {
   };
 
   const handleAdditionalPhotoUpload = async () => {
-    let result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: false,
-      aspect: [4, 3],
-      quality: 1,
-    });
+    if (Platform.OS === "web") {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/*";
+      input.multiple = true;
+      input.addEventListener("change", async (event) => {
+        const files = event.target.files;
+        if (files && files.length > 0) {
+          const newPhotos = Array.from(files).map((file) => ({
+            uri: URL.createObjectURL(file),
+            type: file.type,
+            name: file.name,
+          }));
+          setAdditionalPhotos([...additionalPhotos, ...newPhotos]);
+        }
+      });
+      document.body.appendChild(input);
+      input.click();
+      document.body.removeChild(input);
+    } else {
+      let result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: false,
+        aspect: [4, 3],
+        quality: 1,
+      });
 
-    const uri = result.assets[0].uri;
-
-    if (!result.canceled) {
-      setAdditionalPhotos([...additionalPhotos, uri]);
+      if (!result.canceled) {
+        const uri = result.assets[0].uri;
+        setAdditionalPhotos([...additionalPhotos, uri]);
+      }
     }
   };
 
@@ -200,14 +236,14 @@ export default function Catching() {
       )
         .then((res) => {
           alert("Dog added Successfully!");
-          router.back()
+          router.back();
         })
         .catch((error) => {
           if (error.response) {
             alert(JSON.stringify(error.response));
           } else if (error.request) {
             alert("Dog added Successfully");
-            router.back()
+            router.back();
           } else {
             console.log("Error:", error.message);
           }
