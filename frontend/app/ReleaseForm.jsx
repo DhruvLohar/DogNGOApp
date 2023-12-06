@@ -60,29 +60,32 @@ const ReleaseForm = () => {
     // setReleasedKennels((prev) => prev.filter((kennel) => kennel !== dog));
 
     const region = await catchLocation();
+    console.log(region)
+
     if (releasedKennels.length > 0) {
       releasedKennels.map(dogId => {
         axiosRequest(
           `/dog/${dogId}/release`,
           {
             method: "post",
-            data: toFormData({ releaseLocation: region })
+            data: { releaseLocation: region || "Cannot track the release location" }
           },
           false
         )
-          .then((res) => { })
+        .then((res) => {
+            refreshDogs();
+          })
           .catch((error) => {
             if (error.response) {
               alert(JSON.stringify(error.response));
             } else if (error.request) {
-              console.log("No response received");
+              refreshDogs();
             } else {
               console.log("Error:", error.message);
             }
           });
       })
       alert("Dogs were released.")
-      refreshDogs();
     } else {
       alert("No dogs selected")
     }
@@ -146,20 +149,20 @@ const ReleaseForm = () => {
           false
         )
           .then((res) => {
-            console.log(res.data)
+            refreshDogs();
           })
           .catch((error) => {
             if (error.response) {
               alert(JSON.stringify(error.response));
             } else if (error.request) {
               console.log("No response received");
+              refreshDogs();
             } else {
               console.log("Error:", error.message);
             }
           });
       })
       alert('Release Sheet updated.')
-      refreshDogs();
     } else {
       alert("No dogs selected.")
     }

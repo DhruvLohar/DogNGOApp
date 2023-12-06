@@ -193,29 +193,29 @@ export default function InitialObservations() {
       )
         .then((res) => {
           alert("Initial Observations Noted Successfully!");
-          router.back()
+          router.push('/FormPage')
         })
         .catch((error) => {
           if (error.response) {
             alert(JSON.stringify(error.response.data.message));
           } else if (error.request) {
             alert("Initial Observations Noted Successfully!");
-            router.back()
+            router.push('/FormPage')
           } else {
             console.log("Error:", error.message);
           }
         });
 
       // Reset form fields
-      setKennelNumber("");
-      setMainColor("");
-      setDogName("");
-      setBreed("");
-      setDescription("");
-      setGender("");
-      setAggression("");
-      setKennelPhoto(null);
-      setAdditionalPhotos([]);
+      // setKennelNumber("");
+      // setMainColor("");
+      // setDogName("");
+      // setBreed("");
+      // setDescription("");
+      // setGender("");
+      // setAggression("");
+      // setKennelPhoto(null);
+      // setAdditionalPhotos([]);
     }
   };
 

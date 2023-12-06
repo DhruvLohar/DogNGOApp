@@ -26,22 +26,6 @@ const Index = () => {
 
   useEffect(() => {
     role();
-
-    Axios.get("https://jsonplaceholder.typicode.com/posts/1")
-      .then(res => {
-        alert("YE AXIOS SE MARA ON HTTPS : ", JSON.stringify(res), res)
-      })
-      .catch(err => {
-        alert("YE AXIOS SE MARA ON HTTPS : ", JSON.stringify(err), err)
-      })
-
-    fetch("https://jsonplaceholder.typicode.com/posts/1")
-      .then(res => {
-        alert("YE AXIOS SE MARA ON HTTPS : ", JSON.stringify(res), res)
-      })
-      .catch(err => {
-        alert("YE AXIOS SE MARA ON HTTPS : ", JSON.stringify(err), err)
-      })
   }, [])
 
   const handleLogin = () => {

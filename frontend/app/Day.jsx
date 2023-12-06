@@ -230,7 +230,7 @@ export default function Day() {
       </View>
 
       {/* Add logic to open the modal */}
-      <TouchableOpacity style={styles.submitButton} onPress={handleModalOpen}>
+      <TouchableOpacity style={styles.submitButton} onPress={handleModalOpen} disabled={!kennel}>
         <Text style={styles.submitText}>Retrieve Dog Info</Text>
       </TouchableOpacity>
 

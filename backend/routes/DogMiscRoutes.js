@@ -290,13 +290,12 @@ router.get("/dispatchable", async (req, res) => {
 
 
     const vetDetailsArray = await Doctor.find(
-      { surgeryDate: { $lte: past3Days } },
-      { _id: 1 }
+      { surgeryDate: { $lte: past3Days } }
     );
 
     const vetDetailsIds = vetDetailsArray.map((vetDetails) => vetDetails._id);
 
-    const dogs = await Dog.find({ vetDetails: { $in: vetDetailsIds } })
+    const dogs = await Dog.find({ vetDetails: { $in: vetDetailsIds }, isReleased: false, isDispatched: false })
       .populate({
         path: "catcherDetails",
         select: "catchingLocation",
