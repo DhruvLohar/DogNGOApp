@@ -170,10 +170,10 @@ export default function Catching() {
     setCaretakerNumberError(errors.caretakerNumberError || "");
 
     if (Object.keys(errors).length === 0) {
-      setLocationError("");
-      setDateError("");
-      setTimeError("");
-      setCaretakerNumberError("");
+      // setLocationError("");
+      // setDateError("");
+      // setTimeError("");
+      // setCaretakerNumberError("");
 
       // const formData = new FormData();
       formData.append("catchingLocation", catchingLocation);

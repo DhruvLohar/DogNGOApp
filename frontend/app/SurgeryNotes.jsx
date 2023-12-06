@@ -246,14 +246,14 @@ export default function SurgeryNotes() {
         });
 
       // Reset form fields
-      setKennelNumber("");
-      setDate(new Date().toLocaleDateString());
-      setTime(formatTime());
-      setPhoto(null);
-      setAdditionalPhotos([]);
-      setNotes("");
-      setWeight("");
-      setTemperature("");
+      // setKennelNumber("");
+      // setDate(new Date().toLocaleDateString());
+      // setTime(formatTime());
+      // setPhoto(null);
+      // setAdditionalPhotos([]);
+      // setNotes("");
+      // setWeight("");
+      // setTemperature("");
     }
   };
 
@@ -275,7 +275,7 @@ export default function SurgeryNotes() {
       </View>
 
       {/* Add logic to open the modal */}
-      <TouchableOpacity style={styles.submitButton} onPress={handleModalOpen} disabled={!kennel}>
+      <TouchableOpacity style={styles.submitButton} onPress={handleModalOpen} disabled={!kennelNumber}>
         <Text style={styles.submitText}>Retrieve Dog Info</Text>
       </TouchableOpacity>
 

@@ -145,6 +145,10 @@ router.get("/kennel/:id", authenticateToken, async (req, res) => {
       })
       .populate("kennel");
 
+    if (!dog) {
+      res.status(400).json("Kennel is Empty")
+    }
+
     res.status(200).json(dog);
   } catch (error) {
     res

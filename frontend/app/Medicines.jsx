@@ -325,25 +325,26 @@ export default function Medicines() {
             console.log("Error:", error.message);
           }
         });
+
       // Reset form fields
-      setKennelNumber("");
-      setDate(new Date().toLocaleDateString());
-      setTime(formatTime());
-      setArv("");
-      setPhoto(null);
-      setAdditionalPhotos([]);
-      setXylazine("");
-      setDexa("");
-      setMelonex("");
-      setAtropine("");
-      setEnrodac("");
-      setPrednisolone("");
-      setKetamin("");
-      setStadren("");
-      setDicrysticin("");
-      setProcedure("");
-      setEarNotched("");
-      setObservations("");
+      // setKennelNumber("");
+      // setDate(new Date().toLocaleDateString());
+      // setTime(formatTime());
+      // setArv("");
+      // setPhoto(null);
+      // setAdditionalPhotos([]);
+      // setXylazine("");
+      // setDexa("");
+      // setMelonex("");
+      // setAtropine("");
+      // setEnrodac("");
+      // setPrednisolone("");
+      // setKetamin("");
+      // setStadren("");
+      // setDicrysticin("");
+      // setProcedure("");
+      // setEarNotched("");
+      // setObservations("");
     }
   };
 
@@ -365,7 +366,7 @@ export default function Medicines() {
       </View>
 
       {/* Add logic to open the modal */}
-      <TouchableOpacity style={styles.submitButton} onPress={handleModalOpen} disabled={!kennel}>
+      <TouchableOpacity style={styles.submitButton} onPress={handleModalOpen} disabled={!kennelNumber}>
         <Text style={styles.submitText}>Retrieve Dog Info</Text>
       </TouchableOpacity>
 

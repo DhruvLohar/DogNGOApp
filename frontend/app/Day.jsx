@@ -201,14 +201,14 @@ export default function Day() {
         });
 
       // Reset form fields
-      setKennel("");
-      setDate(new Date().toLocaleDateString());
-      setFoodIntake("");
-      setWaterIntake("");
-      setAntibiotics("");
-      setPainkiller("");
-      setPhoto(null);
-      setCaseNumber("");
+      // setKennel("");
+      // setDate(new Date().toLocaleDateString());
+      // setFoodIntake("");
+      // setWaterIntake("");
+      // setAntibiotics("");
+      // setPainkiller("");
+      // setPhoto(null);
+      // setCaseNumber("");
     }
   };
 
