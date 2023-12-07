@@ -8,13 +8,14 @@ import {
   StyleSheet,
   ScrollView,
   Modal,
+  Platform,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import * as ImagePicker from "expo-image-picker";
-import * as FileSystem from "expo-file-system";
 const moment = require("moment");
 import { API_URL, axiosRequest } from "../service/api";
 import { useNavigation } from "expo-router";
+import { getFileSizeFromBase64 } from "../service/getSize";
 
 export default function Day() {
   const navigation = useNavigation();
@@ -99,29 +100,26 @@ export default function Day() {
       input.accept = "image/*";
       input.addEventListener("change", async (event) => {
         const file = event.target.files[0];
+        file["uri"] = URL.createObjectURL(file) 
         if (file) {
-          setPhoto({
-            uri: URL.createObjectURL(file),
-            type: file.type,
-            name: file.name,
-          });
+          setPhoto(file);
         }
+        document.body.removeChild(input);
       });
       document.body.appendChild(input);
       input.click();
-      document.body.removeChild(input);
     } else {
       result = await ImagePicker.launchCameraAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: false,
+        base64: true,
         aspect: [9, 16],
         quality: 0.6,
       });
       if (!result.canceled) {
         const uri = result.assets[0].uri;
-        const fileInfo = await FileSystem.getInfoAsync(uri);
-        const fileSizeInMB = fileInfo.size / (1024 * 1024);
-        if (fileSizeInMB > 3) {
+
+        if (getFileSizeFromBase64(result.assets[0].base64) > 3) {
           alert("Image size should be less than 3MB.");
         } else {
           setPhoto({
@@ -190,12 +188,17 @@ export default function Day() {
       formData.append("painkiller", painkiller);
       formData.append("antibiotics", antibiotics);
 
-      const photoExt = photo.split(".").pop();
-      formData.append("photo", {
-        uri: photo,
-        type: `image/${photoExt}`,
-        name: `reportPhoto_${dogInfo._id}.${photoExt}`,
-      });
+
+      if (Platform.OS !== "web") {
+        const photoExt = photo.uri.split(".").pop();
+        formData.append("photo", {
+          uri: photo.uri,
+          type: `image/${photoExt}`,
+          name: `reportPhoto_${dogInfo._id}.${photoExt}`,
+        });
+      } else {
+        formData.append("photo", photo);
+      }
 
       axiosRequest(
         `/dog/${dogInfo._id}/caretaker/report`,
@@ -508,7 +511,7 @@ export default function Day() {
             </Text>
             {photo && (
               <View style={styles.imageContainerMain}>
-                <Image source={{ uri: photo }} style={styles.uploadedImage} />
+                <Image source={{ uri: photo.uri }} style={styles.uploadedImage} />
                 <TouchableOpacity onPress={() => handleDeleteMain()}>
                   <Text style={styles.deleteIconMain}>Delete</Text>
                 </TouchableOpacity>

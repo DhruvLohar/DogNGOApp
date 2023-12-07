@@ -12,10 +12,10 @@ import {
 import { StatusBar } from "expo-status-bar";
 import * as Location from "expo-location";
 import * as ImagePicker from "expo-image-picker";
-import * as FileSystem from "expo-file-system";
 import { useRouter } from "expo-router";
 const moment = require("moment");
 import { axiosRequest } from "../service/api";
+import { getFileSizeFromBase64 } from "../service/getSize";
 
 export default function Catching() {
   const router = useRouter();
@@ -63,43 +63,38 @@ export default function Catching() {
   }, []);
 
   const handleSpotPhotoUpload = async () => {
-    let result;
     if (Platform.OS === "web") {
       const input = document.createElement("input");
       input.type = "file";
       input.accept = "image/*";
-      input.addEventListener("change", async (event) => {
+      input.addEventListener("change", (event) => {
         const file = event.target.files[0];
+        file["uri"] = URL.createObjectURL(file) 
         if (file) {
-          setSpotPhoto({
-            uri: URL.createObjectURL(file),
-            type: file.type,
-            name: file.name,
-          });
+          setSpotPhoto(file);
         }
+        document.body.removeChild(input);
       });
       document.body.appendChild(input);
       input.click();
-      document.body.removeChild(input);
     } else {
-      result = await ImagePicker.launchCameraAsync({
+      const result = await ImagePicker.launchCameraAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: false,
-        aspect: [9, 16],
+        base64: true,
+        aspect: [4, 3],
         quality: 0.6,
       });
       if (!result.canceled) {
         const uri = result.assets[0].uri;
-        const fileInfo = await FileSystem.getInfoAsync(uri);
-        const fileSizeInMB = fileInfo.size / (1024 * 1024);
-        if (fileSizeInMB > 3) {
+        if (getFileSizeFromBase64(result.assets[0].base64) > 3) {
           alert("Image size should be less than 3MB.");
         } else {
           const ext = uri.split(".").pop();
           setSpotPhoto({
             uri: uri,
-            type: `${result.assets[0].type}/${ext}`,
-            name: `spotPhoto.${ext}`,
+            type: `${result?.assets[0]?.type}/${ext}`,
+            name: `spotPhoto.${ext}`, 
           });
         }
       }
@@ -119,11 +114,10 @@ export default function Catching() {
       input.addEventListener("change", async (event) => {
         const files = event.target.files;
         if (files && files.length > 0) {
-          const newPhotos = Array.from(files).map((file) => ({
-            uri: URL.createObjectURL(file),
-            type: file.type,
-            name: file.name,
-          }));
+          const newPhotos = Array.from(files).map(file => {
+            file["uri"] = URL.createObjectURL(file);
+            return file;
+          })
           setAdditionalPhotos([...additionalPhotos, ...newPhotos]);
         }
       });
@@ -135,7 +129,7 @@ export default function Catching() {
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: false,
         aspect: [4, 3],
-        quality: 1,
+        quality: .6,
       });
 
       if (!result.canceled) {
@@ -215,16 +209,23 @@ export default function Catching() {
       formData.append("catchingLocation", catchingLocation);
       formData.append("locationDetails", locationDetails);
 
-      console.log(date);
       formData.append("spotPhoto", spotPhoto);
-      additionalPhotos.forEach((photo, index) => {
-        let ext = photo.split(".").pop();
-        formData.append("additionalPhotos[]", {
-          uri: photo,
-          type: `image/${ext}`,
-          name: `catcherAdditionalPhoto_${index}.${ext}`,
+
+      if (Platform.OS === "web") {
+        additionalPhotos.forEach(photo => {
+          formData.append("additionalPhotos[]", photo);
+        })
+      } else {
+        additionalPhotos.forEach((photo, index) => {
+          let ext = photo.split(".").pop();
+  
+          formData.append("additionalPhotos[]", {
+            uri: photo,
+            type: `image/${ext}`,
+            name: `catcherAdditionalPhoto_${index}.${ext}`,
+          });
         });
-      });
+      }
 
       axiosRequest(
         "/dog",
@@ -273,7 +274,7 @@ export default function Catching() {
           style={styles.input}
           value={catchingLocation}
           onChangeText={(text) => setCatchingLocation(text)}
-          placeholder="Enter location"
+          placeholder="Trying to auto fetch your location ..."
         />
         <Text style={styles.error}>{locationError}</Text>
       </View>
@@ -292,7 +293,7 @@ export default function Catching() {
       {/* Spot Photo */}
       <View style={styles.fieldContainer}>
         <Text>
-          Spot Photo <Text style={styles.required}>*</Text>{" "}
+          Spot Photo <Text style={styles.required}>*</Text>
         </Text>
         {spotPhoto && (
           <View style={styles.imageContainerMain}>
@@ -304,7 +305,7 @@ export default function Catching() {
               <Text style={styles.deleteIconMain}>Delete</Text>
             </TouchableOpacity>
           </View>
-        )}
+        )}  
         <TouchableOpacity
           style={styles.uploadButton}
           onPress={handleSpotPhotoUpload}
@@ -326,7 +327,7 @@ export default function Catching() {
             <View style={styles.additionalImage}>
               {additionalPhotos.map((photo, index) => (
                 <View key={index} style={styles.imageContainer}>
-                  <Image source={{ uri: photo }} style={styles.uploadedImage} />
+                  <Image source={{ uri: Platform.OS === "web" ? photo.uri : photo }} style={styles.uploadedImage} />
                   <TouchableOpacity onPress={() => handleDeletePhoto(index)}>
                     <Text style={styles.deleteIcon}>Delete</Text>
                   </TouchableOpacity>

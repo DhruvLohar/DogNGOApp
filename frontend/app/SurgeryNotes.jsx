@@ -10,11 +10,11 @@ import {
   Modal,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import * as FileSystem from "expo-file-system";
 import { StatusBar } from "expo-status-bar";
 
 const moment = require("moment");
 import { API_URL, axiosRequest } from "../service/api";
+import { getFileSizeFromBase64 } from "../service/getSize";
 
 export default function SurgeryNotes() {
   const [kennelNumber, setKennelNumber] = useState("");
@@ -112,29 +112,26 @@ export default function SurgeryNotes() {
       input.accept = "image/*";
       input.addEventListener("change", async (event) => {
         const file = event.target.files[0];
+        file["uri"] = URL.createObjectURL(file) 
         if (file) {
-          setPhoto({
-            uri: URL.createObjectURL(file),
-            type: file.type,
-            name: file.name,
-          });
+          setPhoto(file);
         }
+        document.body.removeChild(input);
       });
       document.body.appendChild(input);
       input.click();
-      document.body.removeChild(input);
     } else {
       result = await ImagePicker.launchCameraAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: false,
+        base64: true,
         aspect: [9, 16],
         quality: 0.6,
       });
       if (!result.canceled) {
         const uri = result.assets[0].uri;
-        const fileInfo = await FileSystem.getInfoAsync(uri);
-        const fileSizeInMB = fileInfo.size / (1024 * 1024);
-        if (fileSizeInMB > 3) {
+
+        if (getFileSizeFromBase64(result.assets[0].base64) > 3) {
           alert("Image size should be less than 3MB.");
         } else {
           setPhoto({
@@ -154,11 +151,10 @@ export default function SurgeryNotes() {
       input.addEventListener("change", async (event) => {
         const files = event.target.files;
         if (files && files.length > 0) {
-          const newPhotos = Array.from(files).map((file) => ({
-            uri: URL.createObjectURL(file),
-            type: file.type,
-            name: file.name,
-          }));
+          const newPhotos = Array.from(files).map((file) => {
+            file["uri"] = URL.createObjectURL(file);
+            return file;
+          });
           setAdditionalPhotos([...additionalPhotos, ...newPhotos]);
         }
       });
@@ -170,7 +166,7 @@ export default function SurgeryNotes() {
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: false,
         aspect: [4, 3],
-        quality: 1,
+        quality: .6,
       });
 
       if (!result.canceled) {
@@ -248,22 +244,29 @@ export default function SurgeryNotes() {
       };
       formData.append("vetDetails", JSON.stringify(data));
 
-      const ext = photo.split(".").pop();
-      formData.append("surgeryNotesPhoto", {
-        uri: photo,
-        type: `image/${ext}`,
-        name: `surgeryNotesPhoto.${ext}`,
-      });
-
-      additionalPhotos.forEach((photo, index) => {
-        let ext = photo.split(".").pop();
-        formData.append("additionalNotesPhotos[]", {
-          uri: photo,
-          type: `image/${ext}`,
-          name: `surgeryAdditionalPhoto_${index}.${ext}`,
+      if (Platform.OS === "web") {
+        formData.append('surgeryNotesPhoto', photo);
+        additionalPhotos.forEach((photo, index) => {
+          formData.append("additionalNotesPhotos[]", photo);
         });
-      });
-
+      } else {
+        const photoExt = photo.uri.split(".").pop();
+        formData.append("surgeryNotesPhoto", {
+          uri: photo.uri,
+          type: `image/${photoExt}`,
+          name: `surgeryPhoto.${photoExt}`,
+        });
+  
+        additionalPhotos.forEach((photo, index) => {
+          let ext = photo.split(".").pop();
+          formData.append("additionalNotesPhotos[]", {
+            uri: photo,
+            type: `image/${ext}`,
+            name: `vetAdditionalPhoto_${index}.${ext}`,
+          });
+        });
+      }
+      
       axiosRequest(
         `/dog/${dogInfo._id}/update/vet`,
         {
@@ -435,7 +438,7 @@ export default function SurgeryNotes() {
             </Text>
             {photo && (
               <View style={styles.imageContainerMain}>
-                <Image source={{ uri: photo }} style={styles.uploadedImage} />
+                <Image source={{ uri: photo.uri }} style={styles.uploadedImage} />
                 <TouchableOpacity onPress={() => handleDeleteMain()}>
                   <Text style={styles.deleteIconMain}>Delete</Text>
                 </TouchableOpacity>
@@ -461,7 +464,7 @@ export default function SurgeryNotes() {
                 <View style={styles.additionalImage}>
                   {additionalPhotos.map((uri, index) => (
                     <View key={index} style={styles.imageContainer}>
-                      <Image source={{ uri }} style={styles.uploadedImage} />
+                      <Image source={{ uri: Platform.OS === "web" ? uri.uri : uri }} style={styles.uploadedImage} />
                       <TouchableOpacity
                         onPress={() => handleDeletePhoto(index)}
                       >

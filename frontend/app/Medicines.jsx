@@ -8,12 +8,12 @@ import {
   ScrollView,
   StyleSheet,
   Modal,
+  Platform,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import * as ImagePicker from "expo-image-picker";
-import * as FileSystem from "expo-file-system";
-import { useRouter } from "expo-router";
 import { API_URL, axiosRequest } from "../service/api";
+import { getFileSizeFromBase64 } from "../service/getSize";
 const moment = require("moment");
 
 export default function Medicines() {
@@ -83,7 +83,7 @@ export default function Medicines() {
       )
         .then((res) => {
           setDogModalInfo(res.data);
-          setWeight(res.data?.vetDetails?.dogWeight);
+          setWeight(res.data?.vetDetails?.dogWeight || 0);
           setModalVisible(true);
         })
         .catch((error) => {
@@ -133,11 +133,10 @@ export default function Medicines() {
       input.addEventListener("change", async (event) => {
         const files = event.target.files;
         if (files && files.length > 0) {
-          const newPhotos = Array.from(files).map((file) => ({
-            uri: URL.createObjectURL(file),
-            type: file.type,
-            name: file.name,
-          }));
+          const newPhotos = Array.from(files).map((file) => {
+            file["uri"] = URL.createObjectURL(file);
+            return file;
+          });
           setAdditionalPhotos([...additionalPhotos, ...newPhotos]);
         }
       });
@@ -149,7 +148,7 @@ export default function Medicines() {
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: false,
         aspect: [4, 3],
-        quality: 1,
+        quality: .6,
       });
 
       if (!result.canceled) {
@@ -167,29 +166,26 @@ export default function Medicines() {
       input.accept = "image/*";
       input.addEventListener("change", async (event) => {
         const file = event.target.files[0];
+        file["uri"] = URL.createObjectURL(file) 
         if (file) {
-          setPhoto({
-            uri: URL.createObjectURL(file),
-            type: file.type,
-            name: file.name,
-          });
+          setPhoto(file);
         }
+        document.body.removeChild(input);
       });
       document.body.appendChild(input);
       input.click();
-      document.body.removeChild(input);
     } else {
       result = await ImagePicker.launchCameraAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: false,
+        base64: true,
         aspect: [9, 16],
         quality: 0.6,
       });
       if (!result.canceled) {
         const uri = result.assets[0].uri;
-        const fileInfo = await FileSystem.getInfoAsync(uri);
-        const fileSizeInMB = fileInfo.size / (1024 * 1024);
-        if (fileSizeInMB > 3) {
+
+        if (getFileSizeFromBase64(result.assets[0].base64) > 3) {
           alert("Image size should be less than 3MB.");
         } else {
           setPhoto({
@@ -313,7 +309,6 @@ export default function Medicines() {
       const formDataObject = {
         surgeryDate: dateObject,
         arv: arv,
-        additionalPhotos: additionalPhotos,
         xylazine: xylazine,
         dexa: dexa,
         melonex: melonex,
@@ -329,21 +324,28 @@ export default function Medicines() {
       };
       formData.append("vetDetails", JSON.stringify(formDataObject));
 
-      const photoExt = photo.split(".").pop();
-      formData.append("surgeryPhoto", {
-        uri: photo,
-        type: `image/${photoExt}`,
-        name: `surgeryPhoto.${photoExt}`,
-      });
-
-      additionalPhotos.forEach((photo, index) => {
-        let ext = photo.split(".").pop();
-        formData.append("additionalPhotos[]", {
-          uri: photo,
-          type: `image/${ext}`,
-          name: `vetAdditionalPhoto_${index}.${ext}`,
+      if (Platform.OS === "web") {
+        formData.append('surgeryPhoto', photo);
+        additionalPhotos.forEach((photo, index) => {
+          formData.append("additionalPhotos[]", photo);
         });
-      });
+      } else {
+        const photoExt = photo.uri.split(".").pop();
+        formData.append("surgeryPhoto", {
+          uri: photo.uri,
+          type: `image/${photoExt}`,
+          name: `surgeryPhoto.${photoExt}`,
+        });
+  
+        additionalPhotos.forEach((addphoto, index) => {
+          let ext = addphoto.split(".").pop();
+          formData.append("additionalPhotos[]", {
+            uri: addphoto,
+            type: `image/${ext}`,
+            name: `vetAdditionalPhoto_${index}.${ext}`,
+          });
+        });
+      }
 
       axiosRequest(
         `/dog/${dogInfo._id}/update/vet`,
@@ -550,7 +552,7 @@ export default function Medicines() {
             </Text>
             {photo && (
               <View style={styles.imageContainerMain}>
-                <Image source={{ uri: photo }} style={styles.uploadedImage} />
+                <Image source={{ uri: photo.uri }} style={styles.uploadedImage} />
                 <TouchableOpacity onPress={() => handleDeleteMain()}>
                   <Text style={styles.deleteIconMain}>Delete</Text>
                 </TouchableOpacity>
@@ -577,7 +579,7 @@ export default function Medicines() {
                 <View style={styles.additionalImage}>
                   {additionalPhotos.map((uri, index) => (
                     <View key={index} style={styles.imageContainer}>
-                      <Image source={{ uri }} style={styles.uploadedImage} />
+                      <Image source={{ uri: Platform.OS === "web" ? uri.uri : uri }} style={styles.uploadedImage} />
                       <TouchableOpacity
                         onPress={() => handleDeletePhoto(index)}
                       >
