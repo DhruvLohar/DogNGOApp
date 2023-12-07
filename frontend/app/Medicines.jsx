@@ -148,7 +148,7 @@ export default function Medicines() {
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: false,
         aspect: [4, 3],
-        quality: .6,
+        quality: 0.6,
       });
 
       if (!result.canceled) {
@@ -166,7 +166,7 @@ export default function Medicines() {
       input.accept = "image/*";
       input.addEventListener("change", async (event) => {
         const file = event.target.files[0];
-        file["uri"] = URL.createObjectURL(file) 
+        file["uri"] = URL.createObjectURL(file);
         if (file) {
           setPhoto(file);
         }
@@ -298,7 +298,7 @@ export default function Medicines() {
     if (Object.keys(errors).length === 0) {
       // All fields are valid, proceed with submission
       const formData = new FormData();
-      const momentObject = moment(date, "MM/DD/YYYY");
+      const momentObject = moment(date, "DD/MM/YYYY");
       let dateObject;
       if (momentObject.isValid()) {
         dateObject = momentObject.toDate();
@@ -323,9 +323,9 @@ export default function Medicines() {
         observations: observations,
       };
       formData.append("vetDetails", JSON.stringify(formDataObject));
-
+      // console.log(formDataObject.surgeryDate);
       if (Platform.OS === "web") {
-        formData.append('surgeryPhoto', photo);
+        formData.append("surgeryPhoto", photo);
         additionalPhotos.forEach((photo, index) => {
           formData.append("additionalPhotos[]", photo);
         });
@@ -336,7 +336,7 @@ export default function Medicines() {
           type: `image/${photoExt}`,
           name: `surgeryPhoto.${photoExt}`,
         });
-  
+
         additionalPhotos.forEach((addphoto, index) => {
           let ext = addphoto.split(".").pop();
           formData.append("additionalPhotos[]", {
@@ -552,7 +552,10 @@ export default function Medicines() {
             </Text>
             {photo && (
               <View style={styles.imageContainerMain}>
-                <Image source={{ uri: photo.uri }} style={styles.uploadedImage} />
+                <Image
+                  source={{ uri: photo.uri }}
+                  style={styles.uploadedImage}
+                />
                 <TouchableOpacity onPress={() => handleDeleteMain()}>
                   <Text style={styles.deleteIconMain}>Delete</Text>
                 </TouchableOpacity>
@@ -579,7 +582,10 @@ export default function Medicines() {
                 <View style={styles.additionalImage}>
                   {additionalPhotos.map((uri, index) => (
                     <View key={index} style={styles.imageContainer}>
-                      <Image source={{ uri: Platform.OS === "web" ? uri.uri : uri }} style={styles.uploadedImage} />
+                      <Image
+                        source={{ uri: Platform.OS === "web" ? uri.uri : uri }}
+                        style={styles.uploadedImage}
+                      />
                       <TouchableOpacity
                         onPress={() => handleDeletePhoto(index)}
                       >
