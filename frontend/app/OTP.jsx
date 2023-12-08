@@ -50,7 +50,7 @@ const OTP = () => {
         value={otp}
         onChangeText={setOtp}
         keyboardType="numeric"
-        maxLength={6}
+        maxLength={4}
       />
       <TouchableOpacity style={styles.button} onPress={handleVerifyOTP}>
         <Text style={styles.buttonText}>Verify OTP</Text>
