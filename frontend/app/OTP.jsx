@@ -30,7 +30,7 @@ const OTP = () => {
   }, [])
 
   const handleVerifyOTP = () => {
-    if (otp.length === 6 && sessionId) {
+    if (otp.length === 4 && sessionId) {
       verifyOTP(sessionId, otp).then(res => {
         if (res) {
           navigation.navigate("Setpin", { contactNumber: phoneNumber });
@@ -46,7 +46,7 @@ const OTP = () => {
       <Text style={styles.heading}>OTP Verification</Text>
       <TextInput
         style={styles.input}
-        placeholder="6 Digit OTP sent to your phone number"
+        placeholder="4 Digit OTP was sent to your phone number"
         value={otp}
         onChangeText={setOtp}
         keyboardType="numeric"
