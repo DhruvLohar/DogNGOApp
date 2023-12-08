@@ -43,7 +43,7 @@ export default function Day() {
 
   useEffect(() => {
     navigation.setOptions({
-      title: "Daily Monitoring Report",
+      title: "Daily Treatment",
     });
   }, []);
 

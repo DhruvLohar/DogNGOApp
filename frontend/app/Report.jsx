@@ -40,6 +40,7 @@ const Report = () => {
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
 
   const [dogs, setDogs] = useState([]);
+  const [currPage, setCurrPage] = useState(0)
 
   const isWeb = Platform.OS === "web";
 
@@ -151,6 +152,12 @@ const Report = () => {
     }
   };
 
+  const chunk = (arr, size) => {
+    return Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>
+      arr.slice(i * size, i * size + size)
+    );
+  }
+
   const handleSubmit = () => {
     if (startDate && endDate) {
       axiosRequest(
@@ -165,7 +172,7 @@ const Report = () => {
         false
       )
         .then((res) => {
-          setDogs(res.data);
+          setDogs(chunk(res.data, 10));
         })
         .catch((error) => {
           if (error.response) {
@@ -180,7 +187,7 @@ const Report = () => {
   };
 
   return (
-    <ScrollView>
+    <>
       <StatusBar style="dark" />
       <View style={styles.container}>
         <View style={styles.dateContainer}>
@@ -233,40 +240,49 @@ const Report = () => {
         </TouchableOpacity>
 
         {dogs.length > 0 ? (
-          <View style={{ width: "85%", marginTop: 20 }}>
+          <View style={{ width: "85%", marginTop: 20, maxHeight: "64%" }}>
             <Text style={{ fontSize: 20, marginBottom: 10 }}>
               Dogs Found :{" "}
             </Text>
-            {dogs?.map((dog, idx) => (
-              <View key={idx} style={styles.dogContainer}>
-                <Image
-                  source={{
-                    uri: API_URL + "/" + dog?.catcherDetails?.spotPhoto?.path,
-                  }}
-                  style={{
-                    width: 100,
-                    height: 100,
-                    borderRadius: 50,
-                    marginBottom: 20,
-                  }}
-                />
-                <View>
-                  <Text>Case Number:</Text>
-                  <Text> {dog.caseNumber}</Text>
+            <ScrollView>
+              {dogs[currPage]?.map((dog, idx) => (
+                <View key={idx} style={styles.dogContainer}>
+                  <Image
+                    source={{
+                      uri: API_URL + "/" + dog?.catcherDetails?.spotPhoto?.path,
+                    }}
+                    style={{
+                      width: 100,
+                      height: 100,
+                      borderRadius: 50,
+                      marginBottom: 20,
+                    }}
+                  />
+                  <View>
+                    <Text>Case Number:</Text>
+                    <Text> {dog.caseNumber}</Text>
+                  </View>
+                  {/* <Text>Dog's Name: {dog.dogName}</Text> */}
                 </View>
-                {/* <Text>Dog's Name: {dog.dogName}</Text> */}
-              </View>
-            ))}
+              ))}
+            </ScrollView>
+            <View style={{ justifyContent: "center", alignItems: "center", flexDirection: "row", gap: 30, marginTop: 20 }}>
+              {Array.from({ length: dogs.length }).map((_, idx) => (
+                <TouchableOpacity key={idx} style={[(idx === currPage) && paginationStyles.activePage]} onPress={() => setCurrPage(idx)}>
+                  <Text style={[{ fontSize: 24 }, (idx === currPage) && paginationStyles.activePagetext]}>{idx + 1}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
             <TouchableOpacity
               style={styles.button}
               onPress={() => downloadReport(dogs)}
             >
-              <Text>Generate and Download Report</Text>
+              <Text style={{color: "white"}}>Generate and Download Report</Text>
             </TouchableOpacity>
           </View>
         ) : null}
       </View>
-    </ScrollView>
+    </>
   );
 };
 
@@ -290,7 +306,6 @@ const styles = StyleSheet.create({
     padding: 10,
     fontSize: 16,
     backgroundColor: "#007BFF",
-    color: "white",
     borderRadius: 5,
     marginTop: 20,
     marginBottom: 20,
@@ -357,5 +372,20 @@ const cardStyles = StyleSheet.create({
     textAlign: "center",
   },
 });
+
+const paginationStyles = StyleSheet.create({
+  activePage: {
+    width: 40, height: 40,
+    justifyContent: "center", alignItems: "center",
+    fontWeight: "bold",
+    borderRadius: 30,
+    backgroundColor: "#007BFF",
+    // padding: 2,
+  },
+  activePagetext: {
+    textAlign: "center",
+    color: "white",
+  }
+})
 
 export default Report;

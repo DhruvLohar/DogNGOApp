@@ -27,7 +27,7 @@ const DogPhotos = () => {
       true
     )
       .then((res) => {
-        setDogs(res.data);
+        setDogs(Array.from(res.data).reverse());
       })
       .catch((error) => {
         if (error.response) {
