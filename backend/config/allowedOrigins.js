@@ -1,6 +1,11 @@
 require("dotenv").config();
 
-const allowedOrigins = ["http://localhost:8081", process.env.REMOTE_CLIENT_APP];
+const allowedOrigins = [
+    "http://localhost:8081",
+    "http://j-app.in", "http://www.j-app.in", 
+    "https://j-app.in", "https://www.j-app.in", 
+    "http://api.j-app.in", "https://api.j-app.in", 
+    process.env.REMOTE_CLIENT_APP];
 
 module.exports = allowedOrigins;
 

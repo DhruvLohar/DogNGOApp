@@ -1,8 +1,8 @@
 {
   "expo": {
     "name": "J App",
-    "slug": "j-app",
-    "scheme": "j-app",
+    "slug": "jeevraksha",
+    "scheme": "jeevraksha",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
