@@ -176,7 +176,7 @@ export default function Catching() {
       errors.dateError = "Please enter a date.";
     }
 
-    const momentObject = moment(date, "MM/DD/YYYY");
+    const momentObject = moment(date, "DD/MM/YYYY");
     if (momentObject.isValid()) {
       const dateObject = momentObject.toDate();
       formData.append("catchingDate", dateObject);
