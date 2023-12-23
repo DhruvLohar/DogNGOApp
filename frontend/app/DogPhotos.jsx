@@ -76,7 +76,7 @@ const DogPhotos = () => {
               <View style={{ marginBottom: 10 }}>
                 <Image
                   source={{
-                    uri: API_URL + "/" + dog?.catcherDetails?.spotPhoto?.path,
+                    uri: API_URL + "/" + dog?.dogImage,
                   }}
                   style={{ width: 100, height: 100, borderRadius: 50 }}
                 />

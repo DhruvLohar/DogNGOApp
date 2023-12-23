@@ -249,7 +249,7 @@ const Report = () => {
                 <View key={idx} style={styles.dogContainer}>
                   <Image
                     source={{
-                      uri: API_URL + "/" + dog?.catcherDetails?.spotPhoto?.path,
+                      uri: API_URL + "/" + dog?.dogImage,
                     }}
                     style={{
                       width: 100,

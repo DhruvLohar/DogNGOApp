@@ -113,11 +113,17 @@ const FormPage = () => {
             />
           ) : null}
           {userRole === "admin" ? (
-            <FormCard
-              image={AddUser}
-              title="Add a User"
-              navigate={() => navigateToForm("/LoginAdmin")}
-            />
+            <>
+              <FormCard
+                image={AddUser}
+                title="Add a User"
+                navigate={() => navigateToForm("/LoginAdmin")}
+              />
+              <FormCard
+                title="View Dogs"
+                navigate={() => navigateToForm("/ViewDogs")}
+              />
+            </>
           ) : null}
           {userRole === "admin" ? (
             <FormCard

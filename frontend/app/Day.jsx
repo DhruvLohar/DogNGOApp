@@ -285,7 +285,7 @@ export default function Day() {
                       uri:
                         API_URL +
                         "/" +
-                        dogModalInfo?.catcherDetails?.spotPhoto?.path,
+                        dogModalInfo?.dogImage,
                     }}
                     style={{
                       width: 200,

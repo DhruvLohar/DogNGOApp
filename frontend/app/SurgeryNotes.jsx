@@ -352,7 +352,7 @@ export default function SurgeryNotes() {
                       uri:
                         API_URL +
                         "/" +
-                        dogModalInfo?.catcherDetails?.spotPhoto?.path,
+                        dogModalInfo?.dogImage,
                     }}
                     style={{
                       width: 200,

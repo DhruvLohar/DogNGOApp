@@ -24,6 +24,12 @@ const Layout = () => {
         }}
       />
       <Stack.Screen
+        name="ViewDogs"
+        options={{
+          title: "View Dogs",
+        }}
+      />
+      <Stack.Screen
         name="FormPage"
         options={{
           title: "Home Page",
