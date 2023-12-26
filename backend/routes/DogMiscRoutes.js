@@ -267,7 +267,7 @@ router.get("/generate/report/:dogIDS/xlsx", async (req, res) => {
 // Get : dogs for inital observations (dogs with no kennel)
 router.get("/observable", authenticateToken, async (req, res) => {
   try {
-    const dogs = await Dog.find({ kennel: { $exists: false } }).populate({
+    const dogs = await Dog.find({ kennel: { $exists: false }, isReleased: false, isDispatched: false }).populate({
       path: "catcherDetails",
       select: "catchingLocation",
       populate: {

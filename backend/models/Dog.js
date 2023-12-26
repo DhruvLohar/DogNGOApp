@@ -40,13 +40,12 @@ const doctorSchema = new mongoose.Schema(
     stadren: String,
     dicrysticin: String,
 
-    surgeryPhoto: { type: mongoose.Schema.Types.ObjectId, ref: "Image" },
-    additionalPhotos: [{ type: mongoose.Schema.Types.ObjectId, ref: "Image" }],
+    surgeryPhoto: String,
+    additionalPhotos: [String],
 
-    surgeryNotesPhoto: { type: mongoose.Schema.Types.ObjectId, ref: "Image" },
-    additionalNotesPhotos: [
-      { type: mongoose.Schema.Types.ObjectId, ref: "Image" },
-    ],
+    surgeryNotesPhoto: String,
+    additionalNotesPhotos: [String],
+    
   },
   { timestamps: true, versionKey: false }
 );
@@ -65,6 +64,7 @@ const dailyMonitoringSchema = new mongoose.Schema(
     waterIntake: String,
     antibiotics: String,
     painkiller: String,
+    stool: String,
 
     observations: String,
     photo: { type: mongoose.Schema.Types.ObjectId, ref: "Image" },
@@ -85,16 +85,24 @@ const dogSchema = new mongoose.Schema(
 
     // initial observation data
     dogName: String,
+    
+    dogImage: String,
+    dogAdditionalImages: [String],
+
     breed: String,
+    age: Number,
     mainColor: String,
     description: String,
     gender: String,
     agression: Boolean,
+    status: {
+      type: String,
+      enum: ["Adopted", "Available", "Operated", "UnderTreatment", "FitForRelease", "Dispatched", "Released"],
+      default: "Available"
+    },
 
-    kennelPhoto: { type: mongoose.Schema.Types.ObjectId, ref: "Image" },
-    additionalKennelPhotos: [
-      { type: mongoose.Schema.Types.ObjectId, ref: "Image" },
-    ],
+    kennelPhoto: String,
+    additionalKennelPhotos: [String],
 
     // release form data
     isReleased: { type: Boolean, default: false },

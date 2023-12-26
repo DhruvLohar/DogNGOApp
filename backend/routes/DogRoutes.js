@@ -191,14 +191,14 @@ router.post(
       // Save the spotPhoto to the database
       if (req.files["spotPhoto"] && req.files["spotPhoto"].length > 0) {
         const spotPhoto = req.files["spotPhoto"][0];
-        // Assuming you have an Image model to save image details, create and save it
-        const image = new Image({
-          name: spotPhoto.originalname,
-          filename: spotPhoto.filename,
-          path: spotPhoto.path,
-        });
-        await image.save();
-        imageRefs.push(image._id);
+
+        // const image = new Image({
+        //   name: spotPhoto.originalname,
+        //   filename: spotPhoto.filename,
+        //   path: spotPhoto.path,
+        // });
+        // await image.save();
+        imageRefs.push(spotPhoto.path);
       }
 
       // Save the additionalPhotos to the database
@@ -209,13 +209,13 @@ router.post(
         const additionalPhotos = req.files["additionalPhotos[]"];
         for (const photo of additionalPhotos) {
           // Create and save each additional photo to the Image model
-          const image = new Image({
-            name: photo.originalname,
-            filename: photo.filename,
-            path: photo.path,
-          });
-          await image.save();
-          imageRefs.push(image._id);
+          // const image = new Image({
+          //   name: photo.originalname,
+          //   filename: photo.filename,
+          //   path: photo.path,
+          // });
+          // await image.save();
+          imageRefs.push(photo.path);
         }
       }
 
@@ -225,17 +225,19 @@ router.post(
         catchingLocation,
         locationDetails,
         catchingDate,
-        spotPhoto: imageRefs[0], // Assign the first image as the spotPhoto
+        // spotPhoto: imageRefs[0], // Assign the first image as the spotPhoto
       });
 
-      for (let i of imageRefs.slice(1)) {
-        catcher.additionalPhotos.push(i);
-      }
+      // for (let i of imageRefs.slice(1)) {
+      //   catcher.additionalPhotos.push(i);
+      // }
       await catcher.save();
 
       // Create a new Dog model and link it to the catcher
       const dog = new Dog({
         catcherDetails: catcher._id,
+        dogImage: imageRefs[0],
+        dogAdditionalImages: imageRefs.slice(1)
       });
 
       dog.caseNumber = await Dog.generateCaseNumber();
@@ -273,6 +275,7 @@ router.post(
       } = req.body;
 
       const kennel = await Kennel.findOne({ kennelId: kennelId });
+
       if (!kennel) {
         return res.status(404).json({ message: "Kennel not found" });
       }
@@ -286,14 +289,13 @@ router.post(
       // Save the kennelPhoto to the database
       if (req.files["kennelPhoto"] && req.files["kennelPhoto"].length > 0) {
         const spotPhoto = req.files["kennelPhoto"][0];
-        // Assuming you have an Image model to save image details, create and save it
-        const image = new Image({
-          name: spotPhoto.originalname,
-          filename: spotPhoto.filename,
-          path: spotPhoto.path,
-        });
-        await image.save();
-        imageRefs.push(image._id);
+        // const image = new Image({
+        //   name: spotPhoto.originalname,
+        //   filename: spotPhoto.filename,
+        //   path: spotPhoto.path,
+        // });
+        // await image.save();
+        imageRefs.push(spotPhoto.path);
       }
 
       // Save the additionalPhotos to the database
@@ -303,14 +305,13 @@ router.post(
       ) {
         const additionalPhotos = req.files["additionalKennelPhotos[]"];
         for (const photo of additionalPhotos) {
-          // Create and save each additional photo to the Image model
-          const image = new Image({
-            name: photo.originalname,
-            filename: photo.filename,
-            path: photo.path,
-          });
-          await image.save();
-          imageRefs.push(image._id);
+          // const image = new Image({
+          //   name: photo.originalname,
+          //   filename: photo.filename,
+          //   path: photo.path,
+          // });
+          // await image.save();
+          imageRefs.push(photo.path);
         }
       }
 
@@ -323,11 +324,12 @@ router.post(
         dogName,
         breed,
         kennelPhoto: imageRefs[0],
+        additionalKennelPhotos: imageRefs.slice(1)
       });
 
-      for (let i of imageRefs.slice(1)) {
-        dog.additionalKennelPhotos.push(i);
-      }
+      // for (let i of imageRefs.slice(1)) {
+      //   dog.additionalKennelPhotos.push(i);
+      // }
 
       kennel.isOccupied = true;
       await kennel.save();
@@ -393,14 +395,14 @@ router.put(
         // Save the kennelPhoto to the database
         if (req.files["surgeryPhoto"] && req.files["surgeryPhoto"].length > 0) {
           const spotPhoto = req.files["surgeryPhoto"][0];
-          // Assuming you have an Image model to save image details, create and save it
-          const image = new Image({
-            name: spotPhoto.originalname,
-            filename: spotPhoto.filename,
-            path: spotPhoto.path,
-          });
-          await image.save();
-          imageRefs.push(image._id);
+
+          // const image = new Image({
+          //   name: spotPhoto.originalname,
+          //   filename: spotPhoto.filename,
+          //   path: spotPhoto.path,
+          // });
+          // await image.save();
+          imageRefs.push(spotPhoto.path);
         }
 
         if (
@@ -408,14 +410,14 @@ router.put(
           req.files["surgeryNotesPhoto"].length > 0
         ) {
           const spotPhoto = req.files["surgeryNotesPhoto"][0];
-          // Assuming you have an Image model to save image details, create and save it
-          const image = new Image({
-            name: spotPhoto.originalname,
-            filename: spotPhoto.filename,
-            path: spotPhoto.path,
-          });
-          await image.save();
-          imageRefs.push(image._id);
+          
+          // const image = new Image({
+          //   name: spotPhoto.originalname,
+          //   filename: spotPhoto.filename,
+          //   path: spotPhoto.path,
+          // });
+          // await image.save();
+          imageRefs.push(spotPhoto.path);
         }
 
         // Save the additionalPhotos to the database
@@ -425,14 +427,14 @@ router.put(
         ) {
           const additionalPhotos = req.files["additionalPhotos[]"];
           for (const photo of additionalPhotos) {
-            // Create and save each additional photo to the Image model
-            const image = new Image({
-              name: photo.originalname,
-              filename: photo.filename,
-              path: photo.path,
-            });
-            await image.save();
-            imageRefs.push(image._id);
+            
+            // const image = new Image({
+            //   name: photo.originalname,
+            //   filename: photo.filename,
+            //   path: photo.path,
+            // });
+            // await image.save();
+            imageRefs.push(photo.path);
           }
         }
 
@@ -442,14 +444,14 @@ router.put(
         ) {
           const additionalPhotos = req.files["additionalNotesPhotos[]"];
           for (const photo of additionalPhotos) {
-            // Create and save each additional photo to the Image model
-            const image = new Image({
-              name: photo.originalname,
-              filename: photo.filename,
-              path: photo.path,
-            });
-            await image.save();
-            imageRefs.push(image._id);
+            
+            // const image = new Image({
+            //   name: photo.originalname,
+            //   filename: photo.filename,
+            //   path: photo.path,
+            // });
+            // await image.save();
+            imageRefs.push(photo.path);
           }
         }
 
@@ -476,14 +478,17 @@ router.put(
         if (imageRefs && imageRefs.length > 0) {
           if (req.files["surgeryPhoto"] || req.files["additionalPhotos[]"]) {
             vetDetails.surgeryPhoto = imageRefs[0];
-            for (let i of imageRefs.slice(1)) {
-              vetDetails.additionalPhotos.push(i);
-            }
+            vetDetails.additionalPhotos = imageRefs.slice(1)
+
+            // for (let i of imageRefs.slice(1)) {
+            //   vetDetails.additionalPhotos.push(i);
+            // }
           } else if (req.files["surgeryNotesPhoto"] || req.files["additionalNotesPhotos"]) {
             vetDetails.surgeryNotesPhoto = imageRefs[0];
-            for (let i of imageRefs.slice(1)) {
-              vetDetails.additionalNotesPhotos.push(i);
-            }
+            vetDetails.additionalNotesPhotos = imageRefs.slice(1)
+            // for (let i of imageRefs.slice(1)) {
+            //   vetDetails.additionalNotesPhotos.push(i);
+            // }
           }
         }
 
