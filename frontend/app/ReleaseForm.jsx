@@ -193,7 +193,7 @@ const ReleaseForm = () => {
                 <View style={{ marginBottom: 10 }}>
                   <Image
                     source={{
-                      uri: API_URL + "/" + dog?.catcherDetails?.spotPhoto?.path,
+                      uri: API_URL + "/" + dog?.dogImage,
                     }}
                     style={{ width: 200, height: 200, aspectRatio: 9 / 16, objectFit: "contain" }}
                   />
@@ -241,7 +241,7 @@ const ReleaseForm = () => {
                       <View style={{ marginBottom: 10 }}>
                         <Image
                           source={{
-                            uri: API_URL + "/" + dog?.catcherDetails?.spotPhoto?.path,
+                            uri: API_URL + "/" + dog?.dogImage,
                           }}
                           style={{ width: 200, height: 200, aspectRatio: 9 / 16, objectFit: "contain" }}
                         />

@@ -237,7 +237,8 @@ router.post(
       const dog = new Dog({
         catcherDetails: catcher._id,
         dogImage: imageRefs[0],
-        dogAdditionalImages: imageRefs.slice(1)
+        dogAdditionalImages: imageRefs.slice(1),
+        status: 'Adopted'
       });
 
       dog.caseNumber = await Dog.generateCaseNumber();
@@ -324,7 +325,8 @@ router.post(
         dogName,
         breed,
         kennelPhoto: imageRefs[0],
-        additionalKennelPhotos: imageRefs.slice(1)
+        additionalKennelPhotos: imageRefs.slice(1),
+        status: 'Available'
       });
 
       // for (let i of imageRefs.slice(1)) {
@@ -466,6 +468,8 @@ router.put(
           await vetDetails.save();
 
           dog.vetDetails = vetDetails._id;
+          dog.status = "UnderTreatment"
+
         } else {
           // Update the existing vetDetails
           vetDetails = await Doctor.findByIdAndUpdate(
@@ -473,6 +477,8 @@ router.put(
             vetDetailsData,
             { new: true }
           );
+
+          dog.status = "Operated"
         }
 
         if (imageRefs && imageRefs.length > 0) {
@@ -549,14 +555,14 @@ router.post(
         if (req.files["photo"] && req.files["photo"].length > 0) {
           const spotPhoto = req.files["photo"][0];
           // Assuming you have an Image model to save image details, create and save it
-          const image = new Image({
-            name: spotPhoto.originalname,
-            filename: spotPhoto.filename,
-            path: spotPhoto.path,
-          });
-          await image.save();
+          // const image = new Image({
+          //   name: spotPhoto.originalname,
+          //   filename: spotPhoto.filename,
+          //   path: spotPhoto.path,
+          // });
+          // await image.save();
 
-          reportImage = image._id;
+          reportImage = spotPhoto.path;
         }
 
         const dailyReport = new DailyMonitoring({
@@ -574,6 +580,10 @@ router.post(
 
         dog = await dog.populate("careTakerDetails");
         dog.careTakerDetails.reports.push(dailyReport._id);
+
+        if (dog.careTakerDetails.reports.length >= 2) {
+          dog.status = "FitForRelease"
+        }
 
         await dog.careTakerDetails.save();
         await dog.save();

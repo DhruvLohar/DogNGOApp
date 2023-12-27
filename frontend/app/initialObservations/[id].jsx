@@ -290,20 +290,6 @@ export default function InitialObservations() {
         />
       </View>
 
-      {/* Dog Name */}
-      {/* <View style={styles.fieldContainer}>
-                <Text>
-                    Dog's Name <Text style={styles.required}>*</Text>
-                </Text>
-                <TextInput
-                    style={styles.input}
-                    value={dogName}
-                    onChangeText={(text) => setDogName(text)}
-                    placeholder="Enter Dog's name"
-                />
-                <Text style={styles.error}>{dogNameError}</Text>
-            </View> */}
-
       {/* Dog Breed */}
       <View style={styles.fieldContainer}>
         <Text>
