@@ -75,12 +75,12 @@ const getReportData = (dog) => {
         "Catching Location Details": dog.catcherDetails.locationDetails,
         "Releasing Location": dog.catcherDetails.releasingLocation,
         "Catched At": dog.catcherDetails.createdAt.toString(),
-        "Spot Photo": {
+        "Spot Photo": dog.dogImage ? {
           t: "s",
-          v: "Click to open photo",
-          l: { Target: BASE_URL + dog.catcherDetails.spotPhoto.path },
+          v: dog.dogImage.split('/').pop(),
+          l: { Target: BASE_URL + dog.dogImage },
           s: { font: { color: { rgb: "0000FFFF" }, underline: true } },
-        },
+        } : "",
       };
     }
 
@@ -91,12 +91,12 @@ const getReportData = (dog) => {
         "Vet's Contact Number": dog.vetDetails.vet.contactNumber,
         "Surgery date": dog.vetDetails.surgeryDate.toString(),
 
-        "Surgery Photo": {
+        "Surgery Photo": dog.vetDetails.surgeryPhoto ? {
           t: "s",
-          v: "Click to open photo",
-          l: { Target: BASE_URL + dog.vetDetails.surgeryPhoto.path },
+          v: dog.vetDetails.surgeryPhoto.split('/').pop(),
+          l: { Target: BASE_URL + dog.vetDetails.surgeryPhoto },
           s: { font: { color: { rgb: "0000FFFF" }, underline: true } },
-        },
+        } : "",
       }
 
       Object.keys(dog.vetDetails._doc).map((key, i) => {
@@ -133,14 +133,15 @@ const getReportData = (dog) => {
           [`Day ${idx + 1} Report ID`]: report._id.toString(),
           [`Day ${idx + 1} Food Intake`]: report.foodIntake,
           [`Day ${idx + 1} Water Intake`]: report.waterIntake,
+          [`Day ${idx + 1} Stool`]: report.stool,
           [`Day ${idx + 1} Antibiotics`]: report.antibiotics,
           [`Day ${idx + 1} Painkiller`]: report.painkiller,
-          [`Day ${idx + 1} Photo`]: {
+          [`Day ${idx + 1} Photo`]: report.photo ? {
             t: "s",
-            v: "Click to open photo",
-            l: { Target: BASE_URL + report.photo.path },
+            v: report.photo.split('/').pop(),
+            l: { Target: BASE_URL + report.photo },
             s: { font: { color: { rgb: "0000FFFF" }, underline: true } },
-          },
+          } : "",
           Date: report.date.toString(),
         };
       });
@@ -359,6 +360,7 @@ router.post("/:id/dispatch", authenticateToken, async (req, res) => {
     }
 
     dog.isDispatched = true;
+    dog.status = "Dispatched";
     await dog.save();
 
     res.status(200).json({ message: "Dog was dispatched" });
@@ -381,6 +383,7 @@ router.post("/:id/release", authenticateToken, async (req, res) => {
     }
 
     dog.isReleased = true;
+    dog.status = "Released"
     dog.releaseDate = new Date(); // set current date
     dog.releaseLocation = releaseLocation;
     await dog.save();

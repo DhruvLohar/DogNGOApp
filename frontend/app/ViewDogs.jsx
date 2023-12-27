@@ -7,6 +7,8 @@ import {
     Platform,
     Picker as NativePicker,
     Image,
+    TouchableOpacity,
+    ScrollView,
 } from "react-native";
 import { Picker as WebPicker } from "react-native-web";
 import { API_URL, axiosRequest } from "../service/api";
@@ -26,6 +28,8 @@ const ViewDogs = () => {
     const [filteredDogs, setFilteredDogs] = useState([]);
     const [statusFilter, setStatusFilter] = useState("");
     const [dateFilter, setDateFilter] = useState("");
+
+    const [currPage, setCurrPage] = useState(0)
 
     useEffect(() => {
         axiosRequest(
@@ -146,11 +150,22 @@ const ViewDogs = () => {
                     </Picker>
                 </View>
             </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} 
+                style={{ maxHeight: 60, marginVertical: 20, flexDirection: 'row', marginLeft: 10 }}>
+                <View style={{ flexDirection: 'row', columnGap: 20, justifyContent: "start", alignItems: "center", maxHeight: 60 }}>
+                    {Array.from({ length: 80 }).map((_, idx) => (
+                        <TouchableOpacity key={idx} style={[(idx === currPage) && paginationStyles.activePage]} onPress={() => setCurrPage(idx)}>
+                            <Text style={[{ fontSize: 24 }, (idx === currPage) && paginationStyles.activePagetext]}>{idx + 1}</Text>
+                        </TouchableOpacity>
+                    ))}
+                </View>
+            </ScrollView>
 
             <FlatList
                 data={filteredDogs}
                 keyExtractor={(item) => item.id}
                 renderItem={renderDogItem}
+                style={{ maxHeight: "70%", marginTop: 20 }}
             />
         </View>
     );
@@ -184,5 +199,20 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
     },
 });
+
+const paginationStyles = StyleSheet.create({
+    activePage: {
+        width: 40, height: 40,
+        justifyContent: "center", alignItems: "center",
+        fontWeight: "bold",
+        borderRadius: 30,
+        backgroundColor: "#007BFF",
+        // padding: 2,
+    },
+    activePagetext: {
+        textAlign: "center",
+        color: "white",
+    }
+})
 
 export default ViewDogs;
