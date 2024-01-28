@@ -63,40 +63,40 @@ export default function Catching() {
   }, []);
 
   const handleSpotPhotoUpload = async () => {
-    if (Platform.OS === "web") {
-      const input = document.createElement("input");
-      input.type = "file";
-      input.accept = "image/*";
-      input.addEventListener("change", (event) => {
-        const file = event.target.files[0];
-        file["uri"] = URL.createObjectURL(file) 
-        if (file) {
-          setSpotPhoto(file);
-        }
-        document.body.removeChild(input);
-      });
-      document.body.appendChild(input);
-      input.click();
-    } else {
-      const result = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: false,
-        base64: true,
-        aspect: [4, 3],
-        quality: 0.6,
-      });
-      if (!result.canceled) {
-        const uri = result.assets[0].uri;
-        if (getFileSizeFromBase64(result.assets[0].base64) > 3) {
-          alert("Image size should be less than 3MB.");
-        } else {
-          const ext = uri.split(".").pop();
-          setSpotPhoto({
-            uri: uri,
-            type: `${result?.assets[0]?.type}/${ext}`,
-            name: `spotPhoto.${ext}`, 
-          });
-        }
+    // if (Platform.OS === "web") {
+    //   const input = document.createElement("input");
+    //   input.type = "file";
+    //   input.accept = "image/*";
+    //   input.addEventListener("change", (event) => {
+    //     const file = event.target.files[0];
+    //     file["uri"] = URL.createObjectURL(file) 
+    //     if (file) {
+    //       setSpotPhoto(file);
+    //     }
+    //     document.body.removeChild(input);
+    //   });
+    //   document.body.appendChild(input);
+    //   input.click();
+    // } else {
+    // }
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: false,
+      base64: true,
+      aspect: [4, 3],
+      quality: 0.6,
+    });
+    if (!result.canceled) {
+      const uri = result.assets[0].uri;
+      if (getFileSizeFromBase64(result.assets[0].base64) > 3) {
+        alert("Image size should be less than 3MB.");
+      } else {
+        const ext = uri.split(".").pop();
+        setSpotPhoto({
+          uri: uri,
+          type: `${result?.assets[0]?.type}/${ext}`,
+          name: `spotPhoto.${ext}`, 
+        });
       }
     }
   };
