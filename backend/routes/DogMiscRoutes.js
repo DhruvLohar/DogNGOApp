@@ -38,11 +38,6 @@ router.post("/report/xlsx", async (req, res) => {
     }).populate({
       path: "catcherDetails",
       select: "spotPhoto",
-      populate: {
-        path: "spotPhoto",
-        model: "Image",
-        select: "path",
-      },
     });
 
     res.status(200).json(dogs);
@@ -55,11 +50,11 @@ router.post("/report/xlsx", async (req, res) => {
 
 const getReportData = (dog) => {
   try {
-    const BASE_URL = "http://13.235.31.125/";
+    const BASE_URL = "https://api.j-app.in/kd";
     let dogDetail = {};
 
     dogDetail = {
-      "Sr. No.": dog._id.toString(),
+      "Sr. No.": dog._id?.toString(),
       "Dog's Main Color": dog.mainColor,
       "Dog Gender": dog.gender,
       Description: dog.description,
@@ -68,13 +63,13 @@ const getReportData = (dog) => {
     if (dog.catcherDetails) {
       dogDetail = {
         ...dogDetail,
-        "Catcher ID": dog.catcherDetails.catcher._id.toString(),
+        "Catcher ID": dog.catcherDetails.catcher._id?.toString(),
         "Catcher's Name": dog.catcherDetails.catcher.name,
         "Catcher's Contact Number": dog.catcherDetails.catcher.contactNumber,
         "Catching Location": dog.catcherDetails.catchingLocation,
         "Catching Location Details": dog.catcherDetails.locationDetails,
         "Releasing Location": dog.catcherDetails.releasingLocation,
-        "Catched At": dog.catcherDetails.createdAt.toString(),
+        "Catched At": dog.catcherDetails.createdAt?.toString(),
         "Spot Photo": dog.dogImage ? {
           t: "s",
           v: dog.dogImage.split('/').pop(),
@@ -86,10 +81,10 @@ const getReportData = (dog) => {
 
     if (dog.vetDetails) {
       let vetDetails = {
-        "Vet ID": dog.vetDetails.vet._id.toString(),
+        "Vet ID": dog.vetDetails.vet._id?.toString(),
         "Vet's Name": dog.vetDetails.vet.name,
         "Vet's Contact Number": dog.vetDetails.vet.contactNumber,
-        "Surgery date": dog.vetDetails.surgeryDate.toString(),
+        "Surgery date": dog.vetDetails.surgeryDate?.toString(),
 
         "Surgery Photo": dog.vetDetails.surgeryPhoto ? {
           t: "s",
@@ -121,7 +116,7 @@ const getReportData = (dog) => {
 
     if (dog.careTakerDetails) {
       let careTakerDetails = {
-        "Caretaker ID": dog.careTakerDetails.careTaker._id.toString(),
+        "Caretaker ID": dog.careTakerDetails.careTaker._id?.toString(),
         "Caretaker's Name": dog.careTakerDetails.careTaker.name,
         "Caretaker's Contact Number": dog.careTakerDetails.careTaker.contactNumber,
       }
@@ -130,7 +125,7 @@ const getReportData = (dog) => {
       dog.careTakerDetails.reports.map((report, idx) => {
         careTakerDetails = {
           ...careTakerDetails,
-          [`Day ${idx + 1} Report ID`]: report._id.toString(),
+          [`Day ${idx + 1} Report ID`]: report._id?.toString(),
           [`Day ${idx + 1} Food Intake`]: report.foodIntake,
           [`Day ${idx + 1} Water Intake`]: report.waterIntake,
           [`Day ${idx + 1} Stool`]: report.stool,
@@ -138,11 +133,11 @@ const getReportData = (dog) => {
           [`Day ${idx + 1} Painkiller`]: report.painkiller,
           [`Day ${idx + 1} Photo`]: report.photo ? {
             t: "s",
-            v: report.photo.split('/').pop(),
+            v: report.photo?.split('/')?.pop(),
             l: { Target: BASE_URL + report.photo },
             s: { font: { color: { rgb: "0000FFFF" }, underline: true } },
           } : "",
-          Date: report.date.toString(),
+          Date: report.date?.toString(),
         };
       });
 
@@ -173,11 +168,7 @@ router.get("/generate/report/:dogIDS/xlsx", async (req, res) => {
               {
                 path: "catcher",
                 select: "_id name contactNumber role",
-              },
-              {
-                path: "spotPhoto",
-                select: "path",
-              },
+              }
             ],
           },
           {
@@ -186,11 +177,7 @@ router.get("/generate/report/:dogIDS/xlsx", async (req, res) => {
               {
                 path: "vet",
                 select: "_id name contactNumber role",
-              },
-              {
-                path: "surgeryPhoto",
-                select: "path",
-              },
+              }
             ],
           },
           {
@@ -201,12 +188,8 @@ router.get("/generate/report/:dogIDS/xlsx", async (req, res) => {
                 select: "_id name contactNumber role",
               },
               {
-                path: "reports",
-                populate: {
-                  path: "photo",
-                  select: "path",
-                },
-              },
+                path: 'reports'
+              }
             ],
           },
           {
@@ -270,11 +253,7 @@ router.get("/observable", authenticateToken, async (req, res) => {
   try {
     const dogs = await Dog.find({ kennel: { $exists: false }, isReleased: false, isDispatched: false }).populate({
       path: "catcherDetails",
-      select: "catchingLocation",
-      populate: {
-        path: "spotPhoto",
-        model: "Image",
-      },
+      select: "catchingLocation spotPhoto"
     });
 
     res.status(200).json(dogs);
@@ -299,21 +278,12 @@ router.get("/dispatchable", async (req, res) => {
     const dogs = await Dog.find({ vetDetails: { $in: vetDetailsIds }, isReleased: false, isDispatched: false })
       .populate({
         path: "catcherDetails",
-        select: "catchingLocation",
-        populate: {
-          path: "spotPhoto",
-          model: "Image",
-        },
+        select: "spotPhoto"
       })
       .populate("kennel")
       .populate({
         path: "vetDetails",
-        populate: [
-          { path: "surgeryPhoto", model: "Image" },
-          { path: "additionalPhotos", model: "Image" },
-          { path: "surgeryNotesPhoto", model: "Image" },
-          { path: "additionalNotesPhotos", model: "Image" },
-        ],
+        select: "surgeryPhoto additionalPhotos surgeryNotesPhoto additionalNotesPhotos",
       });
 
     res.status(200).json(dogs);
@@ -328,11 +298,7 @@ router.get("/releasable", authenticateToken, async (req, res) => {
     const dogs = await Dog.find({ isDispatched: true, isReleased: false }).populate([
       {
         path: "catcherDetails",
-        select: "catchingLocation",
-        populate: {
-          path: "spotPhoto",
-          model: "Image",
-        },
+        select: "spotPhoto"
       },
       {
         path: "careTakerDetails",

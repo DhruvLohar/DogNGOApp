@@ -10,8 +10,8 @@ const catcherSchema = new mongoose.Schema(
     releasingLocation: String,
     catchingDate: Date,
 
-    spotPhoto: { type: mongoose.Schema.Types.ObjectId, ref: "Image" },
-    additionalPhotos: [{ type: mongoose.Schema.Types.ObjectId, ref: "Image" }],
+    spotPhoto: String,
+    additionalPhotos: [String],
   },
   { timestamps: true, versionKey: false }
 );
@@ -67,7 +67,7 @@ const dailyMonitoringSchema = new mongoose.Schema(
     stool: String,
 
     observations: String,
-    photo: { type: mongoose.Schema.Types.ObjectId, ref: "Image" },
+    photo: String,
     date: Date,
   },
   { timestamps: true, versionKey: false }

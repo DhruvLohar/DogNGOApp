@@ -60,6 +60,12 @@
         "projectId": "f5bfe967-1d38-4ef4-8d70-f90d13dc0ccc"
       }
     },
-    "owner": "jeevraksha"
+    "owner": "jeevraksha",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/f5bfe967-1d38-4ef4-8d70-f90d13dc0ccc"
+    }
   }
 }

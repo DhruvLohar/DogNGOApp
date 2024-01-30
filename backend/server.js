@@ -37,8 +37,9 @@ app.all("*", (req, res) => {
 
 app.use(errorHandler);
 
-// mongo pass for my db : ol0pSSmYqa6KTbiU
-const connectionString = `mongodb+srv://manojcaselaws:${encodedPassword}@jeevraksha.1mvtc5m.mongodb.net/?retryWrites=true&w=majority`
+// mongo pass for my db : tKgQUfm7AQawO63C
+// const connectionString = `mongodb+srv://manojcaselaws:${encodedPassword}@kdjeevraksha.ptigerb.mongodb.net/?retryWrites=true&w=majority`
+const connectionString = `mongodb+srv://admin:tKgQUfm7AQawO63C@dogngoapp.s44h5zf.mongodb.net/?retryWrites=true&w=majority`
 
 mongoose.set("strictQuery", false);
 mongoose
