@@ -18,7 +18,7 @@ const moment = require("moment");
 
 export default function Medicines() {
   const [kennelNumber, setKennelNumber] = useState("");
-  const [date, setDate] = useState(new Date().toLocaleDateString());
+  const [date, setDate] = useState(new Date().toLocaleDateString('en-GB'));
   const [time, setTime] = useState(new Date().toLocaleTimeString());
   const [arv, setArv] = useState("");
   const [additionalPhotos, setAdditionalPhotos] = useState([]);

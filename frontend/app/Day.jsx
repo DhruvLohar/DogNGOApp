@@ -21,7 +21,7 @@ export default function Day() {
   const navigation = useNavigation();
 
   const [kennel, setKennel] = useState("");
-  const [date, setDate] = useState(new Date().toLocaleDateString());
+  const [date, setDate] = useState(new Date().toLocaleDateString('en-GB'));
   const [foodIntake, setFoodIntake] = useState("");
   const [waterIntake, setWaterIntake] = useState("");
   const [antibiotics, setAntibiotics] = useState("");

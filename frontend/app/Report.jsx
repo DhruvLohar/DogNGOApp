@@ -108,7 +108,7 @@ const Report = () => {
   const downloadReport = async (dogs) => {
     try {
       const token = await getAccessToken();
-      const dogIds = dogs.map((dog) => dog._id).join(",");
+      const dogIds = dogs.flat().map((dog) => dog._id).join(",");
       const url = API_URL + `/dog/generate/report/${dogIds}/xlsx/`;
       const header = {
         Authorization: token,
@@ -172,7 +172,8 @@ const Report = () => {
         false
       )
         .then((res) => {
-          setDogs(chunk(res.data, 10));
+          let dogs_chunks = chunk(res.data, 10); 
+          setDogs(dogs_chunks);
         })
         .catch((error) => {
           if (error.response) {

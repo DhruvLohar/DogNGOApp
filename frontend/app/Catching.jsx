@@ -26,7 +26,7 @@ export default function Catching() {
   const [spotPhoto, setSpotPhoto] = useState(null);
   const [spotPhotoError, setSpotPhotoError] = useState(null);
   const [additionalPhotos, setAdditionalPhotos] = useState([]);
-  const [date, setDate] = useState(new Date().toLocaleDateString());
+  const [date, setDate] = useState(new Date().toLocaleDateString('en-GB'));
   const [dateError, setDateError] = useState("");
   const [time, setTime] = useState(new Date().toLocaleTimeString());
   const [timeError, setTimeError] = useState("");

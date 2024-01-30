@@ -120,6 +120,7 @@ const FormPage = () => {
                 navigate={() => navigateToForm("/LoginAdmin")}
               />
               <FormCard
+                image={Release}
                 title="View Dogs"
                 navigate={() => navigateToForm("/ViewDogs")}
               />

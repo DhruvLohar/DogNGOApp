@@ -19,7 +19,7 @@ import { getFileSizeFromBase64 } from "../service/getSize";
 export default function SurgeryNotes() {
   const [kennelNumber, setKennelNumber] = useState("");
   const [caseNumber, setCaseNumber] = useState("");
-  const [date, setDate] = useState(new Date().toLocaleDateString());
+  const [date, setDate] = useState(new Date().toLocaleDateString('en-GB'));
   const [time, setTime] = useState(new Date().toLocaleDateString());
   const [photo, setPhoto] = useState(null);
   const [additionalPhotos, setAdditionalPhotos] = useState([]);

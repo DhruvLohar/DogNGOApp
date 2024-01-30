@@ -1,10 +1,12 @@
+// eas build -p android --profile preview
+
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export const API_URL = process.env.EXPO_PUBLIC_API_URL || "https://api.j-app.in/mb";
+// export const API_URL = process.env.EXPO_PUBLIC_API_URL || "https://api.j-app.in/mb";
+export const API_URL = "https://api.j-app.in/kd";
 // export const API_URL = "http://127.0.0.1:3500";
 
-// eas build -p android --profile preview
 
 const API_KEY = "3b80afc4-787c-11ee-8cbb-0200cd936042";
 
