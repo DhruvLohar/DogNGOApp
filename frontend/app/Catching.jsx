@@ -73,9 +73,9 @@ export default function Catching() {
         if (file) {
           setSpotPhoto(file);
         }
-        // document.body.removeChild(input);
+        document.body.removeChild(input);
       });
-      // document.body.appendChild(input);
+      document.body.appendChild(input);
       input.click();
     } else {
     }
