@@ -3,7 +3,7 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export const API_URL = process.env.EXPO_PUBLIC_API_URL || "https://api.j-app.in/kd";
+export const API_URL = process.env.EXPO_PUBLIC_API_URL || "https://api.j-app.in/ic";
 // export const API_URL = "https://api.j-app.in/kd";
 // export const API_URL = "http://127.0.0.1:3500";
 

@@ -5,10 +5,10 @@ import {
   FlatList,
   StyleSheet,
   Platform,
-  Picker as NativePicker,
   Image,
 } from "react-native";
-import { Picker as WebPicker } from "react-native-web";
+import { Picker } from "@react-native-picker/picker";
+
 import { API_URL, axiosRequest } from "../service/api";
 
 const ITEMS_PER_PAGE = 10; // Number of dogs to display per page
@@ -16,7 +16,7 @@ const ITEMS_PER_PAGE = 10; // Number of dogs to display per page
 const ViewDogs = () => {
   const [dogs, setDogs] = useState([]);
   const [filteredDogs, setFilteredDogs] = useState([]);
-  const [statusFilter, setStatusFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
   const [dateFilter, setDateFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -85,7 +85,7 @@ const ViewDogs = () => {
   };
 
   const renderDogItem = ({ item }) => (
-    <View style={styles.itemContainer}>
+    <View style={[styles.itemContainer, { flexDirection: "row" }]}>
       <Image
         source={{
           uri: API_URL + "/" + item?.dogImage,
@@ -97,12 +97,14 @@ const ViewDogs = () => {
         }}
         resizeMode="contain"
       />
-      <Text style={styles.name}>{item.caseNumber}</Text>
-      <Text>Status: {item.status}</Text>
+      <View>
+        <Text style={styles.name}>{item.caseNumber}</Text>
+        <Text>Status: {item.status}</Text>
+      </View>
     </View>
   );
 
-  const Picker = Platform.OS === "web" ? WebPicker : NativePicker;
+  const [selectedLanguage, setSelectedLanguage] = useState();
 
   return (
     <View style={styles.container}>
@@ -110,7 +112,6 @@ const ViewDogs = () => {
         <View style={styles.filter}>
           <Text>Status:</Text>
           <Picker
-            style={styles.picker}
             selectedValue={statusFilter}
             onValueChange={(itemValue) => setStatusFilter(itemValue)}
           >
@@ -127,7 +128,6 @@ const ViewDogs = () => {
         <View style={styles.filter}>
           <Text>Date:</Text>
           <Picker
-            style={styles.picker}
             selectedValue={dateFilter}
             onValueChange={(itemValue) => setDateFilter(itemValue)}
           >
@@ -144,6 +144,7 @@ const ViewDogs = () => {
         data={filteredDogs}
         keyExtractor={(item) => item._id}
         renderItem={renderDogItem}
+
         ListFooterComponent={() => (
           <View>
             <Text style={{ display: "flex", justifyContent: "center" }}>
@@ -187,18 +188,19 @@ const styles = StyleSheet.create({
   },
   filterContainer: {
     flexDirection: "row",
+    width: "100%"
   },
   filter: {
     flexDirection: "column",
     justifyContent: "space-between",
     padding: 10,
+    width: "50%"
   },
   picker: {
     flex: 1,
   },
   itemContainer: {
     display: "flex",
-    flexDirection: "row",
     padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: "#ccc",

@@ -8,6 +8,7 @@ import {
   Button,
   ScrollView,
 } from "react-native";
+import * as Linking from 'expo-linking';
 import { StatusBar } from 'expo-status-bar';
 import { React, useState, useEffect } from "react";
 import { useRouter } from "expo-router";
@@ -54,6 +55,10 @@ const FormPage = () => {
   useEffect(() => {
     role();
   }, []);
+
+  const handleURLOpen = () => {
+    Linking.openURL("https://computeitsolutions.com")
+  }
 
   const navigateToForm = (title) => {
     router.push(`${title}`);
@@ -134,7 +139,17 @@ const FormPage = () => {
             />
           ) : null}
         </View>
+        <TouchableOpacity onPress={handleURLOpen}>
+          <Text style={{
+          textAlign: "center",
+          backgroundColor: "white",
+          paddingVertical: 10,
+          fontSize: 16,
+          fontWeight: "500"
+        }} >Developed By Devvebs © All Rights Reserved.</Text>
+        </TouchableOpacity>
       </ScrollView>
+
     </ImageBackground>
   );
 };

@@ -146,7 +146,7 @@ router.get("/kennel/:id", authenticateToken, async (req, res) => {
       .populate("kennel");
 
     if (!dog) {
-      return res.status(400).json({error: "Kennel is Empty"})
+      return res.status(400).json({ error: "Kennel is Empty" })
     }
 
     res.status(200).json(dog);
@@ -187,18 +187,19 @@ router.post(
       const { catchingLocation, locationDetails, catchingDate } = req.body;
 
       const imageRefs = [];
+      const photoRefs = {
+        spotPhoto: null,
+        additionalPhotos: []
+      };
 
       // Save the spotPhoto to the database
       if (req.files["spotPhoto"] && req.files["spotPhoto"].length > 0) {
         const spotPhoto = req.files["spotPhoto"][0];
 
-        // const image = new Image({
-        //   name: spotPhoto.originalname,
-        //   filename: spotPhoto.filename,
-        //   path: spotPhoto.path,
-        // });
-        // await image.save();
+        console.log(spotPhoto)
+
         imageRefs.push(spotPhoto.path);
+        photoRefs.spotPhoto = spotPhoto.path
       }
 
       // Save the additionalPhotos to the database
@@ -208,43 +209,35 @@ router.post(
       ) {
         const additionalPhotos = req.files["additionalPhotos[]"];
         for (const photo of additionalPhotos) {
-          // Create and save each additional photo to the Image model
-          // const image = new Image({
-          //   name: photo.originalname,
-          //   filename: photo.filename,
-          //   path: photo.path,
-          // });
-          // await image.save();
           imageRefs.push(photo.path);
+          photoRefs.additionalPhotos.push(photo.path)
         }
       }
 
-      // Create a new Catcher model | !!! If catcher exists then go ahead wihtpout creating
-      const catcher = new Catcher({
-        catcher: req.user.userId, // Assuming userId is accessible through req.user
-        catchingLocation,
-        locationDetails,
-        catchingDate,
-        // spotPhoto: imageRefs[0], // Assign the first image as the spotPhoto
-      });
+      if (photoRefs.spotPhoto) {
+        // Create a new Catcher model | !!! If catcher exists then go ahead wihtpout creating
+        const catcher = new Catcher({
+          catcher: req.user.userId, // Assuming userId is accessible through req.user
+          catchingLocation,
+          locationDetails,
+          catchingDate,
+        });
 
-      // for (let i of imageRefs.slice(1)) {
-      //   catcher.additionalPhotos.push(i);
-      // }
-      await catcher.save();
+        await catcher.save();
 
-      // Create a new Dog model and link it to the catcher
-      const dog = new Dog({
-        catcherDetails: catcher._id,
-        dogImage: imageRefs[0],
-        dogAdditionalImages: imageRefs.slice(1),
-        status: 'Adopted'
-      });
+        // Create a new Dog model and link it to the catcher
+        const dog = new Dog({
+          catcherDetails: catcher._id,
+          dogImage: photoRefs.spotPhoto,
+          dogAdditionalImages: photoRefs.additionalPhotos,
+          status: 'Adopted'
+        });
 
-      dog.caseNumber = await Dog.generateCaseNumber();
-      await dog.save();
+        dog.caseNumber = await Dog.generateCaseNumber();
+        await dog.save();
 
-      res.status(201).json({ message: "Case generated successfully" });
+        res.status(201).json({ message: "Case generated successfully" });
+      } else { res.status(400).json({message: "Spot Photo was not found"}) }
     } catch (error) {
       res
         .status(400)
@@ -412,7 +405,7 @@ router.put(
           req.files["surgeryNotesPhoto"].length > 0
         ) {
           const spotPhoto = req.files["surgeryNotesPhoto"][0];
-          
+
           // const image = new Image({
           //   name: spotPhoto.originalname,
           //   filename: spotPhoto.filename,
@@ -429,7 +422,7 @@ router.put(
         ) {
           const additionalPhotos = req.files["additionalPhotos[]"];
           for (const photo of additionalPhotos) {
-            
+
             // const image = new Image({
             //   name: photo.originalname,
             //   filename: photo.filename,
@@ -446,7 +439,7 @@ router.put(
         ) {
           const additionalPhotos = req.files["additionalNotesPhotos[]"];
           for (const photo of additionalPhotos) {
-            
+
             // const image = new Image({
             //   name: photo.originalname,
             //   filename: photo.filename,
