@@ -63,22 +63,22 @@ export default function Catching() {
   }, []);
 
   const handleSpotPhotoUpload = async () => {
-    // if (Platform.OS === "web") {
-    //   const input = document.createElement("input");
-    //   input.type = "file";
-    //   input.accept = "image/*";
-    //   input.addEventListener("change", (event) => {
-    //     const file = event.target.files[0];
-    //     file["uri"] = URL.createObjectURL(file) 
-    //     if (file) {
-    //       setSpotPhoto(file);
-    //     }
-    //     document.body.removeChild(input);
-    //   });
-    //   document.body.appendChild(input);
-    //   input.click();
-    // } else {
-    // }
+    if (Platform.OS === "web") {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/*";
+      input.addEventListener("change", (event) => {
+        const file = event.target.files[0];
+        file["uri"] = URL.createObjectURL(file) 
+        if (file) {
+          setSpotPhoto(file);
+        }
+        // document.body.removeChild(input);
+      });
+      // document.body.appendChild(input);
+      input.click();
+    } else {
+    }
     const result = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: false,
